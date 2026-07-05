@@ -1,0 +1,11 @@
+@media (max-width:768px){
+
+.about h2{
+    font-size:32px;
+}
+
+.about-text{
+    font-size:16px;
+}
+
+}

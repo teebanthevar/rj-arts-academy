@@ -1,0 +1,23 @@
+html{
+  scroll-behavior:smooth;
+}
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body{
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #FAF9F6;
+}
+
+#root{
+  width: 100%;
+}
+
+html{
+  scroll-behavior:smooth;
+}

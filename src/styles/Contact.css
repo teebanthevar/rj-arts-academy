@@ -1,0 +1,22 @@
+.map-section{
+    margin-top:50px;
+}
+
+.map-section h3{
+    color:#0F3D2E;
+    margin-bottom:20px;
+    text-align:center;
+}
+
+.map-section iframe{
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,.15);
+}
+
+@media (max-width:768px){
+
+.contact-container{
+    grid-template-columns:1fr;
+}
+
+}

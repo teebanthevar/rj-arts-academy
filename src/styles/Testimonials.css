@@ -1,0 +1,7 @@
+@media (max-width:768px){
+
+.testimonial-grid{
+    grid-template-columns:1fr;
+}
+
+}
