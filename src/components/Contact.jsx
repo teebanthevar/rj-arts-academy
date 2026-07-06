@@ -1,9 +1,15 @@
 import { useRef } from "react";
 import emailjs from "@emailjs/browser";
+import {
+  FaPhoneAlt,
+  FaEnvelope,
+  FaWhatsapp,
+  FaInstagram,
+  FaMapMarkerAlt
+} from "react-icons/fa";
 import "../styles/Contact.css";
 
 function Contact() {
-
   const form = useRef();
 
   const sendEmail = (e) => {
@@ -26,22 +32,24 @@ function Contact() {
 
   return (
     <section id="contact" className="contact" data-aos="fade-up">
-
       <h2>Contact Us</h2>
 
       <div className="contact-container">
-
-        {/* LEFT SIDE */}
-
+        {/* LEFT SIDE: Contact Info */}
         <div className="contact-info">
-
           <h3>RJ Arts Academy</h3>
 
-          <p>📍 Lot 1205, Kampung Perhentian, 35800 Slim River, Perak</p>
+          <p>
+            <FaMapMarkerAlt className="contact-icon" /> Classes available at various locations & online
+          </p>
 
-          <p>📞 +60 12-245 1679</p>
+          <p>
+            <FaPhoneAlt className="contact-icon" /> +60 12-245 1679
+          </p>
 
-          <p>📧 rjartsacademy@gmail.com</p>
+          <p>
+            <FaEnvelope className="contact-icon" /> rjartsacademy@gmail.com
+          </p>
 
           <a
             href="https://wa.me/60122451679"
@@ -49,7 +57,7 @@ function Contact() {
             rel="noreferrer"
             className="whatsapp-btn"
           >
-            Chat on WhatsApp
+            <FaWhatsapp /> Chat on WhatsApp
           </a>
 
           <a
@@ -58,21 +66,17 @@ function Contact() {
             rel="noreferrer"
             className="instagram-btn"
           >
-            Follow us on Instagram
+            <FaInstagram /> Follow us on Instagram
           </a>
-
         </div>
 
-        {/* RIGHT SIDE */}
-
+        {/* RIGHT SIDE: Email Form */}
         <div>
-
           <form
             ref={form}
             onSubmit={sendEmail}
             className="contact-form"
           >
-
             <input
               type="text"
               name="from_name"
@@ -103,28 +107,9 @@ function Contact() {
             <button type="submit">
               Send Message
             </button>
-
           </form>
-
-          <div className="map-section">
-
-            <h3>Find Us</h3>
-
-            <iframe
-              src="https://www.google.com/maps?q=Lot%201205,%20Kampung%20Perhentian,%2035800%20Slim%20River,%20Perak&output=embed"
-              width="100%"
-              height="350"
-              style={{ border: 0 }}
-              loading="lazy"
-              title="RJ Arts Academy"
-            ></iframe>
-
-          </div>
-
         </div>
-
       </div>
-
     </section>
   );
 }

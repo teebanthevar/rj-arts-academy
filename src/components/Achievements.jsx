@@ -1,4 +1,10 @@
 import CountUp from "react-countup";
+import { 
+  FaUserGraduate, 
+  FaTrophy, 
+  FaPalette, 
+  FaAward 
+} from "react-icons/fa";
 import '../styles/Achievements.css';
 
 function Achievements() {
@@ -7,25 +13,25 @@ function Achievements() {
       number: 500,
       suffix: "+",
       title: "Students Trained",
-      icon: "🎓",
+      icon: <FaUserGraduate />,
     },
     {
       number: 50,
       suffix: "+",
       title: "Competition Awards",
-      icon: "🏆",
+      icon: <FaTrophy />,
     },
     {
       number: 1000,
       suffix: "+",
       title: "Artworks Created",
-      icon: "🎨",
+      icon: <FaPalette />,
     },
     {
       number: 5,
       suffix: "+",
       title: "Years Experience",
-      icon: "⭐",
+      icon: <FaAward />,
     },
   ];
 

@@ -1,3 +1,10 @@
+import { 
+  FaPaintBrush, 
+  FaMedal, 
+  FaUsers, 
+  FaCalendarAlt, 
+  FaMapMarkerAlt 
+} from "react-icons/fa";
 import '../styles/Events.css';
 
 function Events() {
@@ -7,19 +14,19 @@ function Events() {
       title: "Watercolour Workshop",
       date: "20 August 2026",
       location: "RJ Arts Academy",
-      icon: "🖌️"
+      icon: <FaPaintBrush />
     },
     {
       title: "Colouring Competition",
       date: "5 September 2026",
       location: "Sri Raja Madurai Veeran Temple",
-      icon: "🎨"
+      icon: <FaMedal />
     },
     {
       title: "Annual Art Exhibition",
       date: "15 October 2026",
       location: "Ipoh, Perak",
-      icon: "🏆"
+      icon: <FaUsers />
     }
   ];
 
@@ -44,9 +51,13 @@ function Events() {
 
             <h3>{event.title}</h3>
 
-            <p>📅 {event.date}</p>
+            <p>
+              <FaCalendarAlt className="event-info-icon" /> {event.date}
+            </p>
 
-            <p>📍 {event.location}</p>
+            <p>
+              <FaMapMarkerAlt className="event-info-icon" /> {event.location}
+            </p>
 
             <button>Register Now</button>
 

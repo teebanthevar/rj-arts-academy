@@ -1,3 +1,9 @@
+import { 
+  FaChalkboardTeacher, 
+  FaLightbulb, 
+  FaTrophy, 
+  FaGlobe 
+} from "react-icons/fa";
 import "../styles/WhyChoose.css";
 
 const reasons = [
@@ -5,25 +11,25 @@ const reasons = [
     title: "Professional Guidance",
     description:
       "Learn from experienced instructors who guide students from beginner to advanced levels.",
-    icon: "🎨",
+    icon: <FaChalkboardTeacher />,
   },
   {
     title: "Creative Learning",
     description:
       "Develop imagination, confidence and artistic skills through fun, engaging lessons.",
-    icon: "💡",
+    icon: <FaLightbulb />,
   },
   {
     title: "Competitions & Exhibitions",
     description:
       "Students are encouraged to participate in competitions and showcase their talents.",
-    icon: "🏆",
+    icon: <FaTrophy />,
   },
   {
     title: "Flexible Classes",
     description:
       "Join our classes at various locations or learn conveniently through online sessions.",
-    icon: "🌍",
+    icon: <FaGlobe />,
   },
 ];
 

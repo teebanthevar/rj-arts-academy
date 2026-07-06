@@ -1,3 +1,4 @@
+import { FaWhatsapp } from "react-icons/fa";
 import "../styles/FloatingWhatsApp.css";
 
 function FloatingWhatsApp() {
@@ -9,7 +10,7 @@ function FloatingWhatsApp() {
       className="floating-whatsapp"
       title="Chat with us on WhatsApp"
     >
-      💬
+      <FaWhatsapp />
     </a>
   );
 }
