@@ -1,0 +1,11 @@
+.scroll-progress{
+    position:fixed;
+    top:0;
+    left:0;
+    height:5px;
+    width:0;
+    background:#D8C2A0;
+    z-index:99999;
+    transition:width .1s linear;
+    box-shadow:0 0 15px rgba(216,194,160,.7);
+}

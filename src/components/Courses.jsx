@@ -41,6 +41,8 @@ const courses = [
 ];
 
 function Courses() {
+  const academyPhone = "60122451679";
+
   return (
     <section id="courses" className="courses" data-aos="fade-up">
       <h2>Our Courses</h2>
@@ -51,23 +53,46 @@ function Courses() {
       </p>
 
       <div className="course-grid">
-        {courses.map((course, index) => (
-          <div className="course-card" key={index}>
-            <img
-              src={course.image}
-              alt={course.title}
-              className="course-image"
-            />
+        {courses.map((course, index) => {
+          // Construct the custom WhatsApp template for each individual course card
+          const message = `Hi RJ Arts Academy!
 
-            <div className="course-content">
-              <h3>{course.title}</h3>
+I would like to enroll in the *${course.title}* course.
 
-              <p>{course.description}</p>
+Name: 
+Age: 
+Preferred Class: 
 
-              <button>Learn More</button>
+Thank you.`;
+
+          const whatsappURL = `https://wa.me/${academyPhone}?text=${encodeURIComponent(message)}`;
+
+          return (
+            <div className="course-card" key={index}>
+              <img
+                src={course.image}
+                alt={course.title}
+                className="course-image"
+              />
+
+              <div className="course-content">
+                <h3>{course.title}</h3>
+
+                <p>{course.description}</p>
+
+                {/* This button opens WhatsApp directly with the pre-filled template text */}
+                <a
+                  href={whatsappURL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="course-btn"
+                >
+                  Enroll Now
+                </a>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

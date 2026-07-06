@@ -1,7 +1,23 @@
-@media (max-width:768px){
-
-.course-grid{
-    grid-template-columns:1fr;
+@media (max-width: 768px) {
+  .course-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
+/* Replaced .enroll-btn with .course-btn and updated styles */
+.course-btn {
+  display: inline-block;
+  margin-top: 20px;
+  background: #0F3D2E;
+  color: white;
+  text-decoration: none;
+  padding: 12px 28px;
+  border-radius: 40px;
+  transition: .3s;
+  font-weight: 600;
+}
+
+.course-btn:hover {
+  background: #D8C2A0;
+  color: #0F3D2E;
 }

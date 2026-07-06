@@ -1,0 +1,62 @@
+.loader{
+    position:fixed;
+    inset:0;
+    background:#0F3D2E;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    z-index:999999;
+}
+
+.loader-logo{
+    width:120px;
+    animation:spin 3s linear infinite;
+}
+
+.loader h2{
+    color:#D8C2A0;
+    margin:25px 0 15px;
+    font-size:36px;
+}
+
+.loader p{
+    color:white;
+    margin-top:20px;
+    letter-spacing:2px;
+}
+
+.loader-bar{
+    width:240px;
+    height:8px;
+    background:rgba(255,255,255,.2);
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.loader-fill{
+    height:100%;
+    width:0;
+    background:#D8C2A0;
+    animation:loading 2s forwards;
+}
+
+@keyframes loading{
+    from{
+        width:0;
+    }
+
+    to{
+        width:100%;
+    }
+}
+
+@keyframes spin{
+    from{
+        transform:rotate(0deg);
+    }
+
+    to{
+        transform:rotate(360deg);
+    }
+}

@@ -197,7 +197,10 @@ nav a:hover{
 
 .primary-btn,
 .secondary-btn{
-    width:100%;
+    display:inline-flex;
+    justify-content:center;
+    align-items:center;
+    text-decoration:none;
 }
 
 }

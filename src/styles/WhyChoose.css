@@ -1,0 +1,49 @@
+.why-choose{
+    padding:80px 10%;
+    background:#ffffff;
+    text-align:center;
+}
+
+.why-choose h2{
+    font-size:42px;
+    color:#0F3D2E;
+}
+
+.why-subtitle{
+    margin:15px 0 50px;
+    color:#666;
+    font-size:18px;
+}
+
+.why-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:30px;
+}
+
+.why-card{
+    background:#FAF9F6;
+    padding:35px;
+    border-radius:20px;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+    transition:.3s;
+}
+
+.why-card:hover{
+    transform:translateY(-10px);
+}
+
+.why-icon{
+    font-size:55px;
+    margin-bottom:20px;
+}
+
+.why-card h3{
+    color:#0F3D2E;
+    margin-bottom:15px;
+}
+
+.why-card p{
+    color:#666;
+    line-height:1.7;
+}
