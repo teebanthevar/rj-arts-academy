@@ -1,7 +1,75 @@
-@media (max-width:768px){
-
-.events-grid{
-    grid-template-columns:1fr;
+.events {
+  padding: 80px 10%;
+  background: #ffffff;
+  text-align: center;
 }
 
+.events h2 {
+  font-size: 42px;
+  color: #0F3D2E;
+}
+
+.events-subtitle {
+  margin: 15px 0 50px;
+  color: #666;
+  font-size: 18px;
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.event-card {
+  background: #FAF9F6;
+  border-radius: 20px;
+  padding: 35px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  transition: 0.3s;
+}
+
+.event-card:hover {
+  transform: translateY(-10px);
+}
+
+.event-icon {
+  font-size: 55px;
+  margin-bottom: 20px;
+}
+
+.event-card h3 {
+  color: #0F3D2E;
+  margin-bottom: 20px;
+}
+
+.event-card p {
+  color: #666;
+  margin: 10px 0;
+}
+
+.event-info-icon {
+  margin-right: 8px;
+}
+
+.event-card button {
+  margin-top: 25px;
+  background: #0F3D2E;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.event-card button:hover {
+  background: #D8C2A0;
+  color: #0F3D2E;
+}
+
+@media (max-width: 768px) {
+  .events-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,7 +1,88 @@
-@media (max-width:768px){
-
-.achievement-grid{
-    grid-template-columns:1fr 1fr;
+/* Achievements Section */
+.achievements {
+  padding: 80px 10%;
+  background-color: #0F3D2E;
+  text-align: center;
+  color: #ffffff;
 }
 
+.achievements h2 {
+  font-size: 48px;
+  color: #D8C2A0;
+  margin-bottom: 20px;
+}
+
+.achievement-subtitle {
+  color: #ffffff;
+  font-size: 18px;
+  margin-bottom: 50px;
+  opacity: 0.9;
+}
+
+/* Grid Layout */
+.achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Individual Cards */
+.achievement-card {
+  background: white;
+  color: #0F3D2E;
+  padding: 40px 20px;
+  border-radius: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  transition: transform 0.3s ease;
+}
+
+.achievement-card:hover {
+  transform: translateY(-10px);
+}
+
+/* Icons and Text */
+.achievement-icon {
+  font-size: 45px;
+  margin-bottom: 20px;
+  color: #0F3D2E;
+}
+
+.achievement-card h3 {
+  font-size: 36px;
+  margin: 10px 0;
+  font-weight: 700;
+}
+
+.achievement-card p {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Responsive Tablet/Mobile Layout */
+@media (max-width: 992px) {
+  .achievement-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .achievements {
+    padding: 50px 5%;
+  }
+
+  .achievement-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .achievements h2 {
+    font-size: 36px;
+  }
 }

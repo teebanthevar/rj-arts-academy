@@ -8,7 +8,6 @@ import {
 import '../styles/Events.css';
 
 function Events() {
-
   const events = [
     {
       title: "Watercolour Workshop",
@@ -32,41 +31,28 @@ function Events() {
 
   return (
     <section id="events" className="events" data-aos="fade-left">
-
       <h2>Upcoming Events</h2>
-
       <p className="events-subtitle">
         Join our exciting workshops, competitions and exhibitions.
       </p>
 
       <div className="events-grid">
-
         {events.map((event, index) => (
-
           <div className="event-card" key={index}>
-
             <div className="event-icon">
               {event.icon}
             </div>
-
             <h3>{event.title}</h3>
-
             <p>
               <FaCalendarAlt className="event-info-icon" /> {event.date}
             </p>
-
             <p>
               <FaMapMarkerAlt className="event-info-icon" /> {event.location}
             </p>
-
             <button>Register Now</button>
-
           </div>
-
         ))}
-
       </div>
-
     </section>
   );
 }
