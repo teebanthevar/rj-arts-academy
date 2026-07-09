@@ -30,7 +30,8 @@ export const students = [
   { id: "KIRTHIGA", password: "KI26", name: "KIRTHIGA", course: "ALL COURSES (INTERMEDIATE)", attendance: "90%" },
   { id: "SIVA", password: "SI26", name: "SIVA MUNEESWARAN", course: "ALL COURSES (INTERMEDIATE)", attendance: "90%" },
   { id: "MITHRRAN", password: "MI26", name: "MITHRRAN", course: "ALL COURSES (INTERMEDIATE)", attendance: "70%" },
-  { id: "DEV HARRIS", password: "DE26", name: "DEV HARRIS", course: "ALL COURSES (BEGINNER)", attendance: "99%" }
+  { id: "DEV HARRIS", password: "DE26", name: "DEV HARRIS", course: "ALL COURSES (BEGINNER)", attendance: "99%" },
+  { id: "MISHALINI", password: "MISHA", name: "MISHALINI", course: "ALL COURSES (BEGINNER)", attendance: "99%" }
 ];
 
 export const academyUpdates = {

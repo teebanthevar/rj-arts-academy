@@ -7,9 +7,15 @@ function Footer() {
 
       <div className="footer-container">
 
-        {/* Logo & Academy */}
+        {/* Academy */}
+
         <div className="footer-section">
-          <img src={logo} alt="RJ Arts Academy" className="footer-logo" />
+
+          <img
+            src={logo}
+            alt="RJ Arts Academy"
+            className="footer-logo"
+          />
 
           <h3>RJ Arts Academy</h3>
 
@@ -17,20 +23,33 @@ function Footer() {
             Inspiring creativity and developing artistic talents through
             professional art education.
           </p>
+
         </div>
 
         {/* Quick Links */}
+
         <div className="footer-section">
+
           <h3>Quick Links</h3>
 
           <a href="#">Home</a>
+
           <a href="#about">About</a>
+
           <a href="#courses">Courses</a>
+
           <a href="#gallery">Gallery</a>
+
           <a href="#contact">Contact</a>
+
+          <a href="#portal" className="portal-link">
+            🎓 Student Portal
+          </a>
+
         </div>
 
         {/* Contact */}
+
         <div className="footer-section">
 
           <h3>Contact</h3>
@@ -44,6 +63,7 @@ function Footer() {
         </div>
 
         {/* Social */}
+
         <div className="footer-section">
 
           <h3>Follow Us</h3>

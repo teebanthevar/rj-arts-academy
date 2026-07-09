@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "../styles/Gallery.css";
 
 import gallery1 from "../assets/images/gallery/gallery1.jpg";
 import gallery2 from "../assets/images/gallery/gallery2.jpg";
@@ -8,7 +9,6 @@ import gallery5 from "../assets/images/gallery/gallery5.jpg";
 import gallery6 from "../assets/images/gallery/gallery6.jpg";
 
 function Gallery() {
-
   const images = [
     gallery1,
     gallery2,
@@ -22,7 +22,6 @@ function Gallery() {
 
   return (
     <section id="gallery" className="gallery" data-aos="zoom-in">
-
       <h2>Our Gallery</h2>
 
       <p className="gallery-subtitle">
@@ -36,7 +35,7 @@ function Gallery() {
             key={index}
             onClick={() => setSelectedImage(image)}
           >
-            <img src={image} alt="" />
+            <img src={image} alt={`Gallery ${index + 1}`} />
           </div>
         ))}
       </div>
@@ -54,12 +53,11 @@ function Gallery() {
 
           <img
             src={selectedImage}
-            alt=""
+            alt="Selected artwork"
             className="lightbox-image"
           />
         </div>
       )}
-
     </section>
   );
 }

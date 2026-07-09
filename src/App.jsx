@@ -19,15 +19,19 @@ import Footer from "./components/Footer";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
 import ScrollProgress from "./components/ScrollProgress";
 import Loader from "./components/Loader";
+import ArtCommission from "./components/ArtCommission";
+import WhyOrder from "./components/WhyOrder";
+import OrderProcess from "./components/OrderProcess";
+import CustomerReviews from "./components/CustomerReviews";
 
 function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Keeps loader for 2 seconds to ensure everything initializes
     const timer = setTimeout(() => {
       setLoading(false);
     }, 2000);
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -38,33 +42,53 @@ function App() {
   return (
     <>
       <ScrollProgress />
+
       <Navbar />
 
       <main>
+
         <Hero />
+
         <About />
+
         <WhyChoose />
+
         <Courses />
+
         <Enrollment />
+
         <Gallery />
+
+        <ArtCommission />
+
+        <WhyOrder />
+
+        <OrderProcess />
+
+        <CustomerReviews />
+
         <Achievements />
+
         <Testimonials />
+
         <Events />
+
         <FAQ />
 
-        {/* Contact section with an id for the #contact link to find */}
         <section id="contact">
           <Contact />
         </section>
 
-        {/* Student Portal section */}
         <section id="portal">
           <StudentPortal />
         </section>
+
       </main>
 
       <Footer />
+
       <FloatingWhatsApp />
+
     </>
   );
 }
