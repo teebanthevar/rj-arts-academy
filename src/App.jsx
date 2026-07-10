@@ -4,9 +4,14 @@ import "./App.css";
 // Components
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
-import About from "./components/About";
+import AboutAcademy from "./components/AboutAcademy";
 import WhyChoose from "./components/WhyChoose";
 import Courses from "./components/Courses";
+import ArtCommission from "./components/ArtCommission";
+import WhyOrder from "./components/WhyOrder";
+import OrderProcess from "./components/OrderProcess";
+import FeaturedMasterpieces from "./components/FeaturedMasterpieces";
+import LearningPrograms from "./components/LearningPrograms";
 import Enrollment from "./components/Enrollment";
 import Gallery from "./components/Gallery";
 import Achievements from "./components/Achievements";
@@ -19,10 +24,6 @@ import Footer from "./components/Footer";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
 import ScrollProgress from "./components/ScrollProgress";
 import Loader from "./components/Loader";
-import ArtCommission from "./components/ArtCommission";
-import WhyOrder from "./components/WhyOrder";
-import OrderProcess from "./components/OrderProcess";
-import CustomerReviews from "./components/CustomerReviews";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -46,49 +47,60 @@ function App() {
       <Navbar />
 
       <main>
-
         <Hero />
 
-        <About />
+        {/* About Academy */}
+        <AboutAcademy />
 
+        {/* Why Choose RJ Arts Academy */}
         <WhyChoose />
 
+        {/* Courses */}
         <Courses />
 
-        <Enrollment />
-
-        <Gallery />
-
+        {/* Custom Artwork Commission */}
         <ArtCommission />
 
+        {/* Why Order Artwork */}
         <WhyOrder />
 
+        {/* Order Process */}
         <OrderProcess />
 
-        <CustomerReviews />
+        {/* Featured Masterpieces */}
+        <FeaturedMasterpieces />
 
+        {/* Learning Programmes */}
+        <LearningPrograms />
+
+        {/* Gallery */}
+        <Gallery />
+
+        {/* Achievements */}
         <Achievements />
 
+        {/* Testimonials */}
         <Testimonials />
 
+        {/* Events */}
         <Events />
 
+        {/* FAQ */}
         <FAQ />
 
-        <section id="contact">
-          <Contact />
-        </section>
+        {/* Enrollment */}
+        <Enrollment />
 
-        <section id="portal">
-          <StudentPortal />
-        </section>
+        {/* Contact */}
+        <Contact />
 
+        {/* Student Portal */}
+        <StudentPortal />
       </main>
 
       <Footer />
 
       <FloatingWhatsApp />
-
     </>
   );
 }

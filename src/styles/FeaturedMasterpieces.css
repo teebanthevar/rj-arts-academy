@@ -1,0 +1,197 @@
+.featured-masterpieces{
+    padding:110px 8%;
+    background:#FAF9F6;
+}
+
+/* ---------- Heading ---------- */
+
+.masterpiece-heading{
+    text-align:center;
+    max-width:850px;
+    margin:auto;
+    margin-bottom:70px;
+}
+
+.heading-line{
+    width:80px;
+    height:3px;
+    background:#D8C2A0;
+    display:block;
+    margin:auto;
+    margin-bottom:22px;
+    border-radius:20px;
+}
+
+.premium-tag{
+
+    letter-spacing:5px;
+
+    color:#B88B4A;
+
+    font-weight:700;
+
+    text-transform:uppercase;
+
+    font-size:14px;
+
+    margin-bottom:18px;
+}
+
+.masterpiece-heading h2{
+
+    font-size:58px;
+
+    font-weight:800;
+
+    color:#0F3D2E;
+
+    margin-bottom:22px;
+
+    line-height:1.15;
+}
+
+.masterpiece-heading h2 span{
+
+    color:#C8A56B;
+
+}
+
+.heading-description{
+
+    max-width:760px;
+
+    margin:auto;
+
+    color:#666;
+
+    font-size:20px;
+
+    line-height:1.9;
+}
+
+/* ---------- Gallery ---------- */
+
+.masterpiece-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+
+    gap:32px;
+}
+
+.masterpiece-card{
+
+    position:relative;
+
+    overflow:hidden;
+
+    border-radius:24px;
+
+    cursor:pointer;
+
+    box-shadow:0 18px 45px rgba(0,0,0,.10);
+
+    transition:.45s;
+}
+
+.masterpiece-card img{
+
+    width:100%;
+
+    height:420px;
+
+    object-fit:cover;
+
+    display:block;
+
+    transition:.6s;
+}
+
+.masterpiece-overlay{
+
+    position:absolute;
+
+    left:0;
+
+    right:0;
+
+    bottom:0;
+
+    padding:26px;
+
+    background:linear-gradient(
+        transparent,
+        rgba(15,61,46,.92)
+    );
+
+    color:white;
+
+    transform:translateY(35px);
+
+    opacity:0;
+
+    transition:.45s;
+}
+
+.masterpiece-overlay h3{
+
+    font-size:26px;
+
+    font-weight:700;
+}
+
+.masterpiece-card:hover{
+
+    transform:translateY(-10px);
+}
+
+.masterpiece-card:hover img{
+
+    transform:scale(1.08);
+}
+
+.masterpiece-card:hover .masterpiece-overlay{
+
+    transform:translateY(0);
+
+    opacity:1;
+}
+
+/* ---------- Mobile ---------- */
+
+@media(max-width:768px){
+
+.featured-masterpieces{
+
+    padding:80px 6%;
+}
+
+.masterpiece-heading h2{
+
+    font-size:40px;
+}
+
+.heading-description{
+
+    font-size:17px;
+}
+
+.masterpiece-grid{
+
+    grid-template-columns:1fr;
+
+    gap:25px;
+}
+
+.masterpiece-card img{
+
+    height:320px;
+}
+
+.masterpiece-overlay h3{
+
+    font-size:22px;
+}
+
+}

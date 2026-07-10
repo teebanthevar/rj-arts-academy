@@ -1,0 +1,278 @@
+.about-academy{
+
+    padding:110px 8%;
+
+    background:
+    radial-gradient(circle at top,#fff7eb 0%,#f8f5ef 70%);
+}
+
+.about-header{
+
+    max-width:900px;
+
+    margin:auto;
+
+    text-align:center;
+
+    margin-bottom:70px;
+}
+
+.about-tag{
+
+    display:inline-block;
+
+    padding:12px 28px;
+
+    border-radius:50px;
+
+    background:#E8D7B8;
+
+    color:#0F3D2E;
+
+    font-size:14px;
+
+    font-weight:700;
+
+    letter-spacing:2px;
+
+    margin-bottom:25px;
+}
+
+.about-header h2{
+
+    font-size:58px;
+
+    color:#0F3D2E;
+
+    line-height:1.15;
+
+    margin-bottom:25px;
+
+    font-weight:800;
+}
+
+.about-header h2 span{
+
+    color:#D8C2A0;
+}
+
+.about-header p{
+
+    max-width:760px;
+
+    margin:auto;
+
+    font-size:20px;
+
+    line-height:1.9;
+
+    color:#666;
+}
+
+.about-grid{
+
+    max-width:1400px;
+
+    margin:auto;
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:30px;
+}
+
+.academy-card{
+
+    position:relative;
+
+    padding:45px 35px;
+
+    border-radius:28px;
+
+    background:
+    rgba(255,255,255,.45);
+
+    backdrop-filter:blur(18px);
+
+    -webkit-backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.65);
+
+    box-shadow:
+    0 20px 45px rgba(0,0,0,.08);
+
+    transition:.4s;
+
+    overflow:hidden;
+}
+
+.academy-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:5px;
+
+    background:#D8C2A0;
+
+    transform:scaleX(0);
+
+    transition:.4s;
+}
+
+.academy-card:hover{
+
+    transform:translateY(-12px);
+
+    box-shadow:
+    0 35px 70px rgba(15,61,46,.15);
+}
+
+.academy-card:hover::before{
+
+    transform:scaleX(1);
+}
+
+.academy-icon{
+
+    width:72px;
+    height:72px;
+
+    border-radius:20px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    margin-bottom:28px;
+
+    background:#0F3D2E;
+
+    color:#D8C2A0;
+
+    font-size:30px;
+
+    transition:.35s;
+}
+
+.academy-card:hover .academy-icon{
+
+    transform:rotate(-8deg) scale(1.08);
+
+    background:#D8C2A0;
+
+    color:#0F3D2E;
+}
+
+.academy-card h3{
+
+    font-size:28px;
+
+    color:#0F3D2E;
+
+    margin-bottom:18px;
+}
+
+.academy-card p{
+
+    color:#666;
+
+    font-size:17px;
+
+    line-height:1.8;
+}
+
+.about-button{
+
+    text-align:center;
+
+    margin-top:70px;
+}
+
+.about-button a{
+
+    display:inline-block;
+
+    padding:18px 50px;
+
+    border-radius:50px;
+
+    background:#0F3D2E;
+
+    color:white;
+
+    text-decoration:none;
+
+    font-size:18px;
+
+    font-weight:600;
+
+    transition:.35s;
+}
+
+.about-button a:hover{
+
+    background:#D8C2A0;
+
+    color:#0F3D2E;
+
+    transform:translateY(-5px);
+}
+
+@media(max-width:1100px){
+
+.about-grid{
+
+grid-template-columns:repeat(2,1fr);
+
+}
+
+}
+
+@media(max-width:768px){
+
+.about-academy{
+
+padding:80px 20px;
+
+}
+
+.about-header h2{
+
+font-size:40px;
+
+}
+
+.about-header p{
+
+font-size:17px;
+
+}
+
+.about-grid{
+
+grid-template-columns:1fr;
+
+}
+
+.academy-card{
+
+padding:35px 28px;
+
+}
+
+.about-button a{
+
+width:100%;
+
+}
+
+}

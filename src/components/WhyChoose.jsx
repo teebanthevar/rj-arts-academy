@@ -1,58 +1,101 @@
-import { 
-  FaChalkboardTeacher, 
-  FaLightbulb, 
-  FaTrophy, 
-  FaGlobe 
-} from "react-icons/fa";
 import "../styles/WhyChoose.css";
 
-const reasons = [
-  {
-    title: "Professional Guidance",
-    description:
-      "Learn from experienced instructors who guide students from beginner to advanced levels.",
-    icon: <FaChalkboardTeacher />,
-  },
-  {
-    title: "Creative Learning",
-    description:
-      "Develop imagination, confidence and artistic skills through fun, engaging lessons.",
-    icon: <FaLightbulb />,
-  },
-  {
-    title: "Competitions & Exhibitions",
-    description:
-      "Students are encouraged to participate in competitions and showcase their talents.",
-    icon: <FaTrophy />,
-  },
-  {
-    title: "Flexible Classes",
-    description:
-      "Join our classes at various locations or learn conveniently through online sessions.",
-    icon: <FaGlobe />,
-  },
-];
-
 function WhyChoose() {
+  const stats = [
+    {
+      number: "500+",
+      title: "Students Trained",
+      text: "Children, teenagers and adults learning with confidence.",
+    },
+    {
+      number: "1000+",
+      title: "Artworks Completed",
+      text: "Portraits, paintings, murals and commissioned masterpieces.",
+    },
+    {
+      number: "20+",
+      title: "Courses & Programmes",
+      text: "Art, tuition, investment, digital skills and mindfulness.",
+    },
+    {
+      number: "99%",
+      title: "Parent Satisfaction",
+      text: "Trusted by families for quality education and personal growth.",
+    },
+  ];
+
+  const features = [
+    "Professional & Friendly Instructors",
+    "Physical & Online Classes",
+    "Premium Learning Environment",
+    "Creative & Skill-Based Education",
+    "Affordable Fees",
+    "Personalised Student Guidance",
+  ];
+
   return (
-    <section className="why-choose" id="why-choose">
-      <h2>Why Choose RJ Arts Academy?</h2>
+    <section id="whychoose" className="whychoose">
 
-      <p className="why-subtitle">
-        Inspiring creativity, building confidence and nurturing artistic talent.
-      </p>
+      <div className="why-header">
 
-      <div className="why-grid">
-        {reasons.map((reason, index) => (
-          <div className="why-card" key={index}>
-            <div className="why-icon">{reason.icon}</div>
+        <span className="section-tag">
+          TRUSTED BY OUR COMMUNITY
+        </span>
 
-            <h3>{reason.title}</h3>
+        <h2>
+          Inspiring Future Success
+        </h2>
 
-            <p>{reason.description}</p>
-          </div>
-        ))}
+        <p>
+          RJ Arts Academy has helped hundreds of students discover
+          their talents through professional art education,
+          academic tuition and practical life skill programmes.
+        </p>
+
       </div>
+
+      <div className="stats-grid">
+
+        {stats.map((item, index) => (
+
+          <div className="stat-card" key={index}>
+
+            <h3>{item.number}</h3>
+
+            <h4>{item.title}</h4>
+
+            <p>{item.text}</p>
+
+          </div>
+
+        ))}
+
+      </div>
+
+      <div className="trust-box">
+
+        <div className="rating">
+
+          <h3>★★★★★</h3>
+
+          <p>Rated Excellent by Students & Parents</p>
+
+        </div>
+
+        <div className="feature-list">
+
+          {features.map((item, index) => (
+
+            <div className="feature-item" key={index}>
+              ✓ {item}
+            </div>
+
+          ))}
+
+        </div>
+
+      </div>
+
     </section>
   );
 }

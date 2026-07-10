@@ -25,7 +25,7 @@ function Gallery() {
       <h2>Our Gallery</h2>
 
       <p className="gallery-subtitle">
-        Explore our students' creativity and academy moments.
+        Explore our student's creativity and academy moments.
       </p>
 
       <div className="gallery-grid">
@@ -35,7 +35,10 @@ function Gallery() {
             key={index}
             onClick={() => setSelectedImage(image)}
           >
-            <img src={image} alt={`Gallery ${index + 1}`} />
+            <img
+              src={image}
+              alt={`Gallery ${index + 1}`}
+            />
           </div>
         ))}
       </div>
