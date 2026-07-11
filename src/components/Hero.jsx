@@ -14,7 +14,7 @@ function Hero() {
 
         <h1>
           Discover Your
-          <span> Artistic Potential</span>
+          <span> Creative Potential</span>
         </h1>
 
         <p>
