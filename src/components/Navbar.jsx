@@ -1,18 +1,17 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { FaBars, FaTimes, FaUserGraduate } from "react-icons/fa";
 import logo from "../assets/images/logo.png";
 import "../styles/Navbar.css";
 
-function Navbar() {
+export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const closeMenu = () => setMenuOpen(false);
 
   return (
     <header className="navbar">
-
       <div className="navbar-container">
-
         {/* Logo */}
         <a href="#" className="logo">
           <img src={logo} alt="RJ Arts Academy" />
@@ -21,46 +20,45 @@ function Navbar() {
           </div>
         </a>
 
-        {/* Desktop Navigation */}
+        {/* Desktop & Mobile Navigation */}
         <nav className={menuOpen ? "nav-menu active" : "nav-menu"}>
+          <a href="#" onClick={closeMenu}>
+            Home
+          </a>
+          <a href="#about" onClick={closeMenu}>
+            About
+          </a>
+          <a href="#courses" onClick={closeMenu}>
+            Courses
+          </a>
+          <a href="#gallery" onClick={closeMenu}>
+            Gallery
+          </a>
+          <a href="#events" onClick={closeMenu}>
+            Events
+          </a>
+          <a href="#faq" onClick={closeMenu}>
+            FAQ
+          </a>
+          <a href="#contact" onClick={closeMenu}>
+            Contact
+          </a>
 
-          <a href="#" onClick={closeMenu}>Home</a>
-
-          <a href="#about" onClick={closeMenu}>About</a>
-
-          <a href="#courses" onClick={closeMenu}>Courses</a>
-
-          <a href="#gallery" onClick={closeMenu}>Gallery</a>
-
-          <a href="#events" onClick={closeMenu}>Events</a>
-
-          <a href="#faq" onClick={closeMenu}>FAQ</a>
-
-          <a href="#contact" onClick={closeMenu}>Contact</a>
-
-          <a
-            href="#portal"
+          <Link
+            to="/student-login"
             className="student-login-btn"
             onClick={closeMenu}
           >
             <FaUserGraduate />
             <span>Student Login</span>
-          </a>
-
+          </Link>
         </nav>
 
         {/* Mobile Menu Button */}
-        <div
-          className="menu-toggle"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
+        <div className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? <FaTimes /> : <FaBars />}
         </div>
-
       </div>
-
     </header>
   );
 }
-
-export default Navbar;

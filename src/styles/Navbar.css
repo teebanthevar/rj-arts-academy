@@ -2,269 +2,209 @@
    PREMIUM NAVBAR
 =========================== */
 
-.navbar{
-    position:sticky;
-    top:0;
-    z-index:1000;
-
-    width:100%;
-
-    background:rgba(15,61,46,.92);
-    backdrop-filter:blur(15px);
-    -webkit-backdrop-filter:blur(15px);
-
-    box-shadow:0 10px 30px rgba(0,0,0,.12);
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  background: #0c3b21ce;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
 
-.navbar-container{
-    max-width:1400px;
-    margin:auto;
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    padding:14px 40px;
+.navbar-container {
+  max-width: 1400px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 40px;
 }
 
 /* ===========================
    Logo
 =========================== */
 
-.logo{
-    display:flex;
-    align-items:center;
-    gap:15px;
-    text-decoration:none;
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  text-decoration: none;
 }
 
-.logo img{
-    width:58px;
-    height:58px;
-    object-fit:contain;
-    border-radius:50%;
+.logo img {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  border-radius: 50%;
 }
 
-.logo-text{
-    display:flex;
-    flex-direction:column;
+.logo-text {
+  display: flex;
+  flex-direction: column;
 }
 
-.logo-text h2{
-    color:#D8C2A0;
-    font-size:32px;
-    font-weight:700;
-    line-height:1.1;
+.logo-text h2 {
+  color: #D8C2A0;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.1;
 }
 
-.logo-text span{
-    color:#e8e8e8;
-    font-size:13px;
-    letter-spacing:1px;
+.logo-text span {
+  color: #e8e8e8;
+  font-size: 13px;
+  letter-spacing: 1px;
 }
 
 /* ===========================
    Navigation
 =========================== */
 
-.nav-menu{
-    display:flex;
-    align-items:center;
-    gap:34px;
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 34px;
 }
 
-.nav-menu a{
-    text-decoration:none;
-    color:#fff;
-    font-size:17px;
-    font-weight:600;
-    transition:.3s;
-    position:relative;
+.nav-menu a {
+  text-decoration: none;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  transition: 0.3s;
+  position: relative;
 }
 
-.nav-menu a:not(.student-login-btn)::after{
-    content:"";
-    position:absolute;
-    left:0;
-    bottom:-6px;
-
-    width:0;
-    height:2px;
-
-    background:#D8C2A0;
-    transition:.3s;
+.nav-menu a:not(.student-login-btn)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0;
+  height: 2px;
+  background: #D8C2A0;
+  transition: 0.3s;
 }
 
-.nav-menu a:hover::after{
-    width:100%;
+.nav-menu a:hover::after {
+  width: 100%;
 }
 
-.nav-menu a:hover{
-    color:#D8C2A0;
+.nav-menu a:hover {
+  color: #D8C2A0;
 }
 
 /* ===========================
    Student Login
 =========================== */
 
-.student-login-btn{
-    display:flex;
-    align-items:center;
-    gap:8px;
-
-    background:#D8C2A0;
-
-    color:#0F3D2E !important;
-
-    padding:11px 22px;
-
-    border-radius:40px;
-
-    font-weight:700;
-
-    transition:.35s;
+.student-login-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #D8C2A0;
+  color: #0F3D2E !important;
+  padding: 11px 22px;
+  border-radius: 40px;
+  font-weight: 700;
+  transition: 0.35s;
 }
 
-.student-login-btn:hover{
-
-    background:white;
-
-    color:#0F3D2E !important;
-
-    transform:translateY(-3px);
-
-    box-shadow:0 10px 25px rgba(0,0,0,.18);
-
+.student-login-btn:hover {
+  background: white;
+  color: #0F3D2E !important;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
 }
 
 /* ===========================
    Mobile Menu Icon
 =========================== */
 
-.menu-toggle{
-
-    display:none;
-
-    color:white;
-
-    font-size:28px;
-
-    cursor:pointer;
-
+.menu-toggle {
+  display: none;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
 }
 
 /* ===========================
    Tablet
 =========================== */
 
-@media (max-width:1024px){
+@media (max-width: 1024px) {
+  .logo img {
+    width: 52px;
+    height: 52px;
+  }
 
-.logo img{
-    width:52px;
-    height:52px;
-}
+  .logo-text h2 {
+    font-size: 26px;
+  }
 
-.logo-text h2{
-    font-size:26px;
-}
+  .nav-menu {
+    gap: 24px;
+  }
 
-.nav-menu{
-    gap:24px;
-}
-
-.nav-menu a{
-    font-size:16px;
-}
-
+  .nav-menu a {
+    font-size: 16px;
+  }
 }
 
 /* ===========================
    Mobile
 =========================== */
 
-@media (max-width:768px){
+@media (max-width: 768px) {
+  .navbar-container {
+    padding: 14px 20px;
+  }
 
-.navbar-container{
+  .logo img {
+    width: 46px;
+    height: 46px;
+  }
 
-    padding:14px 20px;
+  .logo-text h2 {
+    font-size: 22px;
+  }
 
-}
+  .logo-text span {
+    display: none;
+  }
 
-.logo img{
+  .menu-toggle {
+    display: block;
+  }
 
-    width:46px;
-    height:46px;
+  .nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: #0F3D2E;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    padding: 30px 0;
+    transform: translateY(-120%);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.35s;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+  }
 
-}
+  .nav-menu.active {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
 
-.logo-text h2{
-
-    font-size:22px;
-
-}
-
-.logo-text span{
-
-    display:none;
-
-}
-
-.menu-toggle{
-
-    display:block;
-
-}
-
-.nav-menu{
-
-    position:absolute;
-
-    top:100%;
-
-    left:0;
-
-    width:100%;
-
-    background:#0F3D2E;
-
-    display:flex;
-
-    flex-direction:column;
-
-    align-items:center;
-
-    gap:25px;
-
-    padding:30px 0;
-
-    transform:translateY(-120%);
-
-    opacity:0;
-
-    visibility:hidden;
-
-    transition:.35s;
-
-    box-shadow:0 20px 40px rgba(0,0,0,.18);
-
-}
-
-.nav-menu.active{
-
-    transform:translateY(0);
-
-    opacity:1;
-
-    visibility:visible;
-
-}
-
-.student-login-btn{
-
-    width:220px;
-
-    justify-content:center;
-
-}
-
+  .student-login-btn {
+    width: 220px;
+    justify-content: center;
+  }
 }

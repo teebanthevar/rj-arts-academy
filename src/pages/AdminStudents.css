@@ -1,0 +1,342 @@
+.admin-students {
+  padding: 30px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.students-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.students-header h1 {
+  font-size: 26px;
+  color: #0F3D2E;
+  margin-bottom: 5px;
+}
+
+.students-header p {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.add-student-btn {
+  background-color: #0F3D2E;
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.add-student-btn:hover {
+  background-color: #144d3b;
+}
+
+.students-toolbar {
+  margin-bottom: 20px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  padding: 8px 14px;
+  width: 300px;
+  gap: 10px;
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+}
+
+.search-box svg {
+  color: #6c757d;
+}
+
+.students-table {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+}
+
+.students-table table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.students-table th {
+  background-color: #f1f3f5;
+  color: #495057;
+  padding: 14px 20px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.students-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid #dee2e6;
+  font-size: 14px;
+  color: #212529;
+  vertical-align: middle;
+}
+
+.student-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.student-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #dee2e6;
+}
+
+.student-info strong {
+  font-size: 14px;
+  color: #212529;
+}
+
+.student-info small {
+  color: #6c757d;
+  font-size: 12px;
+}
+
+.active-status {
+  background-color: #e6f4ea;
+  color: #137333;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-btn-table,
+.delete-btn-table {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 6px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.edit-btn-table {
+  color: #0F3D2E;
+}
+
+.edit-btn-table:hover {
+  background-color: #e9ecef;
+}
+
+.delete-btn-table {
+  color: #e74c3c;
+}
+
+.delete-btn-table:hover {
+  background-color: #fde8e8;
+}
+
+/* ===================================
+   STUDENT INFO
+=================================== */
+
+.student-info{
+
+display:flex;
+
+align-items:center;
+
+gap:14px;
+
+}
+
+.student-avatar{
+
+width:48px;
+
+height:48px;
+
+border-radius:50%;
+
+object-fit:cover;
+
+border:3px solid #0F3D2E20;
+
+background:#f3f3f3;
+
+}
+
+.student-info strong{
+
+font-size:15px;
+
+color:#222;
+
+}
+
+.student-info small{
+
+color:#888;
+
+font-size:13px;
+
+}
+
+/* ===================================
+   ACTION BUTTONS
+=================================== */
+
+.action-buttons{
+
+display:flex;
+
+gap:10px;
+
+}
+
+.edit-btn-table,
+
+.delete-btn-table{
+
+width:42px;
+
+height:42px;
+
+border:none;
+
+border-radius:12px;
+
+cursor:pointer;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+font-size:15px;
+
+transition:.25s;
+
+}
+
+/* EDIT */
+
+.edit-btn-table{
+
+background:#EEF8FF;
+
+color:#0077CC;
+
+}
+
+.edit-btn-table:hover{
+
+background:#0077CC;
+
+color:white;
+
+transform:translateY(-2px);
+
+}
+
+/* DELETE */
+
+.delete-btn-table{
+
+background:#FFF2F2;
+
+color:#E53935;
+
+}
+
+.delete-btn-table:hover{
+
+background:#E53935;
+
+color:white;
+
+transform:translateY(-2px);
+
+}
+
+/* ===================================
+   TABLE ROW
+=================================== */
+
+.students-table tbody tr{
+
+transition:.25s;
+
+}
+
+.students-table tbody tr:hover{
+
+background:#FAFCFD;
+
+}
+
+/* ===================================
+   EMPTY TABLE
+=================================== */
+
+.students-table td{
+
+vertical-align:middle;
+
+}
+
+.view-btn-table{
+
+padding:10px 18px;
+
+border:none;
+
+border-radius:10px;
+
+background:#0F3D2E;
+
+color:white;
+
+font-weight:600;
+
+cursor:pointer;
+
+transition:.25s;
+
+}
+
+.view-btn-table:hover{
+
+background:#145644;
+
+transform:translateY(-2px);
+
+}

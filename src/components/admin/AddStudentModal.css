@@ -1,0 +1,287 @@
+/* ===========================
+   MODAL OVERLAY
+=========================== */
+
+.modal-overlay{
+
+position:fixed;
+
+inset:0;
+
+background:rgba(0,0,0,.45);
+
+backdrop-filter:blur(6px);
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+z-index:9999;
+
+animation:fadeIn .3s ease;
+
+}
+
+/* ===========================
+   MODAL
+=========================== */
+
+.student-modal{
+
+width:900px;
+
+max-width:95%;
+
+background:white;
+
+border-radius:24px;
+
+overflow:hidden;
+
+box-shadow:0 25px 60px rgba(0,0,0,.18);
+
+animation:popup .35s ease;
+
+}
+
+/* ===========================
+HEADER
+=========================== */
+
+.modal-header{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:25px 35px;
+
+background:linear-gradient(
+135deg,
+#0F3D2E,
+#145644
+);
+
+color:white;
+
+}
+
+.modal-header h2{
+
+font-size:28px;
+
+font-weight:700;
+
+}
+
+.modal-header button{
+
+border:none;
+
+background:none;
+
+color:white;
+
+font-size:24px;
+
+cursor:pointer;
+
+}
+
+/* ===========================
+BODY
+=========================== */
+
+.student-modal form{
+
+padding:35px;
+
+}
+
+.modal-grid{
+
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:22px;
+
+}
+
+.modal-grid input,
+
+.modal-grid select{
+
+width:100%;
+
+padding:16px 18px;
+
+border:1px solid #ddd;
+
+border-radius:14px;
+
+font-size:15px;
+
+transition:.25s;
+
+background:#FAFAFA;
+
+}
+
+.modal-grid input:focus,
+
+.modal-grid select:focus{
+
+outline:none;
+
+border-color:#0F3D2E;
+
+background:white;
+
+box-shadow:0 0 0 4px rgba(15,61,46,.08);
+
+}
+
+/* ===========================
+FOOTER
+=========================== */
+
+.modal-footer{
+
+margin-top:35px;
+
+display:flex;
+
+justify-content:flex-end;
+
+gap:15px;
+
+}
+
+.cancel-btn{
+
+padding:15px 28px;
+
+border:none;
+
+border-radius:12px;
+
+background:#ECECEC;
+
+cursor:pointer;
+
+font-size:15px;
+
+font-weight:600;
+
+}
+
+.save-btn{
+
+padding:15px 30px;
+
+border:none;
+
+border-radius:12px;
+
+background:linear-gradient(
+135deg,
+#0F3D2E,
+#145644
+);
+
+color:white;
+
+cursor:pointer;
+
+font-size:15px;
+
+font-weight:600;
+
+box-shadow:0 15px 30px rgba(15,61,46,.18);
+
+transition:.3s;
+
+}
+
+.save-btn:hover{
+
+transform:translateY(-2px);
+
+}
+
+/* ===========================
+ANIMATION
+=========================== */
+
+@keyframes popup{
+
+from{
+
+opacity:0;
+
+transform:translateY(30px) scale(.96);
+
+}
+
+to{
+
+opacity:1;
+
+transform:translateY(0) scale(1);
+
+}
+
+}
+
+@keyframes fadeIn{
+
+from{
+
+opacity:0;
+
+}
+
+to{
+
+opacity:1;
+
+}
+
+}
+
+/* ===========================
+RESPONSIVE
+=========================== */
+
+@media(max-width:768px){
+
+.modal-grid{
+
+grid-template-columns:1fr;
+
+}
+
+.student-modal{
+
+width:95%;
+
+}
+
+.modal-header{
+
+padding:20px;
+
+}
+
+.student-modal form{
+
+padding:20px;
+
+}
+
+}

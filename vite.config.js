@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePluginSitemap({
-      hostname: "https://rj-arts-academy.netlify.app",
+      hostname: "https://rjartsacademy.com",
     }),
   ],
 });

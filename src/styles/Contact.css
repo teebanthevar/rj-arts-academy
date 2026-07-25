@@ -1,101 +1,127 @@
-.contact{
-  padding:80px 10%;
-  background:#FAF9F6;
+.contact {
+  padding: 80px 10%;
+  background: #FAF9F6;
 }
 
-.contact h2{
-  text-align:center;
-  font-size:42px;
-  color:#0F3D2E;
+.contact h2 {
+  text-align: center;
+  font-size: 42px;
+  color: #0F3D2E;
 }
 
-.contact-subtitle{
-  text-align:center;
-  color:#666;
-  margin:15px 0 50px;
+.contact-subtitle {
+  text-align: center;
+  color: #666;
+  margin: 15px 0 50px;
 }
 
-.contact-container{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:40px;
+.contact-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
 }
 
-.contact-info{
-  background:#0F3D2E;
-  color:white;
-  padding:40px;
-  border-radius:20px;
+.contact-info {
+  background: #0F3D2E;
+  color: white;
+  padding: 40px;
+  border-radius: 20px;
 }
 
-.contact-info h3{
-  color:#D8C2A0;
-  margin-bottom:25px;
+.contact-info h3 {
+  color: #D8C2A0;
+  margin-bottom: 25px;
 }
 
-.contact-info p{
-  margin:18px 0;
+.contact-info p {
+  margin: 18px 0;
 }
 
-.whatsapp-btn{
-  display:inline-block;
-  margin-top:30px;
-  background:#25D366;
-  color:white;
-  text-decoration:none;
-  padding:14px 30px;
-  border-radius:40px;
-  font-weight:bold;
+.whatsapp-btn {
+  display: inline-block;
+  margin-top: 30px;
+  background: #25D366;
+  color: white;
+  text-decoration: none;
+  padding: 14px 30px;
+  border-radius: 40px;
+  font-weight: bold;
 }
 
-.contact-form{
-  display:flex;
-  flex-direction:column;
-  gap:20px;
+/* Updated Form Styles */
+.contact-form {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
 }
 
 .contact-form input,
-.contact-form textarea{
-  padding:18px;
-  border-radius:12px;
-  border:1px solid #ddd;
-  font-size:16px;
+.contact-form textarea {
+  width: 100%;
+  padding: 18px 22px;
+  border: 1px solid #d8d8d8;
+  border-radius: 16px;
+  font-size: 17px;
+  font-family: inherit;
+  background: #fff;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
-.contact-form button{
-  background:#0F3D2E;
-  color:white;
-  border:none;
-  padding:16px;
-  border-radius:40px;
-  cursor:pointer;
-  font-size:17px;
-  transition:.3s;
+.contact-form input {
+  height: 70px;
 }
 
-.contact-form button:hover{
-  background:#D8C2A0;
-  color:#0F3D2E;
+.contact-form textarea {
+  min-height: 200px;
+  resize: vertical;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: #1b5e4b;
+  box-shadow: 0 0 0 4px rgba(27, 94, 75, 0.12);
+}
+
+.contact-form button {
+  background: #0F3D2E;
+  color: white;
+  border: none;
+  width: 240px;
+  height: 62px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 22px;
+  font-weight: 700;
+  transition: .3s;
+}
+
+.contact-form button:hover {
+  background: #D8C2A0;
+  color: #0F3D2E;
 }
 
 @media(max-width:768px){
-  .contact-container{
-    grid-template-columns:1fr;
+  .contact-container {
+    grid-template-columns: 1fr;
   }
 }
 
-.instagram-btn{
-  display:inline-block;
-  margin-top:15px;
-  background:#E1306C;
-  color:white;
-  text-decoration:none;
-  padding:14px 30px;
-  border-radius:40px;
-  font-weight:bold;
-  transition:.3s;
+.instagram-btn {
+  display: inline-block;
+  margin-top: 15px;
+  background: #E1306C;
+  color: white;
+  text-decoration: none;
+  padding: 14px 30px;
+  border-radius: 40px;
+  font-weight: bold;
+  transition: .3s;
 }
 
-.instagram-btn:hover{
-  opacity:.9;
+.instagram-btn:hover {
+  opacity: .9;
 }

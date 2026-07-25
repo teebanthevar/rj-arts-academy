@@ -21,65 +21,79 @@
 
     <meta name="author" content="RJ Arts Academy" />
 
-    <!-- Google Search Console Verification Tag -->
-    <meta name="google-site-verification" content="cBWIyC3v27n53k-QVLeodqnrOQB-v1FBy3o5YXXnhXg" />
+    <!-- Google Search Console Verification -->
+    <meta
+      name="google-site-verification"
+      content="cBWIyC3v27n53k-QVLeodqnrOQB-v1FBy3o5YXXnhXg"
+    />
 
-    <!-- Local Business Structured Data (Schema.org) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "RJ Arts Academy",
-      "image": "https://rj-arts-academy.netlify.app/logo.png",
-      "@id": "https://rj-arts-academy.netlify.app/#organization",
-      "url": "https://rj-arts-academy.netlify.app",
-      "telephone": "",
-      "priceRange": "$$",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Slim River",
-        "addressRegion": "Perak",
-        "addressCountry": "MY"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": "3.8309",
-        "longitude": "101.4013"
-      },
-      "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-          "Sunday"
-        ],
-        "opens": "09:00",
-        "closes": "18:00"
-      },
-      "description": "Professional drawing, painting, sketching, colouring, acrylic, and watercolour art classes for children and adults in Slim River, Perak."
-    }
-    </script>
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://rjartsacademy.com/" />
 
+    <!-- Open Graph -->
     <meta property="og:title" content="RJ Arts Academy" />
-
     <meta
       property="og:description"
       content="Professional art classes for children and adults in Slim River, Perak."
     />
-
     <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://rjartsacademy.com/logo.png" />
+    <meta property="og:url" content="https://rjartsacademy.com/" />
+    <meta property="og:site_name" content="RJ Arts Academy" />
 
-    <meta property="og:image" content="/logo.png" />
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="RJ Arts Academy" />
+    <meta
+      name="twitter:description"
+      content="Professional art classes for children and adults in Slim River, Perak."
+    />
+    <meta name="twitter:image" content="https://rjartsacademy.com/logo.png" />
 
-    <meta property="og:url" content="https://rj-arts-academy.netlify.app" />
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ArtSchool",
+        "name": "RJ Arts Academy",
+        "image": "https://rjartsacademy.com/logo.png",
+        "@id": "https://rjartsacademy.com/#organization",
+        "url": "https://rjartsacademy.com",
+        "telephone": "",
+        "priceRange": "$$",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Slim River",
+          "addressRegion": "Perak",
+          "addressCountry": "MY"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 3.8309,
+          "longitude": 101.4013
+        },
+        "openingHoursSpecification": {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+          ],
+          "opens": "09:00",
+          "closes": "18:00"
+        },
+        "description": "Professional drawing, painting, sketching, colouring, acrylic and watercolour art classes for children and adults in Slim River, Perak."
+      }
+    </script>
   </head>
+
   <body>
     <div id="root"></div>
-    
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

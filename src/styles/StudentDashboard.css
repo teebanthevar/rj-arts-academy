@@ -1,0 +1,54 @@
+.student-dashboard{
+    display:flex;
+    min-height:100vh;
+    background:#F5F6FA;
+}
+
+.dashboard-main{
+    margin-left:290px;
+    width:calc(100% - 290px);
+    padding:40px;
+}
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:25px;
+    margin-top:35px;
+}
+
+@media(max-width:1200px){
+
+.dashboard-main{
+    margin-left:260px;
+    width:calc(100% - 260px);
+}
+
+}
+
+@media(max-width:992px){
+
+.dashboard-main{
+    margin-left:0;
+    width:100%;
+    padding:25px;
+}
+
+.stats-grid{
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+}
+
+}
+
+@media(max-width:768px){
+
+.dashboard-main{
+    padding:20px;
+}
+
+.stats-grid{
+    grid-template-columns:1fr;
+    gap:18px;
+}
+
+}

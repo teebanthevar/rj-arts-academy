@@ -1,7 +1,6 @@
-import '../styles/Testimonials.css';
+import "../styles/Testimonials.css";
 
 function Testimonials() {
-
   const testimonials = [
     {
       name: "A Happy Parent",
@@ -27,30 +26,50 @@ function Testimonials() {
   ];
 
   return (
-    <section id="testimonials" className="testimonials" data-aos="fade-right">
+    <section
+      id="testimonials"
+      className="testimonials"
+      data-aos="fade-up"
+    >
+      <div className="testimonial-heading">
 
-      <h2>What Our Students & Parents Say</h2>
+        <span className="heading-tag">
+          ★ Student & Parent Reviews
+        </span>
 
-      <p className="testimonial-subtitle">
-        Inspiring creativity, building confidence, and nurturing young artists.
-      </p>
+        <h2>
+          What Our Students
+          <br />
+          & Parents Say
+        </h2>
+
+        <p className="testimonial-subtitle">
+          Inspiring creativity, building confidence, and nurturing young
+          artists through meaningful artistic experiences.
+        </p>
+
+      </div>
 
       <div className="testimonial-grid">
         {testimonials.map((item, index) => (
           <div className="testimonial-card" key={index}>
 
+            <div className="card-top"></div>
+
+            <div className="quote">❝</div>
+
             <div className="stars">{item.rating}</div>
 
-            <p className="review">"{item.review}"</p>
+            <p className="review">{item.review}</p>
 
-            <h3>{item.name}</h3>
-
-            <span>{item.role}</span>
+            <div className="testimonial-footer">
+              <h3>{item.name}</h3>
+              <span>{item.role}</span>
+            </div>
 
           </div>
         ))}
       </div>
-
     </section>
   );
 }

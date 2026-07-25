@@ -1,0 +1,303 @@
+/* =========================================
+   MODAL BACKDROP
+========================================= */
+
+.modal-overlay{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.45);
+backdrop-filter:blur(10px);
+display:flex;
+justify-content:center;
+align-items:center;
+padding:30px;
+z-index:9999;
+animation:fadeIn .3s;
+}
+
+/* =========================================
+   MODAL
+========================================= */
+
+.profile-modal{
+
+width:100%;
+max-width:900px;
+
+background:#fff;
+
+border-radius:28px;
+
+overflow:hidden;
+
+box-shadow:
+0 35px 80px rgba(0,0,0,.25);
+
+animation:popup .35s ease;
+}
+
+/* =========================================
+HEADER
+========================================= */
+
+.modal-header{
+
+padding:25px 35px;
+
+background:
+linear-gradient(
+135deg,
+#0F3D2E,
+#176549
+);
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+}
+
+.modal-header h2{
+
+margin:0;
+
+color:white;
+
+font-size:28px;
+}
+
+.modal-header button{
+
+width:42px;
+height:42px;
+
+border:none;
+
+border-radius:50%;
+
+background:rgba(255,255,255,.18);
+
+color:white;
+
+font-size:20px;
+
+cursor:pointer;
+
+transition:.3s;
+}
+
+.modal-header button:hover{
+
+background:white;
+
+color:#0F3D2E;
+}
+
+/* =========================================
+FORM
+========================================= */
+
+.profile-modal form{
+
+padding:35px;
+}
+
+.form-grid{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:22px;
+}
+
+.form-grid .full{
+
+grid-column:1/-1;
+}
+
+.form-grid label{
+
+display:block;
+
+margin-bottom:8px;
+
+font-size:14px;
+
+font-weight:600;
+
+color:#666;
+}
+
+.form-grid input,
+.form-grid textarea{
+
+width:100%;
+
+padding:15px 18px;
+
+border-radius:14px;
+
+border:1px solid #ddd;
+
+background:#fafafa;
+
+font-size:15px;
+
+transition:.3s;
+}
+
+.form-grid input:focus,
+.form-grid textarea:focus{
+
+outline:none;
+
+border-color:#0F3D2E;
+
+background:white;
+
+box-shadow:
+0 0 0 4px rgba(15,61,46,.08);
+}
+
+/* =========================================
+FOOTER
+========================================= */
+
+.modal-footer{
+
+margin-top:35px;
+
+display:flex;
+
+justify-content:flex-end;
+
+gap:15px;
+}
+
+.cancel-btn{
+
+padding:14px 26px;
+
+border:none;
+
+border-radius:14px;
+
+background:#ECECEC;
+
+font-weight:600;
+
+cursor:pointer;
+}
+
+.cancel-btn:hover{
+
+background:#ddd;
+}
+
+.save-btn{
+
+padding:14px 32px;
+
+border:none;
+
+border-radius:14px;
+
+background:
+linear-gradient(
+135deg,
+#0F3D2E,
+#1D6A50
+);
+
+color:white;
+
+font-weight:700;
+
+cursor:pointer;
+
+transition:.3s;
+}
+
+.save-btn:hover{
+
+transform:translateY(-2px);
+
+box-shadow:
+0 15px 30px rgba(15,61,46,.25);
+}
+
+/* =========================================
+ANIMATION
+========================================= */
+
+@keyframes popup{
+
+from{
+
+opacity:0;
+
+transform:translateY(40px) scale(.95);
+
+}
+
+to{
+
+opacity:1;
+
+transform:translateY(0) scale(1);
+
+}
+
+}
+
+@keyframes fadeIn{
+
+from{
+
+opacity:0;
+
+}
+
+to{
+
+opacity:1;
+
+}
+
+}
+
+/* =========================================
+RESPONSIVE
+========================================= */
+
+@media(max-width:768px){
+
+.profile-modal{
+
+max-width:100%;
+}
+
+.profile-modal form{
+
+padding:25px;
+}
+
+.form-grid{
+
+grid-template-columns:1fr;
+}
+
+.modal-footer{
+
+flex-direction:column;
+}
+
+.save-btn,
+.cancel-btn{
+
+width:100%;
+}
+
+}

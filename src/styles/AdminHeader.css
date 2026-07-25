@@ -1,0 +1,59 @@
+.admin-header-bar{
+
+height:80px;
+
+background:white;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:0 35px;
+
+box-shadow:0 8px 25px rgba(0,0,0,.05);
+
+}
+
+.admin-header-bar input{
+
+width:380px;
+
+padding:14px 18px;
+
+border-radius:12px;
+
+border:1px solid #ddd;
+
+}
+
+.admin-profile{
+
+display:flex;
+
+align-items:center;
+
+gap:15px;
+
+}
+
+.admin-profile img{
+
+width:50px;
+
+height:50px;
+
+border-radius:50%;
+
+}
+
+.admin-profile span{
+
+display:block;
+
+color:#777;
+
+font-size:14px;
+
+}

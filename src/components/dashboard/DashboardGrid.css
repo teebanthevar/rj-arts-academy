@@ -1,0 +1,530 @@
+/* ==========================================
+   DASHBOARD GRID
+========================================== */
+
+.dashboard-grid{
+
+    display:grid;
+
+    grid-template-columns:2fr 1fr;
+
+    gap:24px;
+
+    margin-top:28px;
+
+}
+
+.left-column,
+.right-column{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:24px;
+
+}
+
+/* ==========================================
+   CARD
+========================================== */
+
+.dashboard-card{
+
+    background:#ffffff;
+
+    border-radius:24px;
+
+    padding:28px;
+
+    box-shadow:
+    0 15px 40px rgba(15,23,42,.06);
+
+    border:1px solid rgba(15,23,42,.05);
+
+    transition:.35s;
+
+}
+
+.dashboard-card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:
+    0 25px 50px rgba(15,23,42,.10);
+
+}
+
+/* ==========================================
+CARD HEADER
+========================================== */
+
+.card-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:25px;
+
+}
+
+.card-header h2{
+
+    margin:0;
+
+    color:#0F3D2E;
+
+    font-size:24px;
+
+    font-weight:700;
+
+}
+
+.card-header span{
+
+    background:#D8C2A0;
+
+    color:#0F3D2E;
+
+    padding:8px 18px;
+
+    border-radius:30px;
+
+    font-size:13px;
+
+    font-weight:700;
+
+}
+
+.card-header svg{
+
+    color:#D8C2A0;
+
+    font-size:26px;
+
+}
+
+/* ==========================================
+TODAY CLASS
+========================================== */
+
+.class-info h3{
+
+    font-size:28px;
+
+    color:#0F3D2E;
+
+    margin-bottom:12px;
+
+}
+
+.class-info p{
+
+    color:#666;
+
+    line-height:1.8;
+
+    margin-bottom:28px;
+
+}
+
+.class-meta{
+
+    display:flex;
+
+    gap:25px;
+
+    flex-wrap:wrap;
+
+    margin-bottom:28px;
+
+}
+
+.class-meta div{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    color:#666;
+
+    font-weight:600;
+
+}
+
+.class-meta svg{
+
+    color:#D8C2A0;
+
+}
+
+/* ==========================================
+JOIN BUTTON
+========================================== */
+
+.join-btn{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:12px;
+
+    width:100%;
+
+    padding:16px;
+
+    border:none;
+
+    border-radius:18px;
+
+    cursor:pointer;
+
+    background:linear-gradient(
+        135deg,
+        #0F3D2E,
+        #1B5B46
+    );
+
+    color:white;
+
+    font-size:16px;
+
+    font-weight:700;
+
+    transition:.35s;
+
+}
+
+.join-btn:hover{
+
+    transform:translateY(-4px);
+
+    box-shadow:0 18px 35px rgba(15,61,46,.30);
+
+}
+
+/* ==========================================
+ATTENDANCE
+========================================== */
+
+.attendance-progress{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:20px;
+
+}
+
+.progress-bar{
+
+    width:100%;
+
+    height:16px;
+
+    background:#EDF0F5;
+
+    border-radius:50px;
+
+    overflow:hidden;
+
+}
+
+.progress-fill{
+
+    height:100%;
+
+    border-radius:50px;
+
+    background:linear-gradient(
+        90deg,
+        #D8C2A0,
+        #FFD86A
+    );
+
+}
+
+.attendance-progress h3{
+
+    margin:0;
+
+    font-size:38px;
+
+    color:#0F3D2E;
+
+    font-weight:700;
+
+}
+
+/* ==========================================
+REWARD CARD
+========================================== */
+
+.rewards-card{
+
+    background:linear-gradient(
+        135deg,
+        #0F3D2E,
+        #195442
+    );
+
+    color:white;
+
+}
+
+.rewards-card h1{
+
+    font-size:48px;
+
+    margin:18px 0;
+
+}
+
+.rewards-card p{
+
+    color:rgba(255,255,255,.85);
+
+    line-height:1.8;
+
+}
+
+.rewards-card .card-header h2{
+
+    color:white;
+
+}
+
+.rewards-card .card-header svg{
+
+    color:#FFD86A;
+
+}
+
+/* ==========================================
+CERTIFICATE CARD
+========================================== */
+
+.certificates-card{
+
+    background:linear-gradient(
+        135deg,
+        #FFF9EE,
+        #FFF3DA
+    );
+
+}
+
+.certificates-card h1{
+
+    font-size:48px;
+
+    color:#0F3D2E;
+
+    margin:18px 0;
+
+}
+
+.certificates-card p{
+
+    color:#666;
+
+    line-height:1.8;
+
+}
+
+/* ==========================================
+RECENT ACTIVITY
+========================================== */
+
+.activity-list{
+
+    list-style:none;
+
+    margin:0;
+
+    padding:0;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+
+}
+
+.activity-list li{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding:14px 16px;
+
+    border-radius:14px;
+
+    background:#F8F9FC;
+
+    transition:.3s;
+
+    color:#4B5563;
+
+    font-weight:500;
+
+}
+
+.activity-list li:hover{
+
+    background:#EEF4F1;
+
+    transform:translateX(6px);
+
+}
+
+.activity-dot{
+
+    width:12px;
+
+    height:12px;
+
+    border-radius:50%;
+
+    background:#D8C2A0;
+
+    box-shadow:0 0 0 5px rgba(216,194,160,.18);
+
+    flex-shrink:0;
+
+}
+
+/* ==========================================
+PREMIUM EFFECT
+========================================== */
+
+.dashboard-card{
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+
+.dashboard-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+
+    left:-120%;
+
+    width:120%;
+
+    height:100%;
+
+    background:linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,.35),
+        transparent
+    );
+
+    transition:1s;
+
+}
+
+.dashboard-card:hover::before{
+
+    left:120%;
+
+}
+
+/* ==========================================
+RESPONSIVE
+========================================== */
+
+@media(max-width:1200px){
+
+.dashboard-grid{
+
+grid-template-columns:1fr;
+
+}
+
+}
+
+@media(max-width:768px){
+
+.dashboard-grid{
+
+gap:18px;
+
+}
+
+.dashboard-card{
+
+padding:22px;
+
+}
+
+.card-header h2{
+
+font-size:20px;
+
+}
+
+.class-info h3{
+
+font-size:22px;
+
+}
+
+.class-meta{
+
+flex-direction:column;
+
+gap:12px;
+
+}
+
+.join-btn{
+
+padding:14px;
+
+font-size:15px;
+
+}
+
+.attendance-progress h3{
+
+font-size:30px;
+
+}
+
+.rewards-card h1,
+.certificates-card h1{
+
+font-size:36px;
+
+}
+
+.activity-list li{
+
+font-size:14px;
+
+padding:12px;
+
+}
+
+}

@@ -1,24 +1,24 @@
 import { useState } from "react";
 import "../styles/Gallery.css";
 
-import gallery1 from "../assets/images/gallery/gallery1.jpg";
-import gallery2 from "../assets/images/gallery/gallery2.jpg";
-import gallery3 from "../assets/images/gallery/gallery3.jpg";
-import gallery4 from "../assets/images/gallery/gallery4.jpg";
-import gallery5 from "../assets/images/gallery/gallery5.jpg";
-import gallery6 from "../assets/images/gallery/gallery6.jpg";
+// Automatically import and sort all gallery images
+const imageModules = import.meta.glob(
+  "../assets/images/gallery/*.{jpg,jpeg,png,webp,avif}",
+  {
+    eager: true,
+    import: "default",
+  }
+);
+
+const images = Object.entries(imageModules)
+  .sort(([pathA], [pathB]) => pathA.localeCompare(pathB, undefined, { numeric: true }))
+  .map(([, image]) => image);
 
 function Gallery() {
-  const images = [
-    gallery1,
-    gallery2,
-    gallery3,
-    gallery4,
-    gallery5,
-    gallery6,
-  ];
-
   const [selectedImage, setSelectedImage] = useState(null);
+  const [showAll, setShowAll] = useState(false);
+
+  const displayedImages = showAll ? images : images.slice(0, 6);
 
   return (
     <section id="gallery" className="gallery" data-aos="zoom-in">
@@ -29,7 +29,7 @@ function Gallery() {
       </p>
 
       <div className="gallery-grid">
-        {images.map((image, index) => (
+        {displayedImages.map((image, index) => (
           <div
             className="gallery-card"
             key={index}
@@ -43,9 +43,14 @@ function Gallery() {
         ))}
       </div>
 
-      <button className="gallery-btn">
-        View More
-      </button>
+      {!showAll && images.length > 6 && (
+        <button
+          className="gallery-btn"
+          onClick={() => setShowAll(true)}
+        >
+          View More
+        </button>
+      )}
 
       {selectedImage && (
         <div

@@ -1,31 +1,42 @@
 import { useState, useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
+
 import "./App.css";
 
-// Components
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import AboutAcademy from "./components/AboutAcademy";
-import WhyChoose from "./components/WhyChoose";
-import Courses from "./components/Courses";
-import ArtCommission from "./components/ArtCommission";
-import WhyOrder from "./components/WhyOrder";
-import OrderProcess from "./components/OrderProcess";
-import FeaturedMasterpieces from "./components/FeaturedMasterpieces";
-import LearningPrograms from "./components/LearningPrograms";
-import Enrollment from "./components/Enrollment";
-import Gallery from "./components/Gallery";
-import Achievements from "./components/Achievements";
-import Testimonials from "./components/Testimonials";
-import Events from "./components/Events";
-import FAQ from "./components/FAQ";
-import Contact from "./components/Contact";
-import StudentPortal from "./components/StudentPortal";
-import Footer from "./components/Footer";
-import FloatingWhatsApp from "./components/FloatingWhatsApp";
-import ScrollProgress from "./components/ScrollProgress";
 import Loader from "./components/Loader";
+import SupabaseTest from "./components/SupabaseTest";
 
-function App() {
+import MainLayout from "./layouts/MainLayout";
+import DashboardLayout from "./layouts/DashboardLayout";
+import AdminLayout from "./layouts/AdminLayout";
+
+// Public Pages
+import Home from "./pages/Home";
+import StudentLogin from "./pages/StudentLogin";
+
+// Dashboard Pages
+import DashboardHome from "./pages/DashboardHome";
+import MyPortfolio from "./pages/MyPortfolio";
+import MyCourses from "./pages/MyCourses";
+import Attendance from "./pages/Attendance";
+import Certificates from "./pages/Certificates";
+import Payments from "./pages/Payments";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
+
+// Admin Pages
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminStudents from "./pages/AdminStudents";
+import StudentDetails from "./pages/StudentDetails";
+import AdminArtworks from "./pages/AdminArtworks";
+import AdminCourses from "./pages/AdminCourses";
+import AdminAttendance from "./pages/AdminAttendance";
+import AdminCertificates from "./pages/AdminCertificates";
+import AdminPayments from "./pages/AdminPayments";
+import AdminAnnouncement from "./pages/AdminAnnouncement";
+
+export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,67 +53,45 @@ function App() {
 
   return (
     <>
-      <ScrollProgress />
+      <SupabaseTest />
 
-      <Navbar />
+      <Routes>
+        {/* Public Website */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+        </Route>
 
-      <main>
-        <Hero />
+        {/* Login */}
+        <Route path="/student-login" element={<StudentLogin />} />
 
-        {/* About Academy */}
-        <AboutAcademy />
+        {/* Student Dashboard */}
+        <Route element={<DashboardLayout />}>
+          <Route path="/student-dashboard" element={<DashboardHome />} />
+          <Route path="/portfolio" element={<MyPortfolio />} />
+          <Route path="/courses" element={<MyCourses />} />
+          <Route path="/attendance" element={<Attendance />} />
+          <Route path="/certificates" element={<Certificates />} />
+          <Route path="/payments" element={<Payments />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
 
-        {/* Why Choose RJ Arts Academy */}
-        <WhyChoose />
+        {/* Admin Login (Outside Layout) */}
+        <Route path="/admin-login" element={<AdminLogin />} />
 
-        {/* Courses */}
-        <Courses />
-
-        {/* Custom Artwork Commission */}
-        <ArtCommission />
-
-        {/* Why Order Artwork */}
-        <WhyOrder />
-
-        {/* Order Process */}
-        <OrderProcess />
-
-        {/* Featured Masterpieces */}
-        <FeaturedMasterpieces />
-
-        {/* Learning Programmes */}
-        <LearningPrograms />
-
-        {/* Gallery */}
-        <Gallery />
-
-        {/* Achievements */}
-        <Achievements />
-
-        {/* Testimonials */}
-        <Testimonials />
-
-        {/* Events */}
-        <Events />
-
-        {/* FAQ */}
-        <FAQ />
-
-        {/* Enrollment */}
-        <Enrollment />
-
-        {/* Contact */}
-        <Contact />
-
-        {/* Student Portal */}
-        <StudentPortal />
-      </main>
-
-      <Footer />
-
-      <FloatingWhatsApp />
+        {/* Admin Dashboard Pages (Inside AdminLayout) */}
+        <Route element={<AdminLayout />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/students" element={<AdminStudents />} />
+          <Route path="/admin/students/:id" element={<StudentDetails />} />
+          <Route path="/admin/artworks" element={<AdminArtworks />} />
+          <Route path="/admin/courses" element={<AdminCourses />} />
+          <Route path="/admin/attendance" element={<AdminAttendance />} />
+          <Route path="/admin/certificates" element={<AdminCertificates />} />
+          <Route path="/admin/payments" element={<AdminPayments />} />
+          <Route path="/admin/announcements" element={<AdminAnnouncement />} />
+        </Route>
+      </Routes>
     </>
   );
 }
-
-export default App;

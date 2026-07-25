@@ -1,0 +1,71 @@
+.admin-sidebar{
+
+width:280px;
+
+background:#0F3D2E;
+
+color:white;
+
+padding:30px;
+
+display:flex;
+
+flex-direction:column;
+
+}
+
+.admin-logo{
+
+margin-bottom:50px;
+
+}
+
+.admin-logo h2{
+
+color:#C8A96A;
+
+margin-bottom:5px;
+
+}
+
+.admin-sidebar nav{
+
+display:flex;
+
+flex-direction:column;
+
+gap:10px;
+
+}
+
+.admin-sidebar a{
+
+display:flex;
+
+align-items:center;
+
+gap:15px;
+
+padding:15px 18px;
+
+border-radius:14px;
+
+color:white;
+
+text-decoration:none;
+
+transition:.3s;
+
+}
+
+.admin-sidebar a:hover,
+
+.admin-sidebar a.active{
+
+background:#C8A96A;
+
+color:#0F3D2E;
+
+font-weight:600;
+
+}
