@@ -194,7 +194,7 @@ export default function PublicExplore() {
               style={{
                 ...(currentCourse.bg_image_url 
                   ? { 
-                      backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url(${currentCourse.bg_image_url})`,
+                      backgroundImage: `url(${currentCourse.bg_image_url})`,
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                       backgroundRepeat: "no-repeat"
@@ -206,9 +206,6 @@ export default function PublicExplore() {
               }}
             >
               <div className="featured-banner-content">
-                <span className="featured-badge">
-                  JOIN NOW ({currentIndex + 1}/{featuredCourses.length})
-                </span>
                 <h2>{currentCourse.title}</h2>
                 <p>
                   {currentCourse.banner_text || currentCourse.description || "Grab this limited-time featured masterclass and elevate your skills today!"}
