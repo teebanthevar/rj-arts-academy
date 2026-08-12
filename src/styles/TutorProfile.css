@@ -1,100 +1,174 @@
+/* --- Global Container --- */
 .tutor-profile-container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 20px;
-  font-family: inherit;
+  max-width: 950px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #f8fafc;
+  border-radius: 24px;
+  box-sizing: border-box;
 }
 
 .back-link {
-  display: inline-block;
-  margin-bottom: 20px;
-  color: #0f3d2e;
+  display: block;
+  width: 100%;
+  max-width: 950px;
+  margin: 0 auto 16px auto;
+  color: #0f766e;
   text-decoration: none;
   font-weight: 600;
+  transition: color 0.2s;
+  text-align: left;
 }
 
+.back-link:hover {
+  color: #115e59;
+  text-decoration: underline;
+}
+
+/* --- Profile Header Card --- */
 .profile-header-card {
   display: flex;
   align-items: center;
-  gap: 20px;
-  background: #fff;
+  gap: 24px;
+  background: #ffffff;
   padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .profile-avatar {
-  width: 100px;
-  height: 100px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
+  border: 3px solid #0f766e;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.15);
 }
 
 .profile-titles h1 {
-  margin: 0 0 5px 0;
-  color: #0f3d2e;
+  margin: 0 0 6px 0;
+  color: #0f172a;
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
 .profile-profession {
-  color: #666;
-  margin: 0 0 10px 0;
+  color: #64748b;
+  margin: 0 0 12px 0;
   font-size: 1rem;
+  font-weight: 500;
 }
 
 .profile-category-tag {
-  background: #e6f4ea;
-  color: #137333;
-  padding: 4px 10px;
+  background: #f0fdf4;
+  color: #15803d;
+  padding: 4px 12px;
   border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid #dcfce7;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
 }
 
+/* --- Grid & Main Content Cards --- */
 .profile-body-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 20px;
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .profile-main-info, 
 .profile-sidebar-card {
-  background: #fff;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .profile-main-info h3, 
 .profile-sidebar-card h3 {
   margin-top: 0;
+  margin-bottom: 14px;
   color: #0f3d2e;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.2px;
 }
 
+/* About Me Bio Box Styling */
+.profile-main-info > p {
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.7;
+  background: #f8fafc;
+  padding: 16px 20px;
+  border-radius: 14px;
+  border-left: 4px solid #0f766e;
+  margin-bottom: 24px;
+}
+
+/* Location & Details List */
 .profile-main-info ul {
   list-style: none;
   padding: 0;
+  margin: 0 0 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .profile-main-info li {
-  margin-bottom: 10px;
+  background: #f8fafc;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 500;
 }
 
+.profile-main-info li strong {
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* Buttons */
 .book-now-btn {
   width: 100%;
   background: #25d366;
-  color: white; /* Fixed: removed the '#' before white */
+  color: white;
   border: none;
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: bold;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.95rem;
   cursor: pointer;
   margin-top: 15px;
-  transition: background 0.2s;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
+  transition: all 0.2s ease;
 }
 
 .book-now-btn:hover {
   background: #20ba5a;
+  transform: translateY(-1px);
 }
 
 .profile-loading, 
@@ -103,4 +177,50 @@
   padding: 80px 20px;
   font-size: 1.2rem;
   color: #666;
+}
+
+/* --- Mobile Responsive Optimizations --- */
+@media (max-width: 768px) {
+  .tutor-profile-container {
+    padding: 12px;
+    margin: 0 auto;
+    background-color: #f8fafc;
+  }
+
+  .back-link {
+    padding: 0 4px;
+  }
+
+  .profile-header-card {
+    padding: 20px 16px;
+    gap: 16px;
+    border-radius: 16px;
+    margin-bottom: 16px;
+  }
+
+  .profile-avatar {
+    width: 75px;
+    height: 75px;
+  }
+
+  .profile-titles h1 {
+    font-size: 1.25rem;
+  }
+
+  .profile-profession {
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+  }
+
+  .profile-body-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .profile-main-info, 
+  .profile-sidebar-card {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
 }

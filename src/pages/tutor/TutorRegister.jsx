@@ -43,14 +43,13 @@ function TutorRegister() {
     }
 
     if (authData?.user) {
-      // Upsert into profiles table with role explicitly set to 'tutor'
-      const { error: profileError } = await supabase.from("profiles").upsert(
+      // Upsert into the 'tutors' table matching your database columns
+      const { error: tutorError } = await supabase.from("tutors").upsert(
         [
           {
             id: authData.user.id,
             full_name: fullName,
             email: email,
-            role: "tutor", // Automatically registers them as a tutor
           },
         ],
         { onConflict: "id" }
@@ -58,8 +57,8 @@ function TutorRegister() {
 
       setLoading(false);
 
-      if (profileError) {
-        setErrorMessage(profileError.message);
+      if (tutorError) {
+        setErrorMessage(tutorError.message);
         return;
       }
 

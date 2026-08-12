@@ -31,7 +31,22 @@ export default function StudentPublicLogin() {
 
       const user = data.user;
       if (user) {
-        // Redirect straight to the explore hub page instead of the profile page
+        // Check if this user is registered in the tutors table
+        const { data: tutorData } = await supabase
+          .from("tutors")
+          .select("id")
+          .eq("id", user.id)
+          .single();
+
+        if (tutorData) {
+          // If they are a tutor, sign them out and block access
+          await supabase.auth.signOut();
+          setErrorMsg("Access denied. Tutors must log in through the Tutor Login portal.");
+          setLoading(false);
+          return;
+        }
+
+        // Redirect straight to the explore hub page if they are a student
         navigate("/teachhub");
       }
     } catch (err) {

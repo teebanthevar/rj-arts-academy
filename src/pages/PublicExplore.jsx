@@ -11,23 +11,25 @@ export default function PublicExplore() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  // State to track logged-in student session & profile details
   const [currentUser, setCurrentUser] = useState(null);
   const [studentProfile, setStudentProfile] = useState(null);
+  const [followedTutors, setFollowedTutors] = useState({});
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
     checkUserSession();
     fetchPublicTutors();
     fetchFeaturedCourses();
 
-    // Listen for real-time auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setCurrentUser(session.user);
         fetchStudentProfile(session.user.id);
+        fetchUserFollows(session.user.id);
       } else {
         setCurrentUser(null);
         setStudentProfile(null);
+        setFollowedTutors({});
       }
     });
 
@@ -39,6 +41,7 @@ export default function PublicExplore() {
     if (session?.user) {
       setCurrentUser(session.user);
       fetchStudentProfile(session.user.id);
+      fetchUserFollows(session.user.id);
     }
   };
 
@@ -58,10 +61,30 @@ export default function PublicExplore() {
     }
   };
 
+  const fetchUserFollows = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from("follows")
+        .select("tutor_id")
+        .eq("student_id", userId);
+
+      if (!error && data) {
+        const followMap = {};
+        data.forEach((item) => {
+          followMap[item.tutor_id] = true;
+        });
+        setFollowedTutors(followMap);
+      }
+    } catch (err) {
+      console.error("Error fetching user follows:", err);
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setCurrentUser(null);
     setStudentProfile(null);
+    setFollowedTutors({});
   };
 
   useEffect(() => {
@@ -90,7 +113,7 @@ export default function PublicExplore() {
     try {
       const { data, error } = await supabase
         .from("courses")
-        .select("id, title, description, bg_image_url, banner_text")
+        .select("id, title, description, bg_image_url, banner_text, tutor_id")
         .eq("is_featured", true)
         .order("id", { ascending: false });
 
@@ -108,16 +131,62 @@ export default function PublicExplore() {
     if (!currentUser) {
       navigate(`/student-public-login?redirect=course&id=${course.id}`);
     } else {
-      alert("You are logged in! Explore tutors below to enroll directly in their classes.");
+      if (course.tutor_id) {
+        navigate(`/tutor-profile/${course.tutor_id}`);
+      } else {
+        alert("This course is not linked to a specific tutor profile yet.");
+      }
     }
   };
 
-  // Restrict tutor profile viewing: must be logged in as a student first
   const handleViewProfile = (tutorId) => {
     if (!currentUser) {
       navigate("/student-public-login");
     } else {
       navigate(`/tutor-profile/${tutorId}`);
+    }
+  };
+
+  const handleToggleFollow = async (tutorId, e) => {
+    e.stopPropagation();
+    if (!currentUser) {
+      navigate("/student-public-login");
+      return;
+    }
+
+    const isCurrentlyFollowing = !!followedTutors[tutorId];
+
+    // Optimistically update UI immediately
+    setFollowedTutors((prev) => ({
+      ...prev,
+      [tutorId]: !isCurrentlyFollowing,
+    }));
+
+    try {
+      if (isCurrentlyFollowing) {
+        // Remove follow record from Supabase
+        const { error } = await supabase
+          .from("follows")
+          .delete()
+          .eq("student_id", currentUser.id)
+          .eq("tutor_id", tutorId);
+
+        if (error) throw error;
+      } else {
+        // Insert follow record into Supabase
+        const { error } = await supabase
+          .from("follows")
+          .insert([{ student_id: currentUser.id, tutor_id: tutorId }]);
+
+        if (error) throw error;
+      }
+    } catch (err) {
+      console.error("Error updating follow state in database:", err);
+      // Revert UI state if database update fails
+      setFollowedTutors((prev) => ({
+        ...prev,
+        [tutorId]: isCurrentlyFollowing,
+      }));
     }
   };
 
@@ -134,36 +203,50 @@ export default function PublicExplore() {
 
   return (
     <div>
-      {/* Navigation Bar spanning full screen width */}
+      {/* Navigation Bar */}
       <nav className="public-nav">
         <div className="logo">TeachHub</div>
         
         <div className="nav-actions">
           {currentUser ? (
-            /* LOGGED IN VIEW */
             <div className="logged-in-user-panel">
               <span className="welcome-user-text">
                 Welcome, {studentProfile?.full_name || currentUser.email}
               </span>
               
-              {studentProfile && (
-                <Link 
-                  to={`/student-public-profile/${currentUser.id}`}
+              <div className="user-menu-dropdown-wrapper">
+                <button 
                   className="nav-dashboard-btn"
+                  onClick={() => setShowUserMenu(!showUserMenu)}
                 >
-                  My Dashboard
-                </Link>
-              )}
+                  My Dashboard ▾
+                </button>
 
-              <button 
-                onClick={handleLogout}
-                className="nav-logout-btn"
-              >
-                Logout
-              </button>
+                {showUserMenu && (
+                  <div className="user-dropdown-popup">
+                    {studentProfile && (
+                      <Link 
+                        to={`/student-public-profile/${currentUser.id}`}
+                        className="dropdown-link-item"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        Dashboard Home
+                      </Link>
+                    )}
+                    <button 
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        handleLogout();
+                      }}
+                      className="dropdown-logout-item"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
-            /* LOGGED OUT VIEW */
             <>
               <div className="hover-dropdown-container">
                 <button className="nav-main-btn">Student Login ▾</button>
@@ -185,7 +268,7 @@ export default function PublicExplore() {
         </div>
       </nav>
 
-      {/* Hero Section spanning 100% full-width edge-to-edge */}
+      {/* Hero Section */}
       <div className="public-hero">
         <div className="public-hero-content-wrapper">
           {currentCourse && (
@@ -205,12 +288,15 @@ export default function PublicExplore() {
                 )
               }}
             >
-              <div className="featured-banner-content">
-                <h2>{currentCourse.title}</h2>
-                <p>
-                  {currentCourse.banner_text || currentCourse.description || "Grab this limited-time featured masterclass and elevate your skills today!"}
-                </p>
-              </div>
+              {!currentCourse.bg_image_url && (
+                <div className="featured-banner-content">
+                  <h2>{currentCourse.title}</h2>
+                  <p>
+                    {currentCourse.banner_text || currentCourse.description || "Grab this limited-time featured masterclass and elevate your skills today!"}
+                  </p>
+                </div>
+              )}
+
               <button 
                 className="featured-explore-btn"
                 onClick={() => handleEnrollClick(currentCourse)}
@@ -245,23 +331,43 @@ export default function PublicExplore() {
       <div className="public-explore-container">
         <div className="public-tutors-grid">
           {filteredTutors.length > 0 ? (
-            filteredTutors.map((tutor) => (
-              <div key={tutor.id} className="public-tutor-card">
-                <img src={tutor.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.full_name || "Tutor")}&background=0F3D2E&color=fff`} alt={tutor.full_name} className="public-tutor-avatar" />
-                <h3>{tutor.full_name}</h3>
-                <p className="tutor-profession">{tutor.profession || "Professional Tutor"}</p>
-                <span className="tutor-cat-tag">{tutor.category || "General"}</span>
-                <div className="tutor-rate">
-                  <span>Rate:</span> <strong>${tutor.hourly_rate || 30}/hr</strong>
+            filteredTutors.map((tutor) => {
+              const isFollowing = !!followedTutors[tutor.id];
+              return (
+                <div key={tutor.id} className="public-tutor-card">
+                  <img src={tutor.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(tutor.full_name || "Tutor")}&background=0F3D2E&color=fff`} alt={tutor.full_name} className="public-tutor-avatar" />
+                  <h3>{tutor.full_name}</h3>
+                  <p className="tutor-profession">{tutor.profession || "Professional Tutor"}</p>
+                  <span className="tutor-cat-tag">{tutor.category || "General"}</span>
+                  
+                  <div className="tutor-action-container" style={{ margin: "12px 0" }}>
+                    <button
+                      onClick={(e) => handleToggleFollow(tutor.id, e)}
+                      style={{
+                        padding: "6px 16px",
+                        borderRadius: "20px",
+                        border: isFollowing ? "1px solid #0f3d2e" : "none",
+                        backgroundColor: isFollowing ? "transparent" : "#0f3d2e",
+                        color: isFollowing ? "#0f3d2e" : "#fff",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        transition: "all 0.2s ease"
+                      }}
+                    >
+                      {isFollowing ? "Following ✓" : "+ Follow"}
+                    </button>
+                  </div>
+
+                  <button 
+                    className="book-session-btn"
+                    onClick={() => handleViewProfile(tutor.id)}
+                  >
+                    View Profile
+                  </button>
                 </div>
-                <button 
-                  className="book-session-btn"
-                  onClick={() => handleViewProfile(tutor.id)}
-                >
-                  View Profile
-                </button>
-              </div>
-            ))
+              );
+            })
           ) : (
             <p className="no-tutors-found">No tutors found matching your criteria.</p>
           )}

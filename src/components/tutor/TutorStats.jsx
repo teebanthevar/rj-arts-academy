@@ -61,10 +61,10 @@ function TutorStats() {
         }
       }
 
-      // 3. Fetch followers
+      // 3. Fetch followers from the "follows" table
       let followerCount = 0;
       const { count: fCount } = await supabase
-        .from("tutor_followers")
+        .from("follows")
         .select("id", { count: "exact", head: true })
         .eq("tutor_id", user.id);
       followerCount = fCount || 0;
