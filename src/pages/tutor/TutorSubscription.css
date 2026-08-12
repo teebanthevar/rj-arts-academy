@@ -1,0 +1,456 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* Main Scrollable Viewport Container */
+.sub-container {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  padding: 32px;
+  background-color: #f0f4f2;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(15, 61, 46, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(212, 175, 55, 0.08) 0px, transparent 50%);
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Custom Scrollbar Styling - pinned to the far right viewport edge */
+.sub-container::-webkit-scrollbar {
+  width: 10px;
+}
+
+.sub-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.sub-container::-webkit-scrollbar-thumb {
+  background: rgba(15, 61, 46, 0.3);
+  border-radius: 5px;
+}
+
+.sub-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 61, 46, 0.5);
+}
+
+/* Header */
+.sub-header {
+  margin-bottom: 28px;
+}
+
+.sub-header h1 {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #0f3d2e;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
+}
+
+.sub-header p {
+  color: #5d7168;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Current Active Banner */
+.current-plan-card {
+  background: linear-gradient(135deg, #0f3d2e 0%, #17523e 100%);
+  border-radius: 22px;
+  padding: 28px 32px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  box-shadow: 0 12px 30px rgba(15, 61, 46, 0.18);
+  gap: 20px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.plan-badge-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.trial-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(212, 175, 55, 0.25);
+  color: #fef08a;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  width: fit-content;
+}
+
+.days-left {
+  font-size: 0.85rem;
+  color: #a7f3d0;
+  font-weight: 700;
+}
+
+.current-plan-details h2 {
+  margin: 0 0 6px 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.current-plan-details p {
+  margin: 0;
+  color: #d1fae5;
+  font-size: 0.92rem;
+  max-width: 500px;
+}
+
+.manage-billing-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.manage-billing-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Toggle Switcher */
+.billing-cycle-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  font-weight: 700;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.billing-cycle-toggle span.active {
+  color: #0f3d2e;
+  font-weight: 800;
+}
+
+.toggle-switch {
+  width: 52px;
+  height: 28px;
+  background: #cbd5e1;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  padding: 3px;
+  transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.toggle-switch.yearly {
+  background: #0f3d2e;
+}
+
+.toggle-knob {
+  width: 22px;
+  height: 22px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.toggle-switch.yearly .toggle-knob {
+  transform: translateX(24px);
+}
+
+.discount-tag {
+  background: #fef3c7;
+  color: #d97706;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 4px;
+}
+
+/* Pricing Grid */
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 36px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.plan-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 22px;
+  padding: 30px 26px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px -5px rgba(15, 61, 46, 0.05);
+  transition: transform 0.2s ease;
+  box-sizing: border-box;
+}
+
+.plan-card:hover {
+  transform: translateY(-4px);
+}
+
+.popular-card {
+  border: 2px solid #0f3d2e;
+  background: #ffffff;
+  box-shadow: 0 16px 35px -5px rgba(15, 61, 46, 0.12);
+}
+
+.popular-badge {
+  position: absolute;
+  top: -14px;
+  right: 24px;
+  background: #0f3d2e;
+  color: #d4af37;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.plan-name {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #0f3d2e;
+  margin: 0 0 6px 0;
+}
+
+.plan-desc {
+  font-size: 0.88rem;
+  color: #64748b;
+  margin: 0 0 20px 0;
+  min-height: 40px;
+}
+
+.plan-price-box {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.price {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #0f3d2e;
+}
+
+.period {
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 28px 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.features-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: #334155;
+  font-weight: 600;
+}
+
+.check-icon {
+  color: #059669;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.select-plan-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid #0f3d2e;
+  background: transparent;
+  color: #0f3d2e;
+  font-weight: 800;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.select-plan-btn:hover:not(:disabled) {
+  background: rgba(15, 61, 46, 0.08);
+}
+
+.popular-btn {
+  background: #0f3d2e;
+  color: #ffffff;
+  border: none;
+}
+
+.popular-btn:hover:not(:disabled) {
+  background: #14523e;
+}
+
+.select-plan-btn:disabled {
+  border-color: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* History Card */
+.billing-history-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 22px;
+  padding: 26px;
+  box-shadow: 0 10px 25px -5px rgba(15, 61, 46, 0.05);
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: 32px;
+}
+
+.billing-history-card h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f3d2e;
+  margin: 0 0 16px 0;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  border-bottom: 1.5px solid #e2e8f0;
+}
+
+.history-table td {
+  padding: 16px;
+  font-size: 0.9rem;
+  color: #334155;
+  font-weight: 600;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.inv-id {
+  font-family: monospace;
+  font-weight: 700;
+  color: #0f3d2e;
+}
+
+.font-bold {
+  font-weight: 800;
+  color: #0f3d2e;
+}
+
+.billing-status-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .current-plan-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .sub-container {
+    padding: 16px;
+  }
+}
+
+/* Additional Mobile Responsive Fixes */
+@media (max-width: 768px) {
+  .sub-container {
+    padding: 16px;
+  }
+
+  .current-plan-card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .manage-billing-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .plans-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .billing-history-card {
+    padding: 16px;
+    overflow-x: hidden;
+  }
+
+  /* Forces table columns to wrap nicely or scroll inside mobile frames */
+  .billing-history-card div {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .history-table {
+    min-width: 500px;
+  }
+
+  .history-table th,
+  .history-table td {
+    padding: 10px 12px;
+    font-size: 0.82rem;
+  }
+}

@@ -1,0 +1,598 @@
+.public-explore-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  font-family: inherit;
+}
+
+.public-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 20px 60px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.4);
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+}
+
+.public-nav::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #d4af37, transparent);
+}
+
+.public-nav .logo {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0f3d2e;
+  letter-spacing: 0.5px;
+}
+
+.nav-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+/* --- Logged-In User Panel Styling --- */
+.logged-in-user-panel {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.welcome-user-text {
+  font-weight: 600;
+  color: #0f3d2e;
+  font-size: 0.95rem;
+}
+
+.nav-dashboard-btn {
+  padding: 8px 16px;
+  background: #0f3d2e;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: 1px solid #d4af37;
+  transition: all 0.2s;
+}
+
+.nav-dashboard-btn:hover {
+  background: #14523e;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+}
+
+.nav-logout-btn {
+  padding: 8px 16px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.nav-logout-btn:hover {
+  background: #dc2626;
+}
+/* ----------------------------------- */
+
+.login-link {
+  font-weight: 700;
+  color: #0f3d2e;
+  text-decoration: none;
+}
+
+.register-tutor-btn {
+  background: #0f3d2e;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.register-tutor-btn:hover {
+  background: #14523e;
+}
+
+.public-hero {
+  width: 100%;
+  text-align: center;
+  padding: 60px 20px;
+  background: linear-gradient(135deg, rgba(15, 61, 46, 0.04) 0%, rgba(212, 175, 55, 0.08) 100%);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  box-sizing: border-box;
+}
+
+.public-hero-content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.public-hero h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #0f3d2e;
+  margin-bottom: 10px;
+}
+
+.public-hero p {
+  color: #5d7168;
+  font-size: 1.05rem;
+  margin-bottom: 30px;
+}
+
+.search-filter-bar {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.search-filter-bar input,
+.search-filter-bar select {
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1.5px solid #cbd5e1;
+  font-size: 0.95rem;
+  outline: none;
+  background: white;
+  transition: all 0.25s ease;
+}
+
+/* Premium Gold Focus Rings for Search and Filters */
+.search-filter-bar input:focus,
+.search-filter-bar select:focus {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+}
+
+.search-filter-bar input {
+  flex: 1;
+}
+
+.public-tutors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 320px));
+  justify-content: center;
+  gap: 24px;
+  padding: 40px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.public-tutor-card {
+  background: white;
+  padding: 24px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(15, 61, 46, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.public-tutor-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 30px rgba(212, 175, 55, 0.15);
+  border-color: #d4af37;
+}
+
+.public-tutor-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 14px;
+  border: 2px solid #d4af37;
+}
+
+.public-tutor-card h3 {
+  color: #0f3d2e;
+  font-size: 1.2rem;
+  margin: 0 0 4px 0;
+}
+
+.tutor-profession {
+  color: #64748b;
+  font-size: 0.88rem;
+  margin-bottom: 12px;
+}
+
+.tutor-cat-tag {
+  display: inline-block;
+  background: #fdf8e2;
+  color: #856404;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.tutor-rate {
+  font-size: 0.9rem;
+  color: #334155;
+  margin-bottom: 16px;
+}
+
+.book-session-btn {
+  width: 100%;
+  background: transparent;
+  border: 1.5px solid #d4af37;
+  color: #0f3d2e;
+  padding: 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.book-session-btn:hover {
+  background: #0f3d2e;
+  color: #fef08a;
+  border-color: #0f3d2e;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+/* --- Dynamic E-Commerce Campaign Banners with Gold Touch --- */
+.featured-course-banner {
+  color: #ffffff;
+  padding: 36px 44px;
+  border-radius: 24px;
+  margin: 0 auto 35px auto;
+  max-width: 950px;
+  text-align: left;
+  box-shadow: 0 20px 40px rgba(15, 61, 46, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+/* Fallback theme styling */
+.featured-course-banner.magic {
+  background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 50%, #db2777 100%);
+}
+
+.featured-course-banner.programming-tech {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0d9488 100%);
+}
+
+.featured-course-banner.arts-design {
+  background: linear-gradient(135deg, #9f1239 0%, #be185d 50%, #f59e0b 100%);
+}
+
+.featured-course-banner.default-theme {
+  background: linear-gradient(135deg, #0f3d2e 0%, #1b5e47 100%);
+}
+
+.featured-banner-content {
+  max-width: 65%;
+  z-index: 2;
+}
+
+.featured-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(212, 175, 55, 0.25);
+  border: 1px solid #fef08a;
+  padding: 5px 14px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #fef08a;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.featured-course-banner h2 {
+  margin: 0 0 8px 0;
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.featured-course-banner p {
+  margin: 0;
+  opacity: 0.95;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.featured-explore-btn {
+  background: #d4af37;
+  color: #0f3d2e;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.featured-explore-btn:hover {
+  transform: translateY(-2px);
+  background: #f59e0b;
+  color: #ffffff;
+  box-shadow: 0 12px 30px rgba(245, 158, 11, 0.4);
+}
+
+/* Premium Hover Dropdown Styles */
+.hover-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.nav-main-btn {
+  background: none;
+  border: 1px solid #cbd5e1;
+  color: #333;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-main-btn.tutor-btn {
+  background: #0f3d2e;
+  color: #ffffff;
+  border: 1px solid #d4af37;
+}
+
+.hover-dropdown-container:hover .nav-main-btn {
+  background: #fdf8e2;
+  color: #0f3d2e;
+  border-color: #d4af37;
+}
+
+.hover-dropdown-container:hover .nav-main-btn.tutor-btn {
+  background: #144f3c;
+  color: #fef08a;
+}
+
+/* Hidden by default, reveals smoothly on hover */
+.hover-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: #ffffff;
+  box-shadow: 0 10px 25px rgba(15, 61, 46, 0.12);
+  border-radius: 8px;
+  overflow: hidden;
+  min-width: 180px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.25s ease-in-out;
+  z-index: 1000;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.hover-dropdown-container:hover .hover-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(4px);
+}
+
+.dropdown-item {
+  display: block;
+  padding: 12px 16px;
+  color: #444444;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-bottom: 1px solid #f4f4f4;
+  transition: background 0.2s;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background: #fdf8e2;
+  color: #0f3d2e;
+}
+
+.dropdown-item.highlight {
+  font-weight: 600;
+  color: #0f3d2e;
+  background: #fffbf0;
+}
+
+.public-footer {
+  width: 100%;
+  background: #ffffff;
+  border-top: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 30px 20px;
+  text-align: center;
+  margin-top: 60px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.public-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #d4af37, transparent);
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-logo {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #0f3d2e;
+  letter-spacing: 0.5px;
+}
+
+.public-footer p {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  /* Shrink giant hero headings to fit mobile screens */
+  h1, .hero-title, .landing-header h1 {
+    font-size: 1.75rem !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Adjust paragraph subtitle sizing */
+  p, .hero-subtitle {
+    font-size: 0.9rem !important;
+  }
+
+  /* Make search inputs and category filters stack nicely and fit screen width */
+  input[type="text"], select, .search-bar-container {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Stack header buttons and elements vertically to prevent overlapping */
+  header, .navbar, .top-nav {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    padding: 0.75rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Container holding the login buttons */
+  .auth-buttons-container, .nav-auth-buttons, header .buttons-group {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+    gap: 0.4rem !important;
+    flex-wrap: nowrap !important;
+  }
+
+  /* Shrink login buttons to fit nicely in mobile header */
+  .auth-buttons-container button, 
+  .nav-auth-buttons button, 
+  header button,
+  .login-btn {
+    padding: 0.4rem 0.6rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 6px !important;
+    white-space: nowrap !important;
+    min-width: auto !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Target your main header navigation container */
+  header, .navbar, .landing-nav, nav {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0.75rem 1rem !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Ensure the brand name/logo stays on the left */
+  .brand-title, .logo, h2:first-of-type {
+    font-size: 1.25rem !important;
+    margin: 0 !important;
+  }
+
+  /* Group the login buttons tightly together next to or below the logo safely */
+  .auth-buttons-container, .nav-buttons, .header-right {
+    display: flex !important;
+    gap: 0.35rem !important;
+    align-items: center !important;
+  }
+
+  /* Shrink the buttons so they fit nicely side-by-side */
+  .auth-buttons-container button, 
+  .nav-buttons button, 
+  header button {
+    font-size: 0.7rem !important;
+    padding: 0.35rem 0.5rem !important;
+    min-width: unset !important;
+    width: auto !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Force the search container and input to span full width */
+  .search-bar-container, .hero-search-area, .filter-search-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Expand text inputs and select dropdowns to 100% width */
+  .search-bar-container input[type="text"], 
+  .hero-search-area input[type="text"],
+  .search-bar-container select,
+  .hero-search-area select {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 0.75rem !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Force any input element next to the category filter to expand completely */
+  input[type="text"], input[type="search"] {
+    flex: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Target the parent container holding the search bar and category dropdown */
+  form, .search-container, .filter-container, div:has(> select) {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+  }
+}

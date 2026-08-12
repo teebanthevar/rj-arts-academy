@@ -19,19 +19,27 @@ export function StudentProvider({ children }) {
         return;
       }
 
+      // 1. Skip querying students table if logged-in user is a tutor
+      if (user.user_metadata?.role === "tutor") {
+        setStudent(null);
+        setLoading(false);
+        return;
+      }
+
+      // 2. Use .maybeSingle() instead of .single() to avoid 406/PGRST116 errors when 0 rows match
       const { data, error } = await supabase
         .from("students")
         .select("*")
         .eq("auth_user_id", user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
-        console.error(error);
+        setStudent(null);
       } else {
         setStudent(data);
       }
     } catch (err) {
-      console.error(err);
+      setStudent(null);
     } finally {
       setLoading(false);
     }

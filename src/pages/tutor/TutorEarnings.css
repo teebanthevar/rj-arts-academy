@@ -1,0 +1,319 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+.earnings-container {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  padding: 36px;
+  background-color: #f0f4f2;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(15, 61, 46, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(212, 175, 55, 0.08) 0px, transparent 50%);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Header */
+.earnings-header {
+  margin-bottom: 32px;
+}
+
+.earnings-header h1 {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #0f3d2e;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
+}
+
+.earnings-header p {
+  color: #5d7168;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Metrics Row */
+.earnings-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.metric-glass-card {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  padding: 24px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 10px 25px -5px rgba(15, 61, 46, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.metric-glass-card:hover {
+  transform: translateY(-4px);
+}
+
+.metric-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.metric-icon-wrapper.green {
+  background: rgba(15, 61, 46, 0.1);
+  color: #0f3d2e;
+}
+
+.metric-icon-wrapper.gold {
+  background: rgba(212, 175, 55, 0.12);
+  color: #b8860b;
+}
+
+.metric-icon-wrapper.blue {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+}
+
+.metric-details span {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-details h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f3d2e;
+  margin: 4px 0 0 0;
+  letter-spacing: -0.5px;
+}
+
+/* Middle Layout Grid */
+.earnings-middle-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.earnings-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 22px;
+  padding: 26px;
+  box-shadow: 0 10px 25px -5px rgba(15, 61, 46, 0.05);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.card-header h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f3d2e;
+  margin: 0;
+}
+
+.payout-note {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* Summary Cards */
+.summary-stats-wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.summary-stat-box {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+}
+
+.stat-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.stat-amount {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f3d2e;
+  margin: 0;
+}
+
+.icon-green { color: #059669; }
+.icon-orange { color: #d97706; }
+.icon-blue { color: #2563eb; }
+
+/* Info Box */
+.payout-info-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 61, 46, 0.08);
+  color: #0f3d2e;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  width: fit-content;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+}
+
+.payout-info-body p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #5d7168;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Table Responsive Wrapper & Custom Scrollbar */
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+  padding-bottom: 8px; /* Room for the scrollbar */
+}
+
+/* Premium Scrollbar */
+.table-responsive-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-responsive-wrapper::-webkit-scrollbar-track {
+  background: rgba(15, 61, 46, 0.05);
+  border-radius: 10px;
+}
+
+.table-responsive-wrapper::-webkit-scrollbar-thumb {
+  background: #0F3D2E;
+  border-radius: 10px;
+}
+
+.table-responsive-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #D8C2A0;
+}
+
+/* Table Styling */
+.earnings-table {
+  width: 100%;
+  min-width: 700px; /* Forces table to overflow and trigger scroll on mobile */
+  border-collapse: collapse;
+}
+
+.earnings-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  border-bottom: 1.5px solid #e2e8f0;
+  white-space: nowrap; /* Prevents text from stacking vertically */
+}
+
+.earnings-table td {
+  padding: 16px;
+  font-size: 0.9rem;
+  color: #334155;
+  font-weight: 600;
+  border-bottom: 1px solid #f1f5f9;
+  white-space: nowrap; /* Prevents text from stacking vertically */
+}
+
+.txn-id {
+  font-family: monospace;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.student-name {
+  color: #0f3d2e;
+  font-weight: 700;
+}
+
+.amount-col {
+  text-align: right;
+}
+
+.font-bold {
+  font-weight: 800;
+  color: #0f3d2e;
+}
+
+.status-pill {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.status-pill.paid {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.status-pill.pending {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .earnings-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .earnings-middle-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .earnings-container {
+    padding: 18px;
+  }
+
+  .earnings-metrics-grid,
+  .summary-stats-wrapper {
+    grid-template-columns: 1fr;
+  }
+}

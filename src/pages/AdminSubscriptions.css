@@ -1,0 +1,151 @@
+.admin-subscriptions-container {
+  padding: 30px;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: inherit;
+}
+
+.admin-subscriptions-header {
+  margin-bottom: 24px;
+}
+
+.admin-subscriptions-header h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #111;
+  margin: 0 0 6px 0;
+}
+
+.admin-subscriptions-header p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.admin-subscriptions-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.admin-subscriptions-search {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.admin-subscriptions-search:focus {
+  border-color: #064e3b;
+}
+
+.admin-users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-user-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.admin-user-row:hover {
+  background: #f3f4f6;
+}
+
+.admin-user-info h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+}
+
+.admin-user-info p {
+  margin: 2px 0 0 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.admin-user-tier {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.admin-user-tier strong {
+  color: #064e3b;
+}
+
+.admin-user-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-pro {
+  background: #064e3b;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-pro:hover {
+  opacity: 0.9;
+}
+
+.btn-instructor {
+  background: #111;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-instructor:hover {
+  opacity: 0.9;
+}
+
+.btn-reset {
+  background: #e5e7eb;
+  color: #374151;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-reset:hover {
+  background: #d1d5db;
+}
+
+.admin-subscriptions-status {
+  text-align: center;
+  color: #6b7280;
+  padding: 20px;
+  font-size: 14px;
+}

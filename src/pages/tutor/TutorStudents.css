@@ -1,0 +1,91 @@
+.students-page{
+    padding:40px;
+}
+
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:35px;
+}
+
+.page-header h1{
+    font-size:38px;
+    color:#0F3D2E;
+    margin-bottom:8px;
+}
+
+.page-header p{
+    color:#777;
+    font-size:17px;
+}
+
+.students-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:30px;
+}
+
+.student-card{
+    background:#fff;
+    border-radius:24px;
+    padding:30px;
+    box-shadow:0 12px 30px rgba(0,0,0,.08);
+    transition:.35s;
+}
+
+.student-card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 18px 40px rgba(0,0,0,.12);
+}
+
+.student-card img{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    object-fit:cover;
+    margin-bottom:20px;
+}
+
+.student-card h3{
+    color:#0F3D2E;
+    font-size:24px;
+    margin-bottom:8px;
+}
+
+.student-card span{
+    display:inline-block;
+    background:#eef6f3;
+    color:#0F3D2E;
+    padding:8px 18px;
+    border-radius:50px;
+    font-weight:600;
+    margin-bottom:20px;
+}
+
+.student-info{
+    margin-bottom:25px;
+}
+
+.student-info p{
+    margin:10px 0;
+    color:#666;
+    font-size:15px;
+}
+
+.student-card button{
+    width:100%;
+    border:none;
+    background:#0F3D2E;
+    color:#fff;
+    padding:14px;
+    border-radius:12px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.student-card button:hover{
+    background:#19543f;
+}

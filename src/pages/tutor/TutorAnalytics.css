@@ -1,0 +1,218 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+.analytics-page {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  padding: 40px;
+  background: #f0f4f2;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(15, 61, 46, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(212, 175, 55, 0.08) 0px, transparent 50%);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Header Styling */
+.analytics-header {
+  margin-bottom: 35px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.analytics-header h1 {
+  font-size: 34px;
+  font-weight: 800;
+  color: #0F3D2E;
+  margin: 0;
+  letter-spacing: -0.8px;
+}
+
+.analytics-header p {
+  color: #5d7168;
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Glass Stat Cards Grid */
+.analytics-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 35px;
+}
+
+.analytics-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  padding: 26px 22px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 25px -5px rgba(15, 61, 46, 0.05),
+              0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.analytics-card:hover {
+  transform: translateY(-6px);
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(15, 61, 46, 0.2);
+  box-shadow: 0 20px 35px -10px rgba(15, 61, 46, 0.12);
+}
+
+/* Icon Glass Pill */
+.analytics-card svg {
+  font-size: 20px;
+  color: #0F3D2E;
+  background: rgba(15, 61, 46, 0.08);
+  padding: 12px;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  box-sizing: content-box;
+  transition: transform 0.3s ease;
+}
+
+.analytics-card:hover svg {
+  transform: scale(1.1);
+  background: #0F3D2E;
+  color: #ffffff;
+}
+
+.analytics-card h2 {
+  font-size: 30px;
+  font-weight: 800;
+  margin: 0 0 6px 0;
+  color: #0F3D2E;
+  letter-spacing: -0.5px;
+}
+
+.analytics-card span {
+  color: #71837a;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+/* Charts Grid & Section */
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-bottom: 28px;
+}
+
+.chart-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  padding: 28px;
+  border-radius: 22px;
+  box-shadow: 0 10px 25px -5px rgba(15, 61, 46, 0.05);
+  margin-bottom: 28px;
+}
+
+.chart-grid .chart-card {
+  margin-bottom: 0;
+}
+
+.chart-card h3 {
+  margin: 0 0 20px 0;
+  color: #0F3D2E;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.chart-placeholder {
+  height: 300px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(15, 61, 46, 0.03) 0%, rgba(212, 175, 55, 0.05) 100%);
+  border: 1.5px dashed rgba(15, 61, 46, 0.18);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0F3D2E;
+  letter-spacing: 0.2px;
+}
+
+/* Premium Table UI */
+.analytics-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+.analytics-table th {
+  background: transparent;
+  color: #64748b;
+  padding: 12px 18px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border: none;
+}
+
+.analytics-table tbody tr {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  transition: all 0.2s ease;
+}
+
+.analytics-table tbody tr:hover {
+  background: #ffffff;
+  transform: scale(1.008);
+  box-shadow: 0 6px 16px rgba(15, 61, 46, 0.08);
+}
+
+.analytics-table td {
+  padding: 18px;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+}
+
+.analytics-table td:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+  color: #0F3D2E;
+  font-weight: 700;
+}
+
+.analytics-table td:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+  color: #0F3D2E;
+  font-weight: 800;
+}
+
+/* Responsive Styles */
+@media(max-width: 1100px) {
+  .analytics-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media(max-width: 700px) {
+  .analytics-page {
+    padding: 20px;
+  }
+
+  .analytics-cards {
+    grid-template-columns: 1fr;
+  }
+}

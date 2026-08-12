@@ -1,0 +1,233 @@
+.tutor-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 280px;
+  height: 100vh;
+  background: #0F3D2E;
+  color: white;
+  z-index: 999;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 30px 24px;
+
+  transition: .35s ease;
+
+  overflow: hidden;
+}
+
+/* Logo */
+
+.tutor-logo {
+  text-align: center;
+  margin-bottom: 30px;
+  flex-shrink: 0;
+}
+
+.tutor-logo img {
+  width: 78px;
+  margin-bottom: 12px;
+}
+
+.tutor-logo h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.tutor-logo span {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  opacity: .75;
+}
+
+/* Navigation */
+
+.tutor-sidebar nav {
+  flex: 1;
+  overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding-right: 6px;
+}
+
+/* Smooth scrollbar */
+
+.tutor-sidebar nav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.tutor-sidebar nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tutor-sidebar nav::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.18);
+  border-radius: 20px;
+}
+
+.tutor-sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  padding: 15px 18px;
+
+  border-radius: 15px;
+
+  color: white;
+  text-decoration: none;
+
+  font-weight: 600;
+
+  transition: .25s ease;
+}
+
+.tutor-sidebar nav a svg {
+  font-size: 18px;
+}
+
+.tutor-sidebar nav a:hover {
+  background: rgba(255,255,255,.08);
+  transform: translateX(4px);
+}
+
+.tutor-sidebar nav .active {
+  background: #D8C2A0;
+  color: #0F3D2E;
+  box-shadow: 0 8px 20px rgba(0,0,0,.18);
+}
+
+/* Logout */
+
+.logout-card {
+  margin-top: 20px;
+  flex-shrink: 0;
+}
+
+.logout-card button {
+  width: 100%;
+
+  padding: 15px;
+
+  border: none;
+  border-radius: 15px;
+
+  background: #D8C2A0;
+  color: #0F3D2E;
+
+  font-weight: 700;
+  font-size: 15px;
+
+  cursor: pointer;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  transition: .25s ease;
+}
+
+.logout-card button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,.2);
+}
+
+/* Close button */
+
+.close-sidebar {
+  display: none;
+
+  position: absolute;
+
+  right: 20px;
+  top: 20px;
+
+  background: none;
+  border: none;
+
+  color: white;
+
+  font-size: 24px;
+
+  cursor: pointer;
+}
+
+/* Overlay */
+
+.tutor-overlay {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0,0,0,.45);
+
+  backdrop-filter: blur(5px);
+
+  z-index: 998;
+}
+
+/* Mobile */
+
+@media (max-width: 992px) {
+
+  .tutor-sidebar {
+    transform: translateX(-100%);
+  }
+
+  .tutor-sidebar.show {
+    transform: translateX(0);
+  }
+
+  .close-sidebar {
+    display: block;
+  }
+
+}
+
+/* Navigation Groups Stack */
+.sidebar-navigation {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Space between MAIN, BUSINESS, and ACCOUNT groups */
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px; /* Space between links within the group */
+}
+
+.nav-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.5);
+  padding-left: 14px;
+  margin-bottom: 4px;
+}
+
+/* Force absolute vertical stacking for sidebar navigation */
+.tutor-sidebar nav.sidebar-navigation {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+}
+
+.tutor-sidebar .nav-group {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  float: none !important;
+}
+
+.tutor-sidebar .nav-group-title {
+  display: block !important;
+  width: 100% !important;
+}

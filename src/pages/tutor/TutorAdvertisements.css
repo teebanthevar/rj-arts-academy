@@ -1,0 +1,620 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+.ads-container {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  padding: 36px;
+  background-color: #f0f4f2;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(15, 61, 46, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(212, 175, 55, 0.08) 0px, transparent 50%);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Header */
+.ads-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.ads-header h1 {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #0f3d2e;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
+}
+
+.ads-header p {
+  color: #5d7168;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.create-ad-btn {
+  background: #0f3d2e;
+  color: #ffffff;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(15, 61, 46, 0.15);
+}
+
+.create-ad-btn:hover {
+  background: #14523e;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(15, 61, 46, 0.25);
+}
+
+/* Metrics Grid */
+.ads-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.metric-glass-card {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  padding: 24px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 10px 25px -5px rgba(15, 61, 46, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.metric-glass-card:hover {
+  transform: translateY(-4px);
+}
+
+.metric-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.metric-icon-wrapper.green {
+  background: rgba(15, 61, 46, 0.1);
+  color: #0f3d2e;
+}
+
+.metric-icon-wrapper.blue {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+}
+
+.metric-icon-wrapper.gold {
+  background: rgba(212, 175, 55, 0.12);
+  color: #b8860b;
+}
+
+.metric-details span {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-details h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f3d2e;
+  margin: 4px 0 0 0;
+  letter-spacing: -0.5px;
+}
+
+/* Featured Banner Card */
+.promo-banner-card {
+  background: linear-gradient(135deg, #0f3d2e 0%, #17523e 100%);
+  border-radius: 22px;
+  padding: 28px 32px;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  box-shadow: 0 12px 30px rgba(15, 61, 46, 0.18);
+}
+
+.promo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(212, 175, 55, 0.2);
+  color: #f3e5ab;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.promo-content h2 {
+  margin: 0 0 6px 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.promo-content p {
+  margin: 0;
+  color: #d1fae5;
+  font-size: 0.95rem;
+}
+
+.promo-action-btn {
+  background: #d4af37;
+  color: #0f3d2e;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.promo-action-btn:hover {
+  background: #e5c158;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(212, 175, 55, 0.3);
+}
+
+/* Campaigns Card — single definition (was duplicated before) */
+.ads-card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 22px;
+  padding: 26px;
+  box-shadow: 0 10px 25px -5px rgba(15, 61, 46, 0.05);
+  overflow-x: auto;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.card-header h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f3d2e;
+  margin: 0;
+}
+
+.campaign-count {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 700;
+}
+
+/* =========================
+    ADS TABLE
+========================= */
+
+.ads-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  /* Widened from 900px so the Action column has room for 3 buttons
+     without clipping (this was the main cause of the cut-off column) */
+  min-width: 1040px;
+}
+
+.ads-table th,
+.ads-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.ads-table td[colspan] {
+  display: table-cell;
+  width: 100% !important;
+  white-space: normal;
+}
+
+/* Column Widths — single source of truth (no <colgroup> in JSX anymore,
+   so these percentages are the only widths in play). They total 100%
+   and give the Action column enough room for its 3 buttons. */
+
+.ads-table th:nth-child(1),
+.ads-table td:nth-child(1) {
+  width: 22%;
+  text-align: left;
+}
+
+.ads-table th:nth-child(2),
+.ads-table td:nth-child(2) {
+  width: 15%;
+  text-align: left;
+}
+
+.ads-table th:nth-child(3),
+.ads-table td:nth-child(3) {
+  width: 8%;
+  text-align: center;
+}
+
+.ads-table th:nth-child(4),
+.ads-table td:nth-child(4) {
+  width: 8%;
+  text-align: center;
+}
+
+.ads-table th:nth-child(5),
+.ads-table td:nth-child(5) {
+  width: 8%;
+  text-align: center;
+}
+
+.ads-table th:nth-child(6),
+.ads-table td:nth-child(6) {
+  width: 10%;
+  text-align: center;
+}
+
+.ads-table th:nth-child(7),
+.ads-table td:nth-child(7) {
+  width: 12%;
+  text-align: center;
+}
+
+.ads-table th:nth-child(8),
+.ads-table td:nth-child(8) {
+  width: 17%;
+  text-align: right;
+}
+
+/* Header */
+
+.ads-table th {
+  padding: 16px 14px;
+  background: #0f3d2e;
+  color: #dbe4df;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  white-space: nowrap;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Body */
+
+.ads-table td {
+  padding: 20px 14px;
+  font-size: .92rem;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+  border-bottom: 1px solid #eef2f7;
+  vertical-align: middle;
+}
+
+/* Campaign */
+
+.campaign-title strong {
+  display: block;
+  font-size: 1rem;
+  color: #0f3d2e;
+  margin-bottom: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ad-id {
+  display: block;
+  font-size: .73rem;
+  color: #94a3b8;
+  font-family: monospace;
+}
+
+/* Course */
+
+.course-name {
+  color: #475569;
+}
+
+/* Numbers */
+
+.highlight-ctr {
+  font-weight: 800;
+  color: #0f3d2e;
+}
+
+.font-bold {
+  font-weight: 800;
+  color: #0f3d2e;
+}
+
+/* Status */
+
+.status-pill {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 90px;
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  gap: 6px;
+}
+
+.status-pill.active {
+  background: rgba(16, 185, 129, .15);
+  color: #059669;
+}
+
+.status-pill.paused {
+  background: rgba(245, 158, 11, .15);
+  color: #d97706;
+}
+
+/* Action column — IMPORTANT: the <td>/<th> themselves stay as normal
+   table cells (display:table-cell). Only the inner .action-buttons div
+   is a flex container. Previously `display:flex` was applied directly
+   to .action-col (the td/th), which breaks table-cell layout and was
+   the main reason the last column overflowed/clipped in the screenshot. */
+
+.action-col {
+  white-space: nowrap;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+}
+
+.toggle-btn {
+  height: 38px;
+  min-width: 80px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.toggle-btn.active {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.toggle-btn.paused {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.icon-btn:hover {
+  transform: translateY(-2px);
+}
+
+.edit-btn {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.delete-btn {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Responsive */
+
+@media (max-width: 1200px) {
+  .ads-card {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 1024px) {
+  .ads-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .promo-banner-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 650px) {
+  .ads-container {
+    padding: 18px;
+  }
+
+  .ads-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .ads-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Premium Modal Popup Fixes --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 61, 46, 0.45);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 25px 50px -12px rgba(15, 61, 46, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-sizing: border-box;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 0;
+  border-bottom: none;
+  background: transparent;
+}
+
+.modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f3d2e;
+  margin: 0;
+}
+
+.close-modal-btn {
+  background: #f0f4f2;
+  border: none;
+  cursor: pointer;
+  color: #0f3d2e;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.close-modal-btn:hover {
+  background: #e2e8f0;
+}
+
+.form-group {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #5d7168;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  color: #334155;
+  background: #f8fafc;
+  box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  transition: all 0.2s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #0f3d2e;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(15, 61, 46, 0.08);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.cancel-btn {
+  background: #f1f5f9;
+  color: #64748b;
+  border: none;
+  padding: 11px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cancel-btn:hover {
+  background: #e2e8f0;
+}
+
+.submit-btn {
+  background: #0f3d2e;
+  color: #ffffff;
+  border: none;
+  padding: 11px 22px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(15, 61, 46, 0.2);
+  transition: all 0.2s;
+}
+
+.submit-btn:hover {
+  background: #14523e;
+  transform: translateY(-1px);
+}

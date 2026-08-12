@@ -1,0 +1,106 @@
+.tutor-profile-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: inherit;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: #0f3d2e;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.profile-header-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-titles h1 {
+  margin: 0 0 5px 0;
+  color: #0f3d2e;
+}
+
+.profile-profession {
+  color: #666;
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+}
+
+.profile-category-tag {
+  background: #e6f4ea;
+  color: #137333;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.profile-body-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+.profile-main-info, 
+.profile-sidebar-card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.profile-main-info h3, 
+.profile-sidebar-card h3 {
+  margin-top: 0;
+  color: #0f3d2e;
+}
+
+.profile-main-info ul {
+  list-style: none;
+  padding: 0;
+}
+
+.profile-main-info li {
+  margin-bottom: 10px;
+}
+
+.book-now-btn {
+  width: 100%;
+  background: #25d366;
+  color: white; /* Fixed: removed the '#' before white */
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background 0.2s;
+}
+
+.book-now-btn:hover {
+  background: #20ba5a;
+}
+
+.profile-loading, 
+.profile-not-found {
+  text-align: center;
+  padding: 80px 20px;
+  font-size: 1.2rem;
+  color: #666;
+}

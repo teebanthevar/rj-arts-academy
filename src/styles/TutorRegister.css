@@ -1,0 +1,458 @@
+.tutor-register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f2d23 0%, #1b4d3e 50%, #2c6b56 100%);
+  padding: 40px 20px 20px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.back-teachhub-btn {
+  position: absolute;
+  top: 24px;
+  left: calc(50% - 500px);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 5px 10px;
+  border-radius: 6px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: background 0.2s;
+  z-index: 10;
+  width: auto;
+}
+
+.back-teachhub-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tutor-register-wrapper {
+  display: flex;
+  width: 100%;
+  max-width: 1000px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  margin-top: 20px;
+}
+
+.register-brand-panel {
+  flex: 1.1;
+  background: linear-gradient(145deg, #1b4d3e 0%, #11342a 100%);
+  color: #ffffff;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.brand-logo-box {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.brand-logo-box img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.register-brand-panel h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 10px;
+  color: #f3f4f6;
+}
+
+.register-brand-panel p {
+  color: #d1d5db;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+/* Feature Cards Design */
+.register-feature-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.feature-card-item {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 12px 16px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  backdrop-filter: blur(5px);
+  transition: background 0.2s;
+}
+
+.feature-card-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.feature-icon-circle {
+  width: 38px;
+  height: 38px;
+  background: #d4a373; /* Warm accent shade matching your example */
+  color: #11342a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.feature-card-item h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 2px;
+}
+
+.feature-card-item p {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.brand-footer {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 15px;
+}
+
+.register-form-panel {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: #ffffff;
+}
+
+.register-form-header {
+  margin-bottom: 20px;
+}
+
+.register-form-header h2 {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.register-form-header p {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.error-banner {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  color: #b91c1c;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.tutor-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-group-field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field-icon {
+  position: absolute;
+  left: 14px;
+  color: #9ca3af;
+}
+
+.input-with-icon input {
+  width: 100%;
+  padding: 10px 40px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #f9fafb;
+}
+
+.input-with-icon input:focus {
+  border-color: #1b4d3e;
+  box-shadow: 0 0 0 3px rgba(27, 77, 62, 0.1);
+  background-color: #ffffff;
+}
+
+.password-eye-btn {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+}
+
+.submit-login-btn {
+  background: linear-gradient(135deg, #1b4d3e 0%, #2c6b56 100%);
+  color: #ffffff;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(27, 77, 62, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-top: 6px;
+}
+
+.submit-login-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(27, 77, 62, 0.4);
+}
+
+.submit-login-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.login-help-text {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.create-acc-link {
+  color: #1b4d3e;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Mobile Responsive Layout Fixes */
+@media (max-width: 768px) {
+  .student-register-split-container {
+    flex-direction: column !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    overflow-x: hidden !important;
+  }
+
+  .register-brand-panel, 
+  .register-form-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 1.5rem !important;
+  }
+
+  .register-brand-panel h1 {
+    font-size: 1.75rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .student-register-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .student-register-card h2 {
+    font-size: 1.5rem !important;
+  }
+
+  input[type="email"], 
+  input[type="password"], 
+  input[type="text"] {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .register-btn {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .student-register-split-container {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+  }
+
+  .register-brand-panel,
+  .register-form-panel {
+    width: 100% !important;
+    height: auto !important;
+    flex: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Optional: Hide the heavy marketing/branding panel on mobile so the login form appears immediately */
+  .register-brand-panel {
+    display: none !important;
+  }
+
+  /* Make the login form fill the mobile screen nicely */
+  .student-register-split-container {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    min-height: 100vh !important;
+    padding: 1rem !important;
+    background-color: #f9fafb !important; /* or your preferred light background */
+  }
+
+  .register-form-panel {
+    width: 100% !important;
+    padding: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Center the form panel and remove any heavy desktop card margins */
+  .register-form-panel {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1rem !important;
+    min-height: 100vh !important;
+    box-sizing: border-box !important;
+  }
+
+  .student-register-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1.5rem 1rem !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    border: 1px solid #e5e7eb !important;
+  }
+
+  /* Style the Student Login header cleanly */
+  .student-register-card h2 {
+    font-size: 1.35rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .card-subtitle {
+    font-size: 0.8rem !important;
+    color: #6b7280 !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  /* Fix form inputs and labels spacing */
+  .form-group {
+    margin-bottom: 1rem !important;
+    text-align: left !important;
+  }
+
+  .form-group label {
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+    letter-spacing: 0.025em !important;
+    margin-bottom: 0.35rem !important;
+    display: block !important;
+  }
+
+  .student-register-card input[type="email"], 
+  .student-register-card input[type="password"], 
+  .student-register-card input[type="text"] {
+    width: 100% !important;
+    padding: 0.65rem 0.75rem !important;
+    font-size: 0.85rem !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Make the submit button look sleek and proportional */
+  .register-btn {
+    width: 100% !important;
+    padding: 0.75rem !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    margin-top: 0.5rem !important;
+  }
+
+  .login-redirect-text {
+    font-size: 0.75rem !important;
+    margin-top: 1rem !important;
+    text-align: center !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Force the registration wrapper container to handle vertical scrolling */
+  .student-register-split-container {
+    height: 100vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Ensure the form panel inside also allows the scrollbar to take effect */
+  .register-form-panel {
+    overflow-y: visible !important;
+    height: auto !important;
+    min-height: 100% !important;
+    padding-bottom: 3rem !important; /* Extra bottom space so the last button isn't cut off */
+  }
+}

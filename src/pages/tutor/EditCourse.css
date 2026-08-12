@@ -1,0 +1,322 @@
+.editCourse {
+  padding: 40px;
+  background: #f5f7fb;
+  min-height: 100vh;
+}
+
+.wizardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 35px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.wizardHeader h1 {
+  font-size: 38px;
+  color: #103d2b;
+  font-weight: 700;
+  margin: 0;
+}
+
+.wizardHeader p {
+  margin-top: 8px;
+  color: #777;
+  max-width: 600px;
+}
+
+.stepIndicator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.stepIndicator > div {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ddd;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  transition: background-color 0.3s ease;
+}
+
+.stepIndicator > div.active {
+  background: #103d2b;
+}
+
+.wizardCard {
+  background: white;
+  border-radius: 18px;
+  padding: 35px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
+}
+
+.wizardCard h2 {
+  margin-bottom: 25px;
+  color: #103d2b;
+  font-size: 30px;
+}
+
+.wizardCard input,
+.wizardCard select,
+.wizardCard textarea {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  font-size: 15px;
+  margin-bottom: 20px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.wizardCard textarea {
+  resize: none;
+  min-height: 120px;
+}
+
+.wizardCard input:focus,
+.wizardCard select:focus,
+.wizardCard textarea:focus {
+  border-color: #103d2b;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(16, 61, 43, 0.12);
+}
+
+.chapterCard {
+  background: #f9fafc;
+  border-radius: 18px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid #e6e9ef;
+}
+
+.chapterHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.chapterHeader h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #103d2b;
+}
+
+.chapterHeader button {
+  background: #103d2b;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.chapterHeader button:hover {
+  background: #145339;
+}
+
+.lessonCard {
+  background: white;
+  border-radius: 18px;
+  padding: 20px;
+  border: 1px solid #e6e9ef;
+  margin-bottom: 18px;
+}
+
+.lessonCard input,
+.lessonCard textarea,
+.lessonCard select {
+  margin-bottom: 16px;
+}
+
+.lessonUploads {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.lessonUploads label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.lessonBottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.previewLesson {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #103d2b;
+}
+
+.saveLesson,
+.addChapterBtn,
+.publishBtn,
+.wizardButtons button {
+  border: none;
+  border-radius: 12px;
+  padding: 14px 24px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.saveLesson {
+  background: #f4f7fb;
+  color: #103d2b;
+}
+
+.saveLesson:hover {
+  transform: translateY(-1px);
+}
+
+.addChapterBtn,
+.publishBtn {
+  background: #103d2b;
+  color: white;
+  margin-right: 12px;
+}
+
+.addChapterBtn:hover,
+.publishBtn:hover,
+.wizardButtons button:hover {
+  background: #145339;
+}
+
+.wizardButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.wizardButtons button {
+  background: #103d2b;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .stepIndicator {
+    flex-wrap: wrap;
+  }
+
+  .lessonUploads {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.price-card{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+}
+
+.price-option{
+    border:2px solid #ddd;
+    border-radius:18px;
+    padding:25px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.price-option:hover{
+    border-color:#103d2b;
+}
+
+.price-option.active{
+    border-color:#103d2b;
+    background:#f7fff9;
+}
+
+.price-option h3{
+    color:#103d2b;
+    margin-bottom:10px;
+}
+
+.price-option h1{
+    margin:15px 0;
+    font-size:42px;
+}
+
+/* Bottom Buttons */
+
+.bottom-buttons{
+    display:flex;
+    justify-content:space-between;
+    margin-top:30px;
+}
+
+.prev-btn{
+    background:white;
+    color:#103d2b;
+    border:2px solid #103d2b;
+    padding:14px 35px;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.next-btn{
+    background:#103d2b;
+    color:white;
+    border:none;
+    padding:14px 35px;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.prev-btn:hover,
+.next-btn:hover{
+    transform:translateY(-2px);
+}
+
+/* Responsive */
+
+@media(max-width:1100px){
+
+.grid-2,
+.grid-3,
+.price-card{
+grid-template-columns:1fr;
+}
+
+.steps{
+flex-direction:column;
+gap:30px;
+}
+
+.step::after{
+display:none;
+}
+
+.edit-header{
+flex-direction:column;
+align-items:flex-start;
+gap:20px;
+}
+
+}

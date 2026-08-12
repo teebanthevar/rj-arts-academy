@@ -1,0 +1,102 @@
+.create-course-page {
+  padding: 30px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: calc(100vh - 70px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* Glassmorphic Card Container */
+.course-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  border-radius: 20px;
+  padding: 35px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.course-card h1 {
+  font-size: 26px;
+  color: #0f3d2e;
+  margin-bottom: 8px;
+}
+
+.course-card p {
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 25px;
+}
+
+/* 2-Column Grid Layout */
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+/* Inputs & Selects Glass Styling */
+.course-card input,
+.course-card select,
+.course-card textarea {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(200, 200, 200, 0.5);
+  border-radius: 10px;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.course-card input:focus,
+.course-card select:focus,
+.course-card textarea:focus {
+  border-color: #0f3d2e;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 3px rgba(15, 61, 46, 0.1);
+}
+
+.course-card textarea {
+  grid-column: span 2;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Publish Button Style */
+.course-card button[type="submit"] {
+  width: 100%;
+  background: #0f3d2e;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 10px;
+}
+
+.course-card button[type="submit"]:hover {
+  background: #1b5e4b;
+}
+
+.course-card button[type="submit"]:active {
+  transform: scale(0.99);
+}
+
+/* Responsive for smaller screens */
+@media (max-width: 768px) {
+  .course-grid {
+    grid-template-columns: 1fr;
+  }
+}

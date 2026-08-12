@@ -54,11 +54,11 @@ function WhyChoose() {
 
       </div>
 
-      <div className="stats-grid">
+      <div className="whychoose-stats-grid">
 
         {stats.map((item, index) => (
 
-          <div className="stat-card" key={index}>
+          <div className="whychoose-card" key={index}>
 
             <h3>{item.number}</h3>
 

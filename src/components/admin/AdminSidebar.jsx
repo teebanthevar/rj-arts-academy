@@ -9,6 +9,7 @@ import {
   FaCertificate,
   FaMoneyBillWave,
   FaBell,
+  FaBlog,
   FaCog,
 } from "react-icons/fa";
 
@@ -84,11 +85,27 @@ function AdminSidebar() {
 
         </NavLink>
 
+        <NavLink to="/admin/subscriptions">
+
+          <FaMoneyBillWave />
+
+          Subscriptions
+
+        </NavLink>
+
         <NavLink to="/admin/announcements">
 
           <FaBell />
 
           Announcements
+
+        </NavLink>
+
+        <NavLink to="/admin/blog">
+
+          <FaBlog />
+
+          Blog
 
         </NavLink>
 
