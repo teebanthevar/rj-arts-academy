@@ -9,4 +9,5 @@ export default defineConfig({
       hostname: "https://rjartsacademy.com",
     }),
   ],
+  base: "/", // Add this line here
 });
