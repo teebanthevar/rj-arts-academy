@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
 /* ===========================
    PREMIUM NAVBAR
 =========================== */
@@ -20,6 +22,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 40px;
+  gap: 16px;
 }
 
 /* ===========================
@@ -29,33 +32,56 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 18px;
   text-decoration: none;
+  min-width: 0;
 }
 
 .logo img {
-  width: 58px;
-  height: 58px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
   border-radius: 50%;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(216, 194, 160, 0.45);
+  padding: 2px;
+  transition: 0.3s ease;
+}
+
+.logo:hover img {
+  border-color: #D8C2A0;
 }
 
 .logo-text {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .logo-text h2 {
+  font-family: "Playfair Display", serif;
   color: #D8C2A0;
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 1.1;
+  font-size: 27px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
-.logo-text span {
-  color: #e8e8e8;
-  font-size: 13px;
-  letter-spacing: 1px;
+.logo-text h2 span {
+  color: #D8C2A0;
+}
+
+.logo-text small {
+  display: block;
+  margin-top: 3px;
+  color: rgba(232, 232, 232, 0.65);
+  font-family: "Poppins", sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 /* ===========================
@@ -71,8 +97,10 @@
 .nav-menu a {
   text-decoration: none;
   color: #fff;
-  font-size: 17px;
-  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
   transition: 0.3s;
   position: relative;
 }
@@ -108,7 +136,9 @@
   color: #0F3D2E !important;
   padding: 11px 22px;
   border-radius: 40px;
-  font-weight: 700;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.2px;
   transition: 0.35s;
 }
 
@@ -125,9 +155,12 @@
 
 .menu-toggle {
   display: none;
+  align-items: center;
+  justify-content: center;
   color: white;
   font-size: 28px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 /* ===========================
@@ -136,12 +169,12 @@
 
 @media (max-width: 1024px) {
   .logo img {
-    width: 52px;
-    height: 52px;
+    width: 50px;
+    height: 50px;
   }
 
   .logo-text h2 {
-    font-size: 26px;
+    font-size: 23px;
   }
 
   .nav-menu {
@@ -149,7 +182,7 @@
   }
 
   .nav-menu a {
-    font-size: 16px;
+    font-size: 15px;
   }
 }
 
@@ -160,23 +193,29 @@
 @media (max-width: 768px) {
   .navbar-container {
     padding: 14px 20px;
+    gap: 14px;
+  }
+
+  .logo {
+    gap: 10px;
   }
 
   .logo img {
-    width: 46px;
-    height: 46px;
+    width: 44px;
+    height: 44px;
   }
 
   .logo-text h2 {
-    font-size: 22px;
+    font-size: 18px;
   }
 
-  .logo-text span {
+  .logo-text small {
     display: none;
   }
 
   .menu-toggle {
-    display: block;
+    display: flex;
+    margin-left: 12px;
   }
 
   .nav-menu {
@@ -206,5 +245,33 @@
   .student-login-btn {
     width: 220px;
     justify-content: center;
+  }
+}
+
+/* ===========================
+   Small Mobile
+=========================== */
+
+@media (max-width: 400px) {
+  .navbar-container {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+
+  .logo {
+    gap: 8px;
+  }
+
+  .logo img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .logo-text h2 {
+    font-size: 15px;
+  }
+
+  .menu-toggle {
+    font-size: 24px;
   }
 }
