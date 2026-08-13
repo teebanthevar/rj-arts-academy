@@ -3,6 +3,41 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import "../styles/StudentPublicProfile.css";
 
+const rtcConfig = {
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" }
+  ]
+};
+
+const headerCallBtnStyle = {
+  width: "36px",
+  height: "36px",
+  borderRadius: "50%",
+  border: "none",
+  background: "#eefaf5",
+  color: "#064e3b",
+  fontSize: "16px",
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center"
+};
+
+const callControlBtnStyle = (bg) => ({
+  width: "56px",
+  height: "56px",
+  borderRadius: "50%",
+  border: "none",
+  background: bg,
+  color: "#fff",
+  fontSize: "22px",
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center"
+});
+
 export default function StudentPublicProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -23,21 +58,68 @@ export default function StudentPublicProfile() {
 
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [newProject, setNewProject] = useState({ title: "", image_url: "" });
+  const [newProjectFile, setNewProjectFile] = useState(null);
   const [uploadingProj, setUploadingProj] = useState(false);
+
+  const [editingArtId, setEditingArtId] = useState(null);
+  const [editTitleValue, setEditTitleValue] = useState("");
+  const [savingArtId, setSavingArtId] = useState(null);
+  const [deletingArtId, setDeletingArtId] = useState(null);
 
   const [messages, setMessages] = useState([]);
   const [conversations, setConversations] = useState([
     { id: "ai-assistant", name: "TeachHub AI Assistant", role: "AI Support", avatar: "AI", online: true, lastMessage: "Hello student! How can I help you today?" }
   ]);
   const [selectedConversation, setSelectedConversation] = useState("ai-assistant");
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(
+    typeof window !== "undefined" ? window.innerWidth <= 640 : false
+  );
   const [chatSearchQuery, setChatSearchQuery] = useState("");
   const [messageBody, setMessageBody] = useState("");
   const [sendingMsg, setSendingMsg] = useState(false);
-  
+
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [attachedFile, setAttachedFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+
+  // ---- CALLING STATE ----
+  const [callState, setCallState] = useState(null); // null | "outgoing" | "incoming" | "active"
+  const [callType, setCallType] = useState("video"); // "audio" | "video"
+  const [incomingCall, setIncomingCall] = useState(null); // { fromId, fromName, type, sdp }
+  const [callDuration, setCallDuration] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isCameraOff, setIsCameraOff] = useState(false);
+
+  const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null);
+  const peerConnectionRef = useRef(null);
+  const localStreamRef = useRef(null);
+  const ownSignalChannelRef = useRef(null);
+  const peerSignalChannelRef = useRef(null); // { targetId, channel }
+  const callTimerRef = useRef(null);
+  const pendingIceCandidatesRef = useRef([]);
+  const activeCallPartnerIdRef = useRef(null);
+  const callStateRef = useRef(null);
 
   const emojisList = ["😀", "🚀", "💡", "🔥", "⭐", "🎨", "📚", "💻", "❤️", "👍", "🎯", "✨"];
+
+  useEffect(() => {
+    callStateRef.current = callState;
+  }, [callState]);
+
+  useEffect(() => {
+    const mql = window.matchMedia("(max-width: 640px)");
+    const handleChange = (e) => setIsMobileViewport(e.matches);
+    handleChange(mql);
+    if (mql.addEventListener) {
+      mql.addEventListener("change", handleChange);
+      return () => mql.removeEventListener("change", handleChange);
+    } else {
+      mql.addListener(handleChange);
+      return () => mql.removeListener(handleChange);
+    }
+  }, []);
 
   useEffect(() => {
     fetchStudentData();
@@ -60,6 +142,307 @@ export default function StudentPublicProfile() {
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, selectedConversation]);
+
+  // ---- CALL SIGNALING SUBSCRIPTION (own inbox channel) ----
+  useEffect(() => {
+    if (!id) return;
+
+    const channel = supabase.channel(`call-${id}`, {
+      config: { broadcast: { self: false } }
+    });
+
+    channel.on("broadcast", { event: "signal" }, ({ payload }) => {
+      handleIncomingSignal(payload);
+    });
+
+    channel.subscribe();
+    ownSignalChannelRef.current = channel;
+
+    return () => {
+      supabase.removeChannel(channel);
+      if (peerConnectionRef.current) {
+        peerConnectionRef.current.close();
+        peerConnectionRef.current = null;
+      }
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((t) => t.stop());
+        localStreamRef.current = null;
+      }
+      if (peerSignalChannelRef.current) {
+        supabase.removeChannel(peerSignalChannelRef.current.channel);
+        peerSignalChannelRef.current = null;
+      }
+      if (callTimerRef.current) {
+        clearInterval(callTimerRef.current);
+        callTimerRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  const handleIncomingSignal = async (payload) => {
+    const { type, from } = payload;
+
+    if (type === "offer") {
+      if (callStateRef.current) {
+        // Already in / starting a call elsewhere - politely reject
+        sendSignal(from, { type: "hangup", from: id });
+        return;
+      }
+      setIncomingCall({
+        fromId: from,
+        fromName: payload.fromName || "Unknown",
+        type: payload.callType || "video",
+        sdp: payload.sdp
+      });
+      setCallType(payload.callType || "video");
+      setCallState("incoming");
+    } else if (type === "answer") {
+      if (peerConnectionRef.current) {
+        await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+        flushPendingIceCandidates();
+        setCallState("active");
+        startCallTimer();
+      }
+    } else if (type === "ice-candidate") {
+      if (peerConnectionRef.current && peerConnectionRef.current.remoteDescription) {
+        try {
+          await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(payload.candidate));
+        } catch (err) {
+          console.error("Error adding ICE candidate:", err);
+        }
+      } else {
+        pendingIceCandidatesRef.current.push(payload.candidate);
+      }
+    } else if (type === "hangup") {
+      if (from === activeCallPartnerIdRef.current || callStateRef.current === "incoming") {
+        handleEndCall(false);
+      }
+    }
+  };
+
+  const getOrCreatePeerChannel = (targetId) => {
+    return new Promise((resolve) => {
+      if (peerSignalChannelRef.current && peerSignalChannelRef.current.targetId === targetId) {
+        resolve(peerSignalChannelRef.current.channel);
+        return;
+      }
+      if (peerSignalChannelRef.current) {
+        supabase.removeChannel(peerSignalChannelRef.current.channel);
+        peerSignalChannelRef.current = null;
+      }
+      const channel = supabase.channel(`call-${targetId}`, {
+        config: { broadcast: { self: false } }
+      });
+      channel.subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          peerSignalChannelRef.current = { targetId, channel };
+          resolve(channel);
+        }
+      });
+    });
+  };
+
+  const sendSignal = async (targetId, payload) => {
+    try {
+      const channel = await getOrCreatePeerChannel(targetId);
+      await channel.send({ type: "broadcast", event: "signal", payload });
+    } catch (err) {
+      console.error("Error sending call signal:", err);
+    }
+  };
+
+  const flushPendingIceCandidates = () => {
+    const pc = peerConnectionRef.current;
+    if (!pc) return;
+    pendingIceCandidatesRef.current.forEach(async (candidate) => {
+      try {
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (err) {
+        console.error("Error flushing ICE candidate:", err);
+      }
+    });
+    pendingIceCandidatesRef.current = [];
+  };
+
+  const getLocalStream = async (type) => {
+    const constraints = type === "video" ? { audio: true, video: true } : { audio: true, video: false };
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    localStreamRef.current = stream;
+    if (localVideoRef.current && type === "video") {
+      localVideoRef.current.srcObject = stream;
+    }
+    return stream;
+  };
+
+  const createPeerConnection = (targetId) => {
+    const pc = new RTCPeerConnection(rtcConfig);
+
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        sendSignal(targetId, {
+          type: "ice-candidate",
+          from: id,
+          candidate: event.candidate
+        });
+      }
+    };
+
+    pc.ontrack = (event) => {
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = event.streams[0];
+      }
+    };
+
+    peerConnectionRef.current = pc;
+    return pc;
+  };
+
+  const startCallTimer = () => {
+    setCallDuration(0);
+    callTimerRef.current = setInterval(() => {
+      setCallDuration((prev) => prev + 1);
+    }, 1000);
+  };
+
+  const stopCallTimer = () => {
+    if (callTimerRef.current) {
+      clearInterval(callTimerRef.current);
+      callTimerRef.current = null;
+    }
+    setCallDuration(0);
+  };
+
+  const formatDuration = (secs) => {
+    const m = Math.floor(secs / 60).toString().padStart(2, "0");
+    const s = (secs % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
+  const handleStartCall = async (type) => {
+    if (!activeContact || activeContact.id === "ai-assistant") {
+      alert("Calling isn't available for the AI Assistant.");
+      return;
+    }
+
+    try {
+      setCallType(type);
+      setCallState("outgoing");
+      activeCallPartnerIdRef.current = activeContact.id;
+
+      const stream = await getLocalStream(type);
+      const pc = createPeerConnection(activeContact.id);
+
+      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      await sendSignal(activeContact.id, {
+        type: "offer",
+        from: id,
+        fromName: student?.full_name || "Student",
+        callType: type,
+        sdp: offer
+      });
+    } catch (err) {
+      console.error("Error starting call:", err);
+      alert("Could not access your camera/microphone, or the call failed to start.");
+      handleEndCall(false);
+    }
+  };
+
+  const handleAcceptCall = async () => {
+    if (!incomingCall) return;
+
+    try {
+      activeCallPartnerIdRef.current = incomingCall.fromId;
+      setCallState("active");
+
+      const stream = await getLocalStream(incomingCall.type);
+      const pc = createPeerConnection(incomingCall.fromId);
+
+      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+
+      await pc.setRemoteDescription(new RTCSessionDescription(incomingCall.sdp));
+      flushPendingIceCandidates();
+
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      await sendSignal(incomingCall.fromId, {
+        type: "answer",
+        from: id,
+        sdp: answer
+      });
+
+      startCallTimer();
+      setIncomingCall(null);
+    } catch (err) {
+      console.error("Error accepting call:", err);
+      alert("Could not access your camera/microphone.");
+      handleEndCall(false);
+    }
+  };
+
+  const handleDeclineCall = () => {
+    if (incomingCall) {
+      sendSignal(incomingCall.fromId, { type: "hangup", from: id });
+    }
+    setIncomingCall(null);
+    setCallState(null);
+    activeCallPartnerIdRef.current = null;
+  };
+
+  const handleEndCall = (notifyPeer = true) => {
+    if (notifyPeer && activeCallPartnerIdRef.current) {
+      sendSignal(activeCallPartnerIdRef.current, { type: "hangup", from: id });
+    }
+
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
+      peerConnectionRef.current = null;
+    }
+
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((track) => track.stop());
+      localStreamRef.current = null;
+    }
+
+    if (localVideoRef.current) localVideoRef.current.srcObject = null;
+    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+
+    if (peerSignalChannelRef.current) {
+      supabase.removeChannel(peerSignalChannelRef.current.channel);
+      peerSignalChannelRef.current = null;
+    }
+
+    pendingIceCandidatesRef.current = [];
+    activeCallPartnerIdRef.current = null;
+
+    stopCallTimer();
+    setCallState(null);
+    setIncomingCall(null);
+    setIsMuted(false);
+    setIsCameraOff(false);
+  };
+
+  const toggleMute = () => {
+    if (!localStreamRef.current) return;
+    localStreamRef.current.getAudioTracks().forEach((track) => {
+      track.enabled = isMuted;
+    });
+    setIsMuted(!isMuted);
+  };
+
+  const toggleCamera = () => {
+    if (!localStreamRef.current) return;
+    localStreamRef.current.getVideoTracks().forEach((track) => {
+      track.enabled = isCameraOff;
+    });
+    setIsCameraOff(!isCameraOff);
+  };
+  // ---- END CALLING LOGIC ----
 
   const fetchStudentData = async () => {
     try {
@@ -105,8 +488,8 @@ export default function StudentPublicProfile() {
             }
 
             const tutorName = tutorProfile.full_name || "Course Instructor";
-            const initials = tutorName !== "Course Instructor" 
-              ? tutorName.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() 
+            const initials = tutorName !== "Course Instructor"
+              ? tutorName.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()
               : "IN";
 
             tutorConversations.push({
@@ -177,17 +560,35 @@ export default function StudentPublicProfile() {
 
   const handleUploadProject = async (e) => {
     e.preventDefault();
-    if (!newProject.title.trim() || !newProject.image_url.trim()) {
-      alert("Please enter both a project title and an image URL.");
+    if (!newProject.title.trim() || (!newProject.image_url.trim() && !newProjectFile)) {
+      alert("Please enter a project title and either upload a file or paste an image URL.");
       return;
     }
 
     try {
       setUploadingProj(true);
+
+      let finalImageUrl = newProject.image_url;
+
+      if (newProjectFile) {
+        const fileExt = newProjectFile.name.split(".").pop();
+        const fileName = `portfolio-${id}-${Date.now()}.${fileExt}`;
+        const filePath = `portfolio_uploads/${fileName}`;
+
+        const { error: uploadErr } = await supabase.storage
+          .from("avatars")
+          .upload(filePath, newProjectFile);
+
+        if (uploadErr) throw uploadErr;
+
+        const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+        finalImageUrl = urlData.publicUrl;
+      }
+
       const payload = {
         student_id: id,
         title: newProject.title,
-        image_url: newProject.image_url,
+        image_url: finalImageUrl,
         created_at: new Date().toISOString()
       };
 
@@ -203,6 +604,7 @@ export default function StudentPublicProfile() {
       }
 
       setNewProject({ title: "", image_url: "" });
+      setNewProjectFile(null);
       setShowUploadModal(false);
       alert("Project uploaded successfully!");
     } catch (err) {
@@ -210,6 +612,67 @@ export default function StudentPublicProfile() {
       alert("Failed to upload portfolio project.");
     } finally {
       setUploadingProj(false);
+    }
+  };
+
+  const handleDeleteArtwork = async (art) => {
+    const confirmDelete = window.confirm(`Delete "${art.title || "this project"}"? This cannot be undone.`);
+    if (!confirmDelete) return;
+
+    try {
+      setDeletingArtId(art.id);
+      const { error } = await supabase
+        .from("artworks")
+        .delete()
+        .eq("id", art.id);
+
+      if (error) throw error;
+
+      setArtworks((prev) => prev.filter((a) => a.id !== art.id));
+    } catch (err) {
+      console.error("Error deleting artwork:", err);
+      alert("Failed to delete this item. Please try again.");
+    } finally {
+      setDeletingArtId(null);
+    }
+  };
+
+  const handleStartEditArt = (art) => {
+    setEditingArtId(art.id);
+    setEditTitleValue(art.title || "");
+  };
+
+  const handleCancelEditArt = () => {
+    setEditingArtId(null);
+    setEditTitleValue("");
+  };
+
+  const handleSaveEditArt = async (art) => {
+    const trimmedTitle = editTitleValue.trim();
+    if (!trimmedTitle) {
+      alert("Title cannot be empty.");
+      return;
+    }
+
+    try {
+      setSavingArtId(art.id);
+      const { error } = await supabase
+        .from("artworks")
+        .update({ title: trimmedTitle })
+        .eq("id", art.id);
+
+      if (error) throw error;
+
+      setArtworks((prev) =>
+        prev.map((a) => (a.id === art.id ? { ...a, title: trimmedTitle } : a))
+      );
+      setEditingArtId(null);
+      setEditTitleValue("");
+    } catch (err) {
+      console.error("Error updating artwork title:", err);
+      alert("Failed to update the title. Please try again.");
+    } finally {
+      setSavingArtId(null);
     }
   };
 
@@ -258,6 +721,63 @@ export default function StudentPublicProfile() {
     setShowEmojiPicker(false);
   };
 
+  const renderMessageContent = (text) => {
+    if (!text) return null;
+
+    const attachmentRegex = /\[Attached File: (.+?)\]\((.+?)\)/;
+    const match = text.match(attachmentRegex);
+
+    if (match) {
+      const [fullMatch, fileName, fileUrl] = match;
+      const textBeforeAttachment = text.replace(fullMatch, "").trim();
+      const isImage = /\.(png|jpe?g|gif|webp|svg)$/i.test(fileName);
+
+      return (
+        <>
+          {textBeforeAttachment && <div style={{ marginBottom: "6px" }}>{textBeforeAttachment}</div>}
+          {isImage ? (
+            <img
+              src={fileUrl}
+              alt={fileName}
+              onClick={() => setPreviewImage({ url: fileUrl, name: fileName })}
+              style={{
+                maxWidth: "180px",
+                maxHeight: "180px",
+                borderRadius: "10px",
+                cursor: "pointer",
+                display: "block"
+              }}
+            />
+          ) : (
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: "inherit", textDecoration: "underline" }}>
+              📎 {fileName}
+            </a>
+          )}
+        </>
+      );
+    }
+
+    return text;
+  };
+
+  const handleDownloadPreviewImage = async () => {
+    if (!previewImage) return;
+    try {
+      const response = await fetch(previewImage.url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = previewImage.name || "image";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Error downloading image:", err);
+    }
+  };
+
   const handleSendChatMessage = async (e) => {
     e.preventDefault();
     if ((!messageBody.trim() && !attachedFile) || sendingMsg) return;
@@ -281,8 +801,8 @@ export default function StudentPublicProfile() {
         }
       }
 
-      const finalMessageText = attachedFile 
-        ? `${messageBody} [Attached File: ${attachedFile.name}](${fileUrl})` 
+      const finalMessageText = attachedFile
+        ? `${messageBody} [Attached File: ${attachedFile.name}](${fileUrl})`
         : messageBody;
 
       const payload = {
@@ -296,7 +816,6 @@ export default function StudentPublicProfile() {
       const { error } = await supabase.from("messages").insert([payload]);
       if (error) throw error;
 
-      setMessages((prev) => [...prev, payload]);
       setMessageBody("");
       setAttachedFile(null);
 
@@ -310,7 +829,6 @@ export default function StudentPublicProfile() {
             created_at: new Date().toISOString()
           };
           await supabase.from("messages").insert([aiResponsePayload]);
-          setMessages((prev) => [...prev, aiResponsePayload]);
         }, 1000);
       }
 
@@ -326,12 +844,12 @@ export default function StudentPublicProfile() {
     navigate("/teachhub");
   };
 
-  const approvedCourses = enrolledCourses.filter(c => 
-    (!c.status || c.status === "approved") && 
+  const approvedCourses = enrolledCourses.filter(c =>
+    (!c.status || c.status === "approved") &&
     (c.course_title || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const pendingOrDeclinedRequests = enrolledCourses.filter(c => 
+  const pendingOrDeclinedRequests = enrolledCourses.filter(c =>
     c.status === "pending" || c.status === "declined"
   );
 
@@ -342,110 +860,586 @@ export default function StudentPublicProfile() {
   const activeContact = conversations.find(c => c.id === selectedConversation) || conversations[0];
   const activeMessages = messages.filter(m => m.tutor_identifier === selectedConversation);
 
-  const renderModernMessagingLayout = (height = "560px") => (
-    <div className={`messaging-wrapper ${selectedConversation ? "mobile-hide-list mobile-show-chat" : ""}`} style={{ maxWidth: "1050px", margin: "0 auto", display: "flex", background: "#fff", borderRadius: "12px", border: "1px solid #e5e7eb", height, overflow: "hidden", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
-      <div style={{ width: "300px", borderRight: "1px solid #e5e7eb", display: "flex", flexDirection: "column" }}>
-        <div style={{ padding: "14px", borderBottom: "1px solid #e5e7eb" }}>
-          <input 
-            type="text" 
-            placeholder="Search conversations..." 
-            value={chatSearchQuery}
-            onChange={(e) => setChatSearchQuery(e.target.value)}
-            style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", fontSize: "13px", boxSizing: "border-box" }}
-          />
-        </div>
-        <div style={{ flex: 1, overflowY: "auto" }}>
-          {filteredConversations.map((convo) => (
-            <div 
-              key={convo.id}
-              onClick={() => setSelectedConversation(convo.id)}
-              style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: "12px", cursor: "pointer", background: selectedConversation === convo.id ? "#f3f4f6" : "transparent", borderBottom: "1px solid #f9fafb" }}
+  const handleSelectConversation = (convoId) => {
+    setSelectedConversation(convoId);
+    setIsMobileChatOpen(true);
+  };
+
+  const showListPanel = !isMobileViewport || (isMobileViewport && !isMobileChatOpen);
+  const showChatPanel = !isMobileViewport || (isMobileViewport && isMobileChatOpen);
+
+  const formatArtDate = (dateStr) => {
+    if (!dateStr) return "";
+    try {
+      return new Date(dateStr).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+      });
+    } catch {
+      return "";
+    }
+  };
+
+  const renderArtworkCard = (art) => {
+    const isEditing = editingArtId === art.id;
+    const isSaving = savingArtId === art.id;
+    const isDeleting = deletingArtId === art.id;
+
+    return (
+      <div
+        key={art.id}
+        className="art-card"
+        style={{ position: "relative", overflow: "hidden" }}
+      >
+        <div style={{ position: "relative" }}>
+          <img src={art.image_url} alt={art.title || "Project"} />
+          <div
+            className="art-card-actions"
+            style={{
+              position: "absolute",
+              top: "8px",
+              right: "8px",
+              display: "flex",
+              gap: "6px"
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => handleStartEditArt(art)}
+              title="Edit title"
+              disabled={isDeleting}
+              style={{
+                width: "30px",
+                height: "30px",
+                borderRadius: "50%",
+                border: "none",
+                background: "rgba(255,255,255,0.95)",
+                color: "#064e3b",
+                cursor: "pointer",
+                fontSize: "14px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.25)"
+              }}
             >
-              <div style={{ width: "38px", height: "38px", borderRadius: "50%", background: "#064e3b", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "600", fontSize: "13px", flexShrink: 0 }}>
-                {convo.avatar}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <h4 style={{ fontSize: "13px", fontWeight: "600", color: "#111", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{convo.name}</h4>
-                <p style={{ fontSize: "11px", color: "#6b7280", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{convo.lastMessage}</p>
+              ✎
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDeleteArtwork(art)}
+              title="Delete"
+              disabled={isDeleting}
+              style={{
+                width: "30px",
+                height: "30px",
+                borderRadius: "50%",
+                border: "none",
+                background: "rgba(255,255,255,0.95)",
+                color: "#ef4444",
+                cursor: isDeleting ? "not-allowed" : "pointer",
+                fontSize: "14px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+                opacity: isDeleting ? 0.6 : 1
+              }}
+            >
+              {isDeleting ? "…" : "🗑"}
+            </button>
+          </div>
+        </div>
+
+        <div style={{ padding: "10px 12px" }}>
+          {isEditing ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              <input
+                type="text"
+                value={editTitleValue}
+                onChange={(e) => setEditTitleValue(e.target.value)}
+                autoFocus
+                style={{
+                  width: "100%",
+                  padding: "6px 8px",
+                  borderRadius: "4px",
+                  border: "1px solid #d1d5db",
+                  fontSize: "13px",
+                  boxSizing: "border-box"
+                }}
+              />
+              <div style={{ display: "flex", gap: "6px" }}>
+                <button
+                  type="button"
+                  onClick={() => handleSaveEditArt(art)}
+                  disabled={isSaving}
+                  style={{
+                    flex: 1,
+                    padding: "6px 8px",
+                    background: "#064e3b",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    cursor: "pointer"
+                  }}
+                >
+                  {isSaving ? "Saving..." : "Save"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelEditArt}
+                  disabled={isSaving}
+                  style={{
+                    flex: 1,
+                    padding: "6px 8px",
+                    background: "#f3f4f6",
+                    border: "none",
+                    borderRadius: "4px",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    cursor: "pointer"
+                  }}
+                >
+                  Cancel
+                </button>
               </div>
             </div>
-          ))}
+          ) : (
+            <>
+              <h4 style={{ margin: 0 }}>{art.title}</h4>
+              {art.created_at && (
+                <p style={{ fontSize: "11px", color: "#9ca3af", margin: "4px 0 0 0" }}>
+                  Uploaded {formatArtDate(art.created_at)}
+                </p>
+              )}
+            </>
+          )}
         </div>
       </div>
+    );
+  };
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#fdfdfd", minWidth: 0 }}>
-        <div style={{ padding: "12px 16px", borderBottom: "1px solid #e5e7eb", display: "flex", alignItems: "center", gap: "10px", background: "#fff" }}>
-          <button 
-            type="button" 
-            onClick={() => setSelectedConversation(null)} 
-            className="mobile-back-btn"
-            style={{ display: "none", background: "none", border: "none", fontSize: "16px", fontWeight: "bold", cursor: "pointer", marginRight: "4px" }}
-          >
-            ←
-          </button>
-          <div style={{ width: "34px", height: "34px", borderRadius: "50%", background: "#064e3b", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "600", fontSize: "12px", flexShrink: 0 }}>
-            {activeContact?.avatar}
+  const renderModernMessagingLayout = (height = "560px") => (
+    <div
+      style={{
+        maxWidth: "1050px",
+        margin: "0 auto",
+        display: "flex",
+        flexDirection: isMobileViewport ? "column" : "row",
+        background: "#fff",
+        borderRadius: isMobileViewport ? "0px" : "14px",
+        border: isMobileViewport ? "none" : "1px solid #e9ebee",
+        height: isMobileViewport ? "calc(100dvh - 76px)" : height,
+        overflow: "hidden",
+        boxShadow: isMobileViewport ? "none" : "0 8px 30px rgba(6,78,59,0.08)"
+      }}
+    >
+      {showListPanel && (
+        <div
+          style={{
+            width: isMobileViewport ? "100%" : "300px",
+            flexShrink: 0,
+            borderRight: isMobileViewport ? "none" : "1px solid #eef0f2",
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            minHeight: 0,
+            background: "#fcfdfd"
+          }}
+        >
+          <div style={{ padding: "14px", borderBottom: "1px solid #eef0f2", flexShrink: 0 }}>
+            <input
+              type="text"
+              placeholder="Search conversations..."
+              value={chatSearchQuery}
+              onChange={(e) => setChatSearchQuery(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px 14px",
+                borderRadius: "999px",
+                border: "1px solid #e2e5e9",
+                fontSize: "13px",
+                boxSizing: "border-box",
+                background: "#fff",
+                outline: "none"
+              }}
+            />
           </div>
-          <div>
-            <h4 style={{ fontSize: "13px", fontWeight: "600", margin: 0 }}>{activeContact?.name}</h4>
-            <span style={{ fontSize: "10px", color: "#059669" }}>● Online</span>
-          </div>
-        </div>
-
-        <div style={{ flex: 1, padding: "16px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "12px" }}>
-          {activeMessages.map((msg, index) => {
-            const isMe = msg.sender_type === "student";
-            return (
-              <div key={index} style={{ alignSelf: isMe ? "flex-end" : "flex-start", maxWidth: "70%" }}>
-                <div style={{ padding: "9px 13px", borderRadius: "10px", background: isMe ? "#064e3b" : "#e5e7eb", color: isMe ? "#fff" : "#111", fontSize: "13px", lineHeight: "1.4", wordBreak: "break-word" }}>
-                  {msg.message_text}
+          <div style={{ flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+            {filteredConversations.map((convo) => (
+              <div
+                key={convo.id}
+                onClick={() => handleSelectConversation(convo.id)}
+                style={{
+                  padding: "12px 16px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  cursor: "pointer",
+                  background: selectedConversation === convo.id ? "#eefaf5" : "transparent",
+                  borderLeft: selectedConversation === convo.id ? "3px solid #064e3b" : "3px solid transparent",
+                  transition: "background 0.15s ease"
+                }}
+              >
+                <div style={{
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, #0d6b52, #064e3b)",
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: "700",
+                  fontSize: "14px",
+                  flexShrink: 0,
+                  boxShadow: "0 2px 6px rgba(6,78,59,0.25)"
+                }}>
+                  {convo.avatar}
                 </div>
-                <span style={{ fontSize: "10px", color: "#9ca3af", marginTop: "2px", display: "block", textAlign: isMe ? "right" : "left" }}>
-                  {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h4 style={{ fontSize: "13.5px", fontWeight: "600", color: "#111", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{convo.name}</h4>
+                  <p style={{ fontSize: "12px", color: "#8a8f98", margin: "2px 0 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{convo.lastMessage}</p>
+                </div>
               </div>
-            );
-          })}
-          <div ref={chatBottomRef} />
-        </div>
-
-        {attachedFile && (
-          <div style={{ padding: "6px 14px", background: "#f3f4f6", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px" }}>
-            <span>📎 Attached: {attachedFile.name}</span>
-            <button onClick={() => setAttachedFile(null)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontWeight: "bold" }}>Remove</button>
+            ))}
           </div>
-        )}
+        </div>
+      )}
 
-        <form onSubmit={handleSendChatMessage} style={{ padding: "10px 14px", borderTop: "1px solid #e5e7eb", display: "flex", flexDirection: "row", alignItems: "center", gap: "8px", background: "#fff", position: "relative", width: "100%", boxSizing: "border-box" }}>
-          {showEmojiPicker && (
-            <div style={{ position: "absolute", bottom: "55px", left: "14px", background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "16px", padding: "12px", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", zIndex: 10 }}>
-              {emojisList.map((emoji, idx) => (
-                <button 
-                  key={idx} 
-                  type="button" 
-                  onClick={() => handleAddEmoji(emoji)} 
-                  style={{ background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: "12px", fontSize: "24px", cursor: "pointer", padding: "8px" }}
+      {showChatPanel && (
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            background: "#f7f8f9",
+            minWidth: 0,
+            minHeight: 0,
+            height: "100%",
+            width: isMobileViewport ? "100%" : "auto"
+          }}
+        >
+          <div style={{
+            padding: "12px 16px",
+            borderBottom: "1px solid #eef0f2",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "10px",
+            background: "#fff",
+            flexShrink: 0
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
+              {isMobileViewport && (
+                <button
+                  type="button"
+                  onClick={() => setIsMobileChatOpen(false)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "32px",
+                    height: "32px",
+                    background: "#f3f4f6",
+                    border: "none",
+                    borderRadius: "50%",
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    flexShrink: 0
+                  }}
                 >
-                  {emoji}
+                  ←
                 </button>
-              ))}
+              )}
+              <div style={{
+                width: "38px",
+                height: "38px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #0d6b52, #064e3b)",
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: "700",
+                fontSize: "13px",
+                flexShrink: 0,
+                boxShadow: "0 2px 6px rgba(6,78,59,0.25)"
+              }}>
+                {activeContact?.avatar}
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <h4 style={{ fontSize: "14px", fontWeight: "700", margin: 0, color: "#111" }}>{activeContact?.name}</h4>
+                <span style={{ fontSize: "11px", color: "#059669", fontWeight: "500" }}>● Online</span>
+              </div>
+            </div>
+
+            {activeContact?.id !== "ai-assistant" && (
+              <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+                <button type="button" onClick={() => handleStartCall("audio")} title="Voice call" style={headerCallBtnStyle}>📞</button>
+                <button type="button" onClick={() => handleStartCall("video")} title="Video call" style={headerCallBtnStyle}>🎥</button>
+              </div>
+            )}
+          </div>
+
+          <div
+            style={{
+              flex: 1,
+              minHeight: 0,
+              padding: "18px 16px",
+              overflowY: "auto",
+              WebkitOverflowScrolling: "touch",
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px"
+            }}
+          >
+            {activeMessages.map((msg, index) => {
+              const isMe = msg.sender_type === "student";
+              return (
+                <div key={index} style={{ alignSelf: isMe ? "flex-end" : "flex-start", maxWidth: "75%" }}>
+                  <div style={{
+                    padding: "10px 14px",
+                    borderRadius: isMe ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                    background: isMe ? "linear-gradient(135deg, #0d6b52, #064e3b)" : "#fff",
+                    color: isMe ? "#fff" : "#1a1a1a",
+                    fontSize: "13.5px",
+                    lineHeight: "1.45",
+                    wordBreak: "break-word",
+                    boxShadow: isMe ? "0 2px 8px rgba(6,78,59,0.25)" : "0 1px 4px rgba(0,0,0,0.06)"
+                  }}>
+                    {renderMessageContent(msg.message_text)}
+                  </div>
+                  <span style={{ fontSize: "10px", color: "#9ca3af", marginTop: "3px", display: "block", textAlign: isMe ? "right" : "left" }}>
+                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              );
+            })}
+            <div ref={chatBottomRef} />
+          </div>
+
+          {attachedFile && (
+            <div style={{
+              padding: "8px 16px",
+              background: "#eefaf5",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              fontSize: "12px",
+              flexShrink: 0,
+              borderTop: "1px solid #eef0f2"
+            }}>
+              <span>📎 {attachedFile.name}</span>
+              <button onClick={() => setAttachedFile(null)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontWeight: "bold" }}>Remove</button>
             </div>
           )}
-          <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "20px", flexShrink: 0 }}>😀</button>
-          <button type="button" onClick={() => fileInputRef.current?.click()} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "18px", flexShrink: 0 }}>📎</button>
-          <input type="file" ref={fileInputRef} onChange={handleFileSelect} style={{ display: "none" }} />
-          <input 
-            type="text" 
-            placeholder="Type your message..." 
-            value={messageBody}
-            onChange={(e) => setMessageBody(e.target.value)}
-            style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", border: "1px solid #d1d5db", fontSize: "13px", minWidth: 0 }}
-          />
-          <button type="submit" disabled={sendingMsg} style={{ background: "#064e3b", color: "#fff", border: "none", padding: "8px 16px", borderRadius: "6px", fontWeight: "600", cursor: "pointer", fontSize: "13px", flexShrink: 0 }}>Send</button>
-        </form>
-      </div>
+
+          <form
+            onSubmit={handleSendChatMessage}
+            className="chat-message-form"
+            style={{
+              padding: "10px 14px",
+              borderTop: "1px solid #eef0f2",
+              background: "#fff",
+              position: "relative",
+              boxSizing: "border-box",
+              flexShrink: 0
+            }}
+          >
+            {showEmojiPicker && (
+              <div style={{
+                position: "absolute",
+                bottom: "58px",
+                left: "14px",
+                background: "#ffffff",
+                border: "1px solid #e2e8f0",
+                borderRadius: "16px",
+                padding: "12px",
+                display: "grid",
+                gridTemplateColumns: "repeat(4, 1fr)",
+                gap: "8px",
+                zIndex: 10,
+                boxShadow: "0 8px 24px rgba(0,0,0,0.12)"
+              }}>
+                {emojisList.map((emoji, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleAddEmoji(emoji)}
+                    style={{ background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: "12px", fontSize: "22px", cursor: "pointer", padding: "8px" }}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: "19px" }}
+            >
+              😀
+            </button>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: "17px" }}
+            >
+              📎
+            </button>
+            <input type="file" ref={fileInputRef} onChange={handleFileSelect} style={{ display: "none" }} />
+            <input
+              type="text"
+              placeholder="Type your message..."
+              value={messageBody}
+              onChange={(e) => setMessageBody(e.target.value)}
+              style={{
+                padding: "10px 16px",
+                borderRadius: "999px",
+                border: "1px solid #e2e5e9",
+                fontSize: "13.5px",
+                background: "#f7f8f9",
+                outline: "none"
+              }}
+            />
+            <button
+              type="submit"
+              disabled={sendingMsg}
+              style={{
+                background: "linear-gradient(135deg, #0d6b52, #064e3b)",
+                color: "#fff",
+                border: "none",
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: "700",
+                cursor: "pointer",
+                fontSize: "15px",
+                boxShadow: "0 3px 10px rgba(6,78,59,0.3)"
+              }}
+            >
+              ➤
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
+
+  const renderCallModal = () => {
+    if (callState !== "outgoing" && callState !== "active") return null;
+
+    const isVideo = callType === "video";
+    const displayName = activeContact?.name || incomingCall?.fromName || "Unknown";
+
+    return (
+      <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "#0b0f10", zIndex: 10050, display: "flex", flexDirection: "column" }}>
+        <div style={{ padding: "16px", color: "#fff" }}>
+          <h3 style={{ margin: 0, fontSize: "16px" }}>{displayName}</h3>
+          <span style={{ fontSize: "12px", color: "#9ca3af" }}>
+            {callState === "outgoing" && "Calling..."}
+            {callState === "active" && formatDuration(callDuration)}
+          </span>
+        </div>
+
+        <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {isVideo ? (
+            <>
+              <video ref={remoteVideoRef} autoPlay playsInline style={{ width: "100%", height: "100%", objectFit: "cover", background: "#111" }} />
+              <video
+                ref={localVideoRef}
+                autoPlay
+                playsInline
+                muted
+                style={{
+                  position: "absolute",
+                  bottom: "110px",
+                  right: "20px",
+                  width: "140px",
+                  height: "190px",
+                  borderRadius: "12px",
+                  objectFit: "cover",
+                  border: "2px solid #fff",
+                  background: "#222"
+                }}
+              />
+            </>
+          ) : (
+            <div style={{
+              width: "120px",
+              height: "120px",
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #0d6b52, #064e3b)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#fff",
+              fontSize: "36px",
+              fontWeight: "700"
+            }}>
+              {displayName.charAt(0)}
+            </div>
+          )}
+        </div>
+
+        <div style={{ padding: "24px", display: "flex", justifyContent: "center", gap: "20px" }}>
+          <button onClick={toggleMute} style={callControlBtnStyle(isMuted ? "#ef4444" : "#374151")} title={isMuted ? "Unmute" : "Mute"}>
+            {isMuted ? "🔇" : "🎙️"}
+          </button>
+          {isVideo && (
+            <button onClick={toggleCamera} style={callControlBtnStyle(isCameraOff ? "#ef4444" : "#374151")} title={isCameraOff ? "Turn camera on" : "Turn camera off"}>
+              {isCameraOff ? "🚫" : "📷"}
+            </button>
+          )}
+          <button onClick={() => handleEndCall(true)} style={callControlBtnStyle("#ef4444")} title="End call">
+            📵
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderIncomingCallBanner = () => {
+    if (callState !== "incoming" || !incomingCall) return null;
+
+    return (
+      <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "rgba(0,0,0,0.6)", zIndex: 10060, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px", boxSizing: "border-box" }}>
+        <div style={{ background: "#fff", borderRadius: "16px", padding: "28px", width: "100%", maxWidth: "320px", textAlign: "center" }}>
+          <div style={{
+            width: "72px",
+            height: "72px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #0d6b52, #064e3b)",
+            color: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "26px",
+            fontWeight: "700",
+            margin: "0 auto 14px auto"
+          }}>
+            {incomingCall.fromName.charAt(0)}
+          </div>
+          <h3 style={{ margin: "0 0 4px 0" }}>{incomingCall.fromName}</h3>
+          <p style={{ fontSize: "13px", color: "#6b7280", margin: "0 0 20px 0" }}>
+            Incoming {incomingCall.type === "video" ? "video" : "voice"} call...
+          </p>
+          <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
+            <button onClick={handleDeclineCall} style={{ ...callControlBtnStyle("#ef4444"), width: "52px", height: "52px" }} title="Decline">✖</button>
+            <button onClick={handleAcceptCall} style={{ ...callControlBtnStyle("#10b981"), width: "52px", height: "52px" }} title="Accept">✔</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   if (loading) return <div className="profile-loading">Loading secure student portal...</div>;
   if (!student) return <div className="profile-not-found"><h2>Student record not found.</h2><Link to="/teachhub">Return Home</Link></div>;
@@ -453,7 +1447,7 @@ export default function StudentPublicProfile() {
   return (
     <div style={{ position: "relative", minHeight: "100vh", overflowX: "hidden" }}>
       {isSidebarOpen && (
-        <div 
+        <div
           onClick={() => setIsSidebarOpen(false)}
           style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "rgba(0,0,0,0.5)", zIndex: 9998 }}
         />
@@ -497,8 +1491,8 @@ export default function StudentPublicProfile() {
       <main className="dashboard-main-content">
         <header className="dashboard-topbar">
           <div className="topbar-left-group">
-            <button 
-              className="hamburger-btn" 
+            <button
+              className="hamburger-btn"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               aria-label="Toggle Sidebar"
               type="button"
@@ -506,9 +1500,9 @@ export default function StudentPublicProfile() {
               ☰
             </button>
             <div className="topbar-search">
-              <input 
-                type="text" 
-                placeholder="Search courses..." 
+              <input
+                type="text"
+                placeholder="Search courses..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -571,7 +1565,7 @@ export default function StudentPublicProfile() {
                           </div>
                           <p style={{ fontSize: "12px", color: "#6b7280", margin: "6px 0" }}>Requested: {new Date(req.created_at).toLocaleDateString()}</p>
                           {isDeclined && (
-                            <button 
+                            <button
                               onClick={() => handleDismissDeclined(req.id)}
                               style={{ background: "#ef4444", color: "#fff", border: "none", padding: "4px 10px", borderRadius: "4px", fontSize: "11px", cursor: "pointer", marginTop: "6px" }}
                             >
@@ -606,12 +1600,7 @@ export default function StudentPublicProfile() {
                   <h3>Student Portfolio & Projects</h3>
                   {artworks.length > 0 ? (
                     <div className="student-art-grid">
-                      {artworks.map((art) => (
-                        <div key={art.id} className="art-card">
-                          <img src={art.image_url} alt={art.title || "Project"} />
-                          <h4>{art.title}</h4>
-                        </div>
-                      ))}
+                      {artworks.map((art) => renderArtworkCard(art))}
                     </div>
                   ) : (
                     <p className="no-data-text">No portfolio projects uploaded yet.</p>
@@ -647,12 +1636,7 @@ export default function StudentPublicProfile() {
               </div>
               {artworks.length > 0 ? (
                 <div className="student-art-grid">
-                  {artworks.map((art) => (
-                    <div key={art.id} className="art-card">
-                      <img src={art.image_url} alt={art.title || "Project"} />
-                      <h4>{art.title}</h4>
-                    </div>
-                  ))}
+                  {artworks.map((art) => renderArtworkCard(art))}
                 </div>
               ) : (
                 <p className="no-data-text">No projects submitted yet.</p>
@@ -661,11 +1645,13 @@ export default function StudentPublicProfile() {
           )}
 
           {activeView === "messages" && (
-            <div>
-              <div style={{ maxWidth: "1050px", margin: "0 auto 16px auto" }}>
-                <h1 style={{ fontSize: "20px", fontWeight: "700", color: "#111", margin: 0 }}>Messages & Support</h1>
-                <p style={{ fontSize: "13px", color: "#6b7280", margin: "4px 0 0 0" }}>Communicate directly with your instructors and AI assistant.</p>
-              </div>
+            <div style={isMobileViewport ? { margin: "0 -16px" } : undefined}>
+              {!isMobileViewport && (
+                <div style={{ maxWidth: "1050px", margin: "0 auto 16px auto" }}>
+                  <h1 style={{ fontSize: "20px", fontWeight: "700", color: "#111", margin: 0 }}>Messages & Support</h1>
+                  <p style={{ fontSize: "13px", color: "#6b7280", margin: "4px 0 0 0" }}>Communicate directly with your instructors and AI assistant.</p>
+                </div>
+              )}
               {renderModernMessagingLayout("560px")}
             </div>
           )}
@@ -676,9 +1662,9 @@ export default function StudentPublicProfile() {
               <form onSubmit={handleUpdateProfile}>
                 <div style={{ marginBottom: "15px" }}>
                   <label style={{ fontSize: "13px", fontWeight: "600", display: "block", marginBottom: "5px" }}>Full Name</label>
-                  <input 
-                    type="text" 
-                    value={editForm.full_name} 
+                  <input
+                    type="text"
+                    value={editForm.full_name}
                     onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
                     style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box" }}
                     required
@@ -686,15 +1672,15 @@ export default function StudentPublicProfile() {
                 </div>
                 <div style={{ marginBottom: "20px" }}>
                   <label style={{ fontSize: "13px", fontWeight: "600", display: "block", marginBottom: "5px" }}>Avatar Image URL</label>
-                  <input 
-                    type="text" 
-                    value={editForm.avatar_url} 
+                  <input
+                    type="text"
+                    value={editForm.avatar_url}
                     onChange={(e) => setEditForm({ ...editForm, avatar_url: e.target.value })}
                     style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box" }}
                   />
                 </div>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={updatingProfile}
                   style={{ background: "#064e3b", color: "#fff", border: "none", padding: "10px 20px", borderRadius: "6px", fontWeight: "600", cursor: "pointer" }}
                 >
@@ -708,7 +1694,7 @@ export default function StudentPublicProfile() {
             <div className="content-section-box" style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
               <h2 style={{ marginBottom: "10px" }}>Upgrade Your Learning Plan</h2>
               <p style={{ color: "#6b7280", marginBottom: "30px" }}>Unlock premium features, direct tutor priority, and exclusive learning materials.</p>
-              
+
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px", textAlign: "left" }}>
                 <div style={{ border: "1px solid #e5e7eb", borderRadius: "8px", padding: "20px", background: "#fff" }}>
                   <h4>Free Starter</h4>
@@ -746,8 +1732,8 @@ export default function StudentPublicProfile() {
             <form onSubmit={handleUploadProject}>
               <div style={{ marginBottom: "12px" }}>
                 <label style={{ fontSize: "12px", fontWeight: "600", display: "block", marginBottom: "4px" }}>Project Title</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="e.g. React Dashboard App"
                   value={newProject.title}
                   onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
@@ -756,18 +1742,29 @@ export default function StudentPublicProfile() {
                 />
               </div>
               <div style={{ marginBottom: "16px" }}>
-                <label style={{ fontSize: "12px", fontWeight: "600", display: "block", marginBottom: "4px" }}>Image URL</label>
-                <input 
-                  type="text" 
+                <label style={{ fontSize: "12px", fontWeight: "600", display: "block", marginBottom: "4px" }}>Upload from Device</label>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf,.doc,.docx"
+                  onChange={(e) => setNewProjectFile(e.target.files[0] || null)}
+                  style={{ width: "100%", fontSize: "12px" }}
+                />
+                {newProjectFile && (
+                  <p style={{ fontSize: "11px", color: "#059669", margin: "4px 0 0 0" }}>Selected: {newProjectFile.name}</p>
+                )}
+              </div>
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ fontSize: "12px", fontWeight: "600", display: "block", marginBottom: "4px" }}>Or Paste Image URL</label>
+                <input
+                  type="text"
                   placeholder="https://example.com/image.png"
                   value={newProject.image_url}
                   onChange={(e) => setNewProject({ ...newProject, image_url: e.target.value })}
                   style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #d1d5db", boxSizing: "border-box" }}
-                  required
                 />
               </div>
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
-                <button type="button" onClick={() => setShowUploadModal(false)} style={{ padding: "8px 14px", background: "#f3f4f6", border: "none", borderRadius: "4px", cursor: "pointer" }}>Cancel</button>
+                <button type="button" onClick={() => { setShowUploadModal(false); setNewProjectFile(null); }} style={{ padding: "8px 14px", background: "#f3f4f6", border: "none", borderRadius: "4px", cursor: "pointer" }}>Cancel</button>
                 <button type="submit" disabled={uploadingProj} style={{ padding: "8px 14px", background: "#064e3b", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "600" }}>
                   {uploadingProj ? "Uploading..." : "Upload"}
                 </button>
@@ -776,6 +1773,41 @@ export default function StudentPublicProfile() {
           </div>
         </div>
       )}
+
+      {previewImage && (
+        <div
+          onClick={() => setPreviewImage(null)}
+          style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10001, padding: "16px", boxSizing: "border-box" }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: "90vw", maxHeight: "90vh", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}
+          >
+            <img
+              src={previewImage.url}
+              alt={previewImage.name}
+              style={{ maxWidth: "100%", maxHeight: "75vh", borderRadius: "8px", boxShadow: "0 10px 40px rgba(0,0,0,0.4)" }}
+            />
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                onClick={handleDownloadPreviewImage}
+                style={{ padding: "8px 16px", background: "#064e3b", color: "#fff", border: "none", borderRadius: "6px", fontWeight: "600", cursor: "pointer" }}
+              >
+                Download
+              </button>
+              <button
+                onClick={() => setPreviewImage(null)}
+                style={{ padding: "8px 16px", background: "#f3f4f6", border: "none", borderRadius: "6px", fontWeight: "600", cursor: "pointer" }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {renderCallModal()}
+      {renderIncomingCallBanner()}
     </div>
   );
 }

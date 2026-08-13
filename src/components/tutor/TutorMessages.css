@@ -4,11 +4,13 @@
   position: relative;
   display: flex;
   width: 100%;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 100px);   /* fallback for older browsers */
+  height: calc(100dvh - 100px);  /* fixes mobile blank-space issue */
   padding: 24px;
   box-sizing: border-box;
   background-color: #f4f6f8;
   font-family: inherit;
+  overflow: hidden;
 }
 
 .messages-card {
@@ -204,6 +206,7 @@
   flex-direction: column;
   background: #ffffff;
   min-width: 0;
+  min-height: 0; /* prevents flex children from overflowing container */
 }
 
 .chat-header {
@@ -283,6 +286,7 @@
 /* Chat Body */
 .chat-body {
   flex: 1;
+  min-height: 0; /* prevents flex children from overflowing container */
   padding: 28px;
   overflow-y: auto;
   background: #fbfcfd;
@@ -394,6 +398,7 @@
   border: 1px solid #e5e7eb;
   gap: 10px;
   box-sizing: border-box;
+  flex-shrink: 0; /* keeps input bar from being squeezed by flex parent */
 }
 
 .attach-btn {
@@ -514,130 +519,6 @@
   cursor: not-allowed;
 }
 
-/* Call Overlay Modal */
-.call-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(15, 23, 42, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.call-modal {
-  background: #1b3b2b;
-  width: 450px;
-  border-radius: 20px;
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-  color: white;
-}
-
-.call-modal.video {
-  width: 650px;
-}
-
-.video-feed-mock {
-  width: 100%;
-  height: 320px;
-  background: #0f172a;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.video-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-}
-
-.video-off-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #94a3b8;
-  gap: 8px;
-  font-size: 1.1rem;
-}
-
-.avatar-large {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: white;
-  margin-bottom: 15px;
-}
-
-.call-info {
-  text-align: center;
-  margin-bottom: 25px;
-}
-
-.call-info h2 {
-  margin: 0 0 8px 0;
-  font-size: 1.25rem;
-}
-
-.call-status-label {
-  color: #94a3b8;
-  font-size: 0.9rem;
-  margin: 0;
-}
-
-.call-controls {
-  display: flex;
-  gap: 16px;
-}
-
-.control-btn {
-  background: rgba(255, 255, 255, 0.15);
-  border: none;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  color: white;
-  font-size: 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.control-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.control-btn.active-off {
-  background: #ef4444;
-}
-
-.end-call-btn {
-  background: #ef4444;
-}
-
-.end-call-btn:hover {
-  background: #dc2626;
-}
-
 /* Subscription Lock Overlay */
 .subscription-lock-overlay {
   position: absolute;
@@ -744,5 +625,666 @@
 
   .chat-body {
     padding: 16px;
+  }
+}
+
+/* =========================================================
+   PREMIUM VIDEO CALL
+========================================================= */
+
+.call-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 28px;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(20, 60, 48, 0.35),
+      rgba(3, 10, 8, 0.88)
+    );
+
+  backdrop-filter: blur(14px);
+}
+
+
+/* MAIN CALL WINDOW */
+
+.premium-call-modal {
+  width: min(1180px, 94vw) !important;
+  height: min(760px, 90vh) !important;
+
+  max-width: 1180px !important;
+  max-height: 760px !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  overflow: hidden;
+
+  border-radius: 24px !important;
+
+  background: #07110d !important;
+
+  box-shadow:
+    0 35px 100px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+
+  position: relative;
+}
+
+
+/* =========================================================
+   VIDEO STAGE
+========================================================= */
+
+.premium-video-stage {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+
+  background: #050806;
+}
+
+
+/* MAIN REMOTE VIDEO */
+
+.remote-video-main {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  object-fit: cover;
+
+  background: #050806;
+}
+
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.video-top-bar {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+  right: 0;
+
+  z-index: 5;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 24px 26px;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.62),
+      transparent
+    );
+}
+
+
+.video-participant-info {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  color: white;
+}
+
+
+.participant-avatar {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #d9c09a;
+
+  color: #143d30;
+
+  font-size: 17px;
+  font-weight: 800;
+}
+
+
+.video-participant-info strong {
+  display: block;
+
+  font-size: 15px;
+
+  font-weight: 700;
+}
+
+
+.video-participant-info span {
+  display: block;
+
+  margin-top: 3px;
+
+  color: rgba(255, 255, 255, 0.68);
+
+  font-size: 12px;
+}
+
+
+.call-security {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 9px 14px;
+
+  border-radius: 999px;
+
+  background: rgba(0, 0, 0, 0.35);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  color: rgba(255, 255, 255, 0.8);
+
+  font-size: 12px;
+
+  backdrop-filter: blur(10px);
+}
+
+
+/* =========================================================
+   LOCAL VIDEO
+========================================================= */
+
+.local-video-wrapper {
+  position: absolute;
+
+  right: 24px;
+  top: 78px;
+
+  width: 220px;
+  height: 145px;
+
+  z-index: 10;
+
+  overflow: hidden;
+
+  border-radius: 16px;
+
+  background: #111;
+
+  border: 2px solid rgba(255, 255, 255, 0.85);
+
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.5);
+}
+
+
+.local-video-preview {
+  width: 100% !important;
+  height: 100% !important;
+
+  object-fit: cover;
+
+  display: block;
+
+  background: #111;
+}
+
+
+.you-label {
+  position: absolute;
+
+  left: 10px;
+  bottom: 9px;
+
+  padding: 4px 8px;
+
+  border-radius: 6px;
+
+  background: rgba(0, 0, 0, 0.55);
+
+  color: white;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+
+.local-video-off {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background: #18231f;
+}
+
+
+.local-video-off div {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #d9c09a;
+
+  color: #143d30;
+
+  font-size: 18px;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   VIDEO OFF SCREEN
+========================================================= */
+
+.video-off-screen {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  background:
+    radial-gradient(
+      circle at center,
+      #173b2f,
+      #07110d
+    );
+
+  color: white;
+
+  text-align: center;
+}
+
+
+.video-off-avatar {
+  width: 100px;
+  height: 100px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 20px;
+
+  border-radius: 50%;
+
+  background: #d9c09a;
+
+  color: #143d30;
+
+  font-size: 38px;
+  font-weight: 800;
+
+  box-shadow:
+    0 15px 40px rgba(0, 0, 0, 0.35);
+}
+
+
+.video-off-screen h3 {
+  margin: 0;
+
+  font-size: 22px;
+}
+
+
+.video-off-screen p {
+  margin-top: 8px;
+
+  color: rgba(255, 255, 255, 0.6);
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   BOTTOM BAR
+========================================================= */
+
+.video-bottom-bar {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  z-index: 20;
+
+  min-height: 120px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 24px 30px;
+
+  background:
+    linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.82),
+      rgba(0, 0, 0, 0.3),
+      transparent
+    );
+}
+
+
+.call-status-text {
+  min-width: 180px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  color: white;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #34d399;
+
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.7);
+}
+
+
+.call-empty-space {
+  min-width: 180px;
+}
+
+
+/* =========================================================
+   CONTROLS
+========================================================= */
+
+.premium-call-controls {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+}
+
+
+.premium-control-btn,
+.premium-end-call {
+  border: none;
+
+  cursor: pointer;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+
+.premium-control-btn {
+  width: 58px;
+  height: 58px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.13);
+
+  color: white;
+
+  backdrop-filter: blur(10px);
+}
+
+
+.premium-control-btn svg {
+  width: 21px;
+  height: 21px;
+}
+
+
+.premium-control-btn span,
+.premium-end-call span {
+  display: none;
+}
+
+
+.premium-control-btn:hover {
+  transform: translateY(-2px);
+
+  background: rgba(255, 255, 255, 0.22);
+}
+
+
+.premium-control-btn.control-off {
+  background: rgba(239, 68, 68, 0.85);
+}
+
+
+.premium-end-call {
+  width: 64px;
+  height: 58px;
+
+  border-radius: 30px;
+
+  background: #ef4444;
+
+  color: white;
+}
+
+
+.premium-end-call svg {
+  width: 22px;
+  height: 22px;
+}
+
+
+.premium-end-call:hover {
+  transform: translateY(-2px);
+
+  background: #dc2626;
+}
+
+
+/* =========================================================
+   AUDIO CALL
+========================================================= */
+
+.premium-audio-call {
+  width: 100%;
+  height: 100%;
+
+  position: relative;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  color: white;
+
+  background:
+    radial-gradient(
+      circle at center,
+      #174333 0%,
+      #0a1711 55%,
+      #050806 100%
+    );
+}
+
+
+.audio-call-glow {
+  position: absolute;
+
+  width: 280px;
+  height: 280px;
+
+  border-radius: 50%;
+
+  background: rgba(217, 192, 154, 0.12);
+
+  filter: blur(50px);
+}
+
+
+.audio-avatar-large {
+  position: relative;
+
+  width: 120px;
+  height: 120px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #d9c09a;
+
+  color: #143d30;
+
+  font-size: 44px;
+  font-weight: 800;
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+
+.premium-audio-call h2 {
+  margin: 24px 0 5px;
+
+  font-size: 26px;
+}
+
+
+.premium-audio-call > p {
+  margin: 0 0 40px;
+
+  color: rgba(255, 255, 255, 0.65);
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 800px) {
+
+  .call-overlay {
+    padding: 12px;
+  }
+
+  .premium-call-modal {
+    width: 100% !important;
+    height: calc(100vh - 24px) !important;
+    height: calc(100dvh - 24px) !important;
+
+    max-width: none !important;
+    max-height: none !important;
+
+    border-radius: 18px !important;
+  }
+
+  .local-video-wrapper {
+    width: 125px;
+    height: 165px;
+
+    right: 14px;
+    top: 70px;
+  }
+
+  .video-top-bar {
+    padding: 18px;
+  }
+
+  .call-security {
+    display: none;
+  }
+
+  .video-bottom-bar {
+    min-height: 110px;
+
+    padding: 18px;
+
+    justify-content: center;
+  }
+
+  .call-status-text,
+  .call-empty-space {
+    display: none;
+  }
+
+  .premium-call-controls {
+    gap: 12px;
+  }
+
+  .premium-control-btn {
+    width: 54px;
+    height: 54px;
+  }
+
+  .premium-end-call {
+    width: 60px;
+    height: 54px;
   }
 }
