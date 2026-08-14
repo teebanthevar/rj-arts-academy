@@ -1,6 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import {
+  HiOutlinePhone,
+  HiOutlineVideoCamera,
+  HiOutlineMicrophone,
+  HiOutlineVideoCameraSlash,
+  HiOutlinePhoneXMark,
+  HiOutlineCheck,
+  HiOutlineChevronLeft,
+  HiOutlineXMark,
+} from "react-icons/hi2";
 import "../styles/StudentPublicProfile.css";
 
 const rtcConfig = {
@@ -93,6 +103,7 @@ export default function StudentPublicProfile() {
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
+  const remoteAudioRef = useRef(null);
   const peerConnectionRef = useRef(null);
   const localStreamRef = useRef(null);
   const ownSignalChannelRef = useRef(null);
@@ -129,7 +140,23 @@ export default function StudentPublicProfile() {
       .channel("public:messages")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
         if (payload.new.student_id === id) {
-          setMessages((prev) => [...prev, payload.new]);
+          setMessages((prev) => {
+            if (prev.some((message) => message.id === payload.new.id)) {
+              return prev;
+            }
+            return [...prev, payload.new];
+          });
+
+          setConversations((prev) =>
+            prev.map((conversation) =>
+              conversation.id === payload.new.tutor_identifier
+                ? {
+                    ...conversation,
+                    lastMessage: payload.new.message_text || "New message",
+                  }
+                : conversation
+            )
+          );
         }
       })
       .subscribe();
@@ -142,6 +169,22 @@ export default function StudentPublicProfile() {
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, selectedConversation]);
+
+  // Keep local/remote media elements connected after React mounts the call UI.
+  useEffect(() => {
+    if (localVideoRef.current && localStreamRef.current && callType === "video") {
+      localVideoRef.current.srcObject = localStreamRef.current;
+    }
+    if (remoteAudioRef.current && peerConnectionRef.current) {
+      const receivers = peerConnectionRef.current.getReceivers();
+      const remoteTrack = receivers.find((receiver) => receiver.track?.kind === "audio")?.track;
+      if (remoteTrack && remoteAudioRef.current.srcObject == null) {
+        const stream = new MediaStream([remoteTrack]);
+        remoteAudioRef.current.srcObject = stream;
+        remoteAudioRef.current.play().catch(() => {});
+      }
+    }
+  }, [callState, callType]);
 
   // ---- CALL SIGNALING SUBSCRIPTION (own inbox channel) ----
   useEffect(() => {
@@ -289,8 +332,18 @@ export default function StudentPublicProfile() {
     };
 
     pc.ontrack = (event) => {
+      const remoteStream = event.streams?.[0];
+      if (!remoteStream) return;
+
       if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = event.streams[0];
+        remoteVideoRef.current.srcObject = remoteStream;
+      }
+
+      if (remoteAudioRef.current) {
+        remoteAudioRef.current.srcObject = remoteStream;
+        remoteAudioRef.current.play().catch((error) => {
+          console.warn("Remote audio autoplay was blocked:", error);
+        });
       }
     };
 
@@ -411,6 +464,7 @@ export default function StudentPublicProfile() {
 
     if (localVideoRef.current) localVideoRef.current.srcObject = null;
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+    if (remoteAudioRef.current) remoteAudioRef.current.srcObject = null;
 
     if (peerSignalChannelRef.current) {
       supabase.removeChannel(peerSignalChannelRef.current.channel);
@@ -692,7 +746,11 @@ export default function StudentPublicProfile() {
         .order("created_at", { ascending: true });
 
       if (!error && data && data.length > 0) {
-        setMessages(data);
+        setMessages((prev) => {
+          const byId = new Map();
+          [...prev, ...data].forEach((message) => byId.set(message.id, message));
+          return Array.from(byId.values()).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        });
       } else {
         setMessages([
           {
@@ -820,15 +878,17 @@ export default function StudentPublicProfile() {
       setAttachedFile(null);
 
       if (selectedConversation === "ai-assistant") {
+        const sentTextForAI = messageBody;
         setTimeout(async () => {
           const aiResponsePayload = {
             student_id: id,
             tutor_identifier: "ai-assistant",
-            message_text: `I received your message: "${messageBody}". How else can I assist your studies today?`,
+            message_text: `I received your message: "${sentTextForAI}". How else can I assist your studies today?`,
             sender_type: "ai",
             created_at: new Date().toISOString()
           };
-          await supabase.from("messages").insert([aiResponsePayload]);
+          const { error: aiError } = await supabase.from("messages").insert([aiResponsePayload]);
+          if (aiError) console.error("AI response insert failed:", aiError);
         }, 1000);
       }
 
@@ -1153,7 +1213,7 @@ export default function StudentPublicProfile() {
                     flexShrink: 0
                   }}
                 >
-                  ←
+                  <HiOutlineChevronLeft size={18} />
                 </button>
               )}
               <div style={{
@@ -1180,8 +1240,12 @@ export default function StudentPublicProfile() {
 
             {activeContact?.id !== "ai-assistant" && (
               <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
-                <button type="button" onClick={() => handleStartCall("audio")} title="Voice call" style={headerCallBtnStyle}>📞</button>
-                <button type="button" onClick={() => handleStartCall("video")} title="Video call" style={headerCallBtnStyle}>🎥</button>
+                <button type="button" onClick={() => handleStartCall("audio")} title="Voice call" aria-label="Start voice call" style={headerCallBtnStyle}>
+                  <HiOutlinePhone size={18} />
+                </button>
+                <button type="button" onClick={() => handleStartCall("video")} title="Video call" aria-label="Start video call" style={headerCallBtnStyle}>
+                  <HiOutlineVideoCamera size={18} />
+                </button>
               </div>
             )}
           </div>
@@ -1350,27 +1414,51 @@ export default function StudentPublicProfile() {
           </span>
         </div>
 
+        <audio ref={remoteAudioRef} autoPlay playsInline style={{ display: "none" }} />
+
         <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
           {isVideo ? (
             <>
               <video ref={remoteVideoRef} autoPlay playsInline style={{ width: "100%", height: "100%", objectFit: "cover", background: "#111" }} />
-              <video
-                ref={localVideoRef}
-                autoPlay
-                playsInline
-                muted
-                style={{
+              {!isCameraOff ? (
+                <video
+                  ref={localVideoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  style={{
+                    position: "absolute",
+                    bottom: "110px",
+                    right: "20px",
+                    width: "140px",
+                    height: "190px",
+                    borderRadius: "12px",
+                    objectFit: "cover",
+                    border: "2px solid rgba(255,255,255,0.9)",
+                    background: "#222"
+                  }}
+                />
+              ) : (
+                <div style={{
                   position: "absolute",
                   bottom: "110px",
                   right: "20px",
                   width: "140px",
                   height: "190px",
                   borderRadius: "12px",
-                  objectFit: "cover",
-                  border: "2px solid #fff",
-                  background: "#222"
-                }}
-              />
+                  border: "2px solid rgba(255,255,255,0.9)",
+                  background: "#171717",
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  gap: "8px"
+                }}>
+                  <HiOutlineVideoCameraSlash size={28} />
+                  <span style={{ fontSize: "11px" }}>Camera off</span>
+                </div>
+              )}
             </>
           ) : (
             <div style={{
@@ -1391,16 +1479,19 @@ export default function StudentPublicProfile() {
         </div>
 
         <div style={{ padding: "24px", display: "flex", justifyContent: "center", gap: "20px" }}>
-          <button onClick={toggleMute} style={callControlBtnStyle(isMuted ? "#ef4444" : "#374151")} title={isMuted ? "Unmute" : "Mute"}>
-            {isMuted ? "🔇" : "🎙️"}
+          <button onClick={toggleMute} style={callControlBtnStyle(isMuted ? "#ef4444" : "#374151")} title={isMuted ? "Unmute" : "Mute"} aria-label={isMuted ? "Unmute microphone" : "Mute microphone"}>
+            <span style={{ position: "relative", display: "inline-flex" }}>
+              <HiOutlineMicrophone size={23} />
+              {isMuted && <span style={{ position: "absolute", width: "30px", height: "2px", background: "#fff", transform: "rotate(-45deg)", left: "-3px", top: "11px", borderRadius: "2px" }} />}
+            </span>
           </button>
           {isVideo && (
-            <button onClick={toggleCamera} style={callControlBtnStyle(isCameraOff ? "#ef4444" : "#374151")} title={isCameraOff ? "Turn camera on" : "Turn camera off"}>
-              {isCameraOff ? "🚫" : "📷"}
+            <button onClick={toggleCamera} style={callControlBtnStyle(isCameraOff ? "#ef4444" : "#374151")} title={isCameraOff ? "Turn camera on" : "Turn camera off"} aria-label={isCameraOff ? "Turn camera on" : "Turn camera off"}>
+              {isCameraOff ? <HiOutlineVideoCameraSlash size={23} /> : <HiOutlineVideoCamera size={23} />}
             </button>
           )}
-          <button onClick={() => handleEndCall(true)} style={callControlBtnStyle("#ef4444")} title="End call">
-            📵
+          <button onClick={() => handleEndCall(true)} style={callControlBtnStyle("#ef4444")} title="End call" aria-label="End call">
+            <HiOutlinePhoneXMark size={24} />
           </button>
         </div>
       </div>
@@ -1433,8 +1524,8 @@ export default function StudentPublicProfile() {
             Incoming {incomingCall.type === "video" ? "video" : "voice"} call...
           </p>
           <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
-            <button onClick={handleDeclineCall} style={{ ...callControlBtnStyle("#ef4444"), width: "52px", height: "52px" }} title="Decline">✖</button>
-            <button onClick={handleAcceptCall} style={{ ...callControlBtnStyle("#10b981"), width: "52px", height: "52px" }} title="Accept">✔</button>
+            <button onClick={handleDeclineCall} style={{ ...callControlBtnStyle("#ef4444"), width: "52px", height: "52px" }} title="Decline" aria-label="Decline call"><HiOutlinePhoneXMark size={22} /></button>
+            <button onClick={handleAcceptCall} style={{ ...callControlBtnStyle("#10b981"), width: "52px", height: "52px" }} title="Accept" aria-label="Accept call"><HiOutlineCheck size={24} /></button>
           </div>
         </div>
       </div>

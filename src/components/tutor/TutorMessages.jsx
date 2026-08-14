@@ -82,6 +82,7 @@ export default function TutorMessages({ onNavigate }) {
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
+  const remoteAudioRef = useRef(null);
   const peerConnectionRef = useRef(null);
   const localStreamRef = useRef(null);
 
@@ -97,6 +98,7 @@ export default function TutorMessages({ onNavigate }) {
   const fileInputRef = useRef(null);
   const emojiPickerRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const selectedStudentIdRef = useRef(null);
 
   const aiAssistant = {
     id: "ai-assistant",
@@ -536,8 +538,17 @@ export default function TutorMessages({ onNavigate }) {
     };
 
     pc.ontrack = (event) => {
+      const remoteStream = event.streams?.[0];
+      if (!remoteStream) return;
+
       if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = event.streams[0];
+        remoteVideoRef.current.srcObject = remoteStream;
+        remoteVideoRef.current.play?.().catch(() => {});
+      }
+
+      if (remoteAudioRef.current) {
+        remoteAudioRef.current.srcObject = remoteStream;
+        remoteAudioRef.current.play?.().catch(() => {});
       }
     };
 
@@ -597,6 +608,10 @@ export default function TutorMessages({ onNavigate }) {
 
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = null;
+    }
+
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.srcObject = null;
     }
 
     if (peerSignalChannelRef.current) {
@@ -890,6 +905,84 @@ export default function TutorMessages({ onNavigate }) {
       }))
     );
   };
+
+  // =========================================================
+  // REAL-TIME OPEN CHAT
+  // =========================================================
+  // Keeps the tutor's currently open conversation updated immediately
+  // when the student inserts a new message.
+  useEffect(() => {
+    selectedStudentIdRef.current =
+      selectedStudent?.id && selectedStudent.id !== "ai-assistant"
+        ? selectedStudent.id
+        : null;
+  }, [selectedStudent?.id]);
+
+  useEffect(() => {
+    if (!tutorUser?.id || !isSubscribed || !selectedStudent?.id) return;
+    if (selectedStudent.id === "ai-assistant") return;
+
+    const studentId = selectedStudent.id;
+
+    const channel = supabase
+      .channel(`tutor-open-chat-${tutorUser.id}-${studentId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `tutor_identifier=eq.${tutorUser.id}`,
+        },
+        (payload) => {
+          const newMessage = payload?.new;
+
+          if (!newMessage) return;
+          if (newMessage.student_id !== studentId) return;
+
+          setMessages((previous) => {
+            // handleSend() already adds the tutor's own message locally.
+            // Ignore the same INSERT from Realtime to prevent duplicates.
+            if (newMessage.sender_type === "tutor") {
+              return previous;
+            }
+
+            // Student messages are added immediately through Realtime.
+            if (
+              previous.some(
+                (message) => String(message.id) === String(newMessage.id)
+              )
+            ) {
+              return previous;
+            }
+
+            return [
+              ...previous,
+              {
+                id: newMessage.id,
+                sender: "student",
+                text: newMessage.message_text || "",
+                time: new Date(
+                  newMessage.created_at || Date.now()
+                ).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }),
+              },
+            ];
+          });
+        }
+      )
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR") {
+          console.error("Open chat realtime channel error.");
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [tutorUser?.id, isSubscribed, selectedStudent?.id]);
 
   // =========================================================
   // FILE
@@ -1878,6 +1971,16 @@ export default function TutorMessages({ onNavigate }) {
 
         </div>
       )}
+
+      {/* REMOTE AUDIO PLAYBACK
+          This is required for voice calls. Video elements can play remote
+          audio automatically, but an audio-only call needs its own element. */}
+      <audio
+        ref={remoteAudioRef}
+        autoPlay
+        playsInline
+        style={{ display: "none" }}
+      />
 
       {/* OUTGOING / ACTIVE CALL */}
       {(callState === "outgoing" || callState === "active") && (
