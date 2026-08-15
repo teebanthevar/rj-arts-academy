@@ -205,7 +205,7 @@ export default function PublicExplore() {
     <div>
       {/* Navigation Bar */}
       <nav className="public-nav">
-        <div className="logo">TeachHub</div>
+        <div className="logo">Teach<span className="logo-hub">Hub</span></div>
         
         <div className="nav-actions">
           {currentUser ? (

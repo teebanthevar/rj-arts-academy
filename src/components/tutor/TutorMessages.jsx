@@ -189,6 +189,11 @@ export default function TutorMessages({ onNavigate }) {
         ...new Set(messagesData.map((message) => message.student_id)),
       ];
 
+      if (studentIds.length === 0) {
+        setConversations([]);
+        return;
+      }
+
       const { data: profilesData, error: profError } = await supabase
         .from("profiles")
         .select("id, full_name, role")
@@ -361,9 +366,7 @@ export default function TutorMessages({ onNavigate }) {
 
       setActiveCall(payload.callType || "video");
       setCallState("incoming");
-    }
-
-    else if (type === "answer") {
+    } else if (type === "answer") {
       if (peerConnectionRef.current) {
         try {
           await peerConnectionRef.current.setRemoteDescription(
@@ -378,9 +381,7 @@ export default function TutorMessages({ onNavigate }) {
           console.error("Error setting remote answer:", error);
         }
       }
-    }
-
-    else if (type === "ice-candidate") {
+    } else if (type === "ice-candidate") {
       if (
         peerConnectionRef.current &&
         peerConnectionRef.current.remoteDescription
@@ -395,9 +396,7 @@ export default function TutorMessages({ onNavigate }) {
       } else {
         pendingIceCandidatesRef.current.push(payload.candidate);
       }
-    }
-
-    else if (type === "hangup") {
+    } else if (type === "hangup") {
       if (
         from === activeCallPartnerIdRef.current ||
         callStateRef.current === "incoming"
@@ -422,10 +421,7 @@ export default function TutorMessages({ onNavigate }) {
       }
 
       if (peerSignalChannelRef.current) {
-        supabase.removeChannel(
-          peerSignalChannelRef.current.channel
-        );
-
+        supabase.removeChannel(peerSignalChannelRef.current.channel);
         peerSignalChannelRef.current = null;
       }
 
@@ -460,7 +456,7 @@ export default function TutorMessages({ onNavigate }) {
     try {
       const channel = await getOrCreatePeerChannel(targetId);
 
-      await channel.httpSend({
+      await channel.send({
         type: "broadcast",
         event: "signal",
         payload,
@@ -481,9 +477,7 @@ export default function TutorMessages({ onNavigate }) {
 
     pendingIceCandidatesRef.current.forEach(async (candidate) => {
       try {
-        await pc.addIceCandidate(
-          new RTCIceCandidate(candidate)
-        );
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
       } catch (err) {
         console.error("Error flushing ICE candidate:", err);
       }
@@ -508,8 +502,7 @@ export default function TutorMessages({ onNavigate }) {
             video: false,
           };
 
-    const stream =
-      await navigator.mediaDevices.getUserMedia(constraints);
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
     localStreamRef.current = stream;
 
@@ -539,6 +532,7 @@ export default function TutorMessages({ onNavigate }) {
 
     pc.ontrack = (event) => {
       const remoteStream = event.streams?.[0];
+
       if (!remoteStream) return;
 
       if (remoteVideoRef.current) {
@@ -576,7 +570,6 @@ export default function TutorMessages({ onNavigate }) {
   const stopCallTimer = () => {
     if (callTimerIntervalRef.current) {
       clearInterval(callTimerIntervalRef.current);
-
       callTimerIntervalRef.current = null;
     }
 
@@ -590,14 +583,13 @@ export default function TutorMessages({ onNavigate }) {
   const cleanupCallResources = () => {
     if (peerConnectionRef.current) {
       peerConnectionRef.current.close();
-
       peerConnectionRef.current = null;
     }
 
     if (localStreamRef.current) {
-      localStreamRef.current
-        .getTracks()
-        .forEach((track) => track.stop());
+      localStreamRef.current.getTracks().forEach((track) => {
+        track.stop();
+      });
 
       localStreamRef.current = null;
     }
@@ -615,15 +607,11 @@ export default function TutorMessages({ onNavigate }) {
     }
 
     if (peerSignalChannelRef.current) {
-      supabase.removeChannel(
-        peerSignalChannelRef.current.channel
-      );
-
+      supabase.removeChannel(peerSignalChannelRef.current.channel);
       peerSignalChannelRef.current = null;
     }
 
     pendingIceCandidatesRef.current = [];
-
     activeCallPartnerIdRef.current = null;
 
     stopCallTimer();
@@ -634,10 +622,7 @@ export default function TutorMessages({ onNavigate }) {
   // =========================================================
 
   const startCall = async (type) => {
-    if (
-      !selectedStudent ||
-      selectedStudent.id === "ai-assistant"
-    ) {
+    if (!selectedStudent || selectedStudent.id === "ai-assistant") {
       alert("Calling isn't available for the AI Assistant.");
       return;
     }
@@ -651,14 +636,11 @@ export default function TutorMessages({ onNavigate }) {
       setActiveCall(type);
       setCallState("outgoing");
 
-      activeCallPartnerIdRef.current =
-        selectedStudent.id;
+      activeCallPartnerIdRef.current = selectedStudent.id;
 
       const stream = await getLocalStream(type);
 
-      const pc = createPeerConnection(
-        selectedStudent.id
-      );
+      const pc = createPeerConnection(selectedStudent.id);
 
       stream.getTracks().forEach((track) => {
         pc.addTrack(track, stream);
@@ -671,9 +653,7 @@ export default function TutorMessages({ onNavigate }) {
       await sendSignal(selectedStudent.id, {
         type: "offer",
         from: tutorUser.id,
-        fromName:
-          tutorUser?.user_metadata?.full_name ||
-          "Tutor",
+        fromName: tutorUser?.user_metadata?.full_name || "Tutor",
         callType: type,
         sdp: offer,
       });
@@ -696,18 +676,13 @@ export default function TutorMessages({ onNavigate }) {
     if (!incomingCall) return;
 
     try {
-      activeCallPartnerIdRef.current =
-        incomingCall.fromId;
+      activeCallPartnerIdRef.current = incomingCall.fromId;
 
       setCallState("active");
 
-      const stream = await getLocalStream(
-        incomingCall.type
-      );
+      const stream = await getLocalStream(incomingCall.type);
 
-      const pc = createPeerConnection(
-        incomingCall.fromId
-      );
+      const pc = createPeerConnection(incomingCall.fromId);
 
       stream.getTracks().forEach((track) => {
         pc.addTrack(track, stream);
@@ -735,9 +710,7 @@ export default function TutorMessages({ onNavigate }) {
     } catch (err) {
       console.error("Error accepting call:", err);
 
-      alert(
-        "Could not access your camera/microphone."
-      );
+      alert("Could not access your camera/microphone.");
 
       endCall(false);
     }
@@ -767,17 +740,11 @@ export default function TutorMessages({ onNavigate }) {
   // =========================================================
 
   const endCall = (notifyPeer = true) => {
-    if (
-      notifyPeer &&
-      activeCallPartnerIdRef.current
-    ) {
-      sendSignal(
-        activeCallPartnerIdRef.current,
-        {
-          type: "hangup",
-          from: tutorUser?.id,
-        }
-      );
+    if (notifyPeer && activeCallPartnerIdRef.current) {
+      sendSignal(activeCallPartnerIdRef.current, {
+        type: "hangup",
+        from: tutorUser?.id,
+      });
     }
 
     cleanupCallResources();
@@ -798,11 +765,9 @@ export default function TutorMessages({ onNavigate }) {
 
     const newMutedState = !isMuted;
 
-    localStreamRef.current
-      .getAudioTracks()
-      .forEach((track) => {
-        track.enabled = !newMutedState;
-      });
+    localStreamRef.current.getAudioTracks().forEach((track) => {
+      track.enabled = !newMutedState;
+    });
 
     setIsMuted(newMutedState);
   };
@@ -816,11 +781,9 @@ export default function TutorMessages({ onNavigate }) {
 
     const newVideoOffState = !isVideoOff;
 
-    localStreamRef.current
-      .getVideoTracks()
-      .forEach((track) => {
-        track.enabled = !newVideoOffState;
-      });
+    localStreamRef.current.getVideoTracks().forEach((track) => {
+      track.enabled = !newVideoOffState;
+    });
 
     setIsVideoOff(newVideoOffState);
   };
@@ -833,9 +796,7 @@ export default function TutorMessages({ onNavigate }) {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
 
-    return `${mins
-      .toString()
-      .padStart(2, "0")}:${secs
+    return `${mins.toString().padStart(2, "0")}:${secs
       .toString()
       .padStart(2, "0")}`;
   };
@@ -844,9 +805,7 @@ export default function TutorMessages({ onNavigate }) {
   // SELECT CONVERSATION
   // =========================================================
 
-  const handleSelectConversation = async (
-    conversation
-  ) => {
+  const handleSelectConversation = async (conversation) => {
     setSelectedStudent(conversation);
     setShowChatMobile(true);
 
@@ -868,9 +827,7 @@ export default function TutorMessages({ onNavigate }) {
 
     const { data, error } = await supabase
       .from("messages")
-      .select(
-        "id, sender_type, message_text, created_at"
-      )
+      .select("id, sender_type, message_text, created_at")
       .eq("tutor_identifier", tutorUser.id)
       .eq("student_id", conversation.id)
       .order("created_at", {
@@ -878,13 +835,8 @@ export default function TutorMessages({ onNavigate }) {
       });
 
     if (error) {
-      console.error(
-        "Error loading conversation:",
-        error
-      );
-
+      console.error("Error loading conversation:", error);
       setMessages([]);
-
       return;
     }
 
@@ -896,9 +848,7 @@ export default function TutorMessages({ onNavigate }) {
             ? "tutor"
             : "student",
         text: message.message_text || "",
-        time: new Date(
-          message.created_at
-        ).toLocaleTimeString([], {
+        time: new Date(message.created_at).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         }),
@@ -909,23 +859,34 @@ export default function TutorMessages({ onNavigate }) {
   // =========================================================
   // REAL-TIME OPEN CHAT
   // =========================================================
-  // Keeps the tutor's currently open conversation updated immediately
-  // when the student inserts a new message.
+
   useEffect(() => {
     selectedStudentIdRef.current =
-      selectedStudent?.id && selectedStudent.id !== "ai-assistant"
+      selectedStudent?.id &&
+      selectedStudent.id !== "ai-assistant"
         ? selectedStudent.id
         : null;
   }, [selectedStudent?.id]);
 
   useEffect(() => {
-    if (!tutorUser?.id || !isSubscribed || !selectedStudent?.id) return;
-    if (selectedStudent.id === "ai-assistant") return;
+    if (
+      !tutorUser?.id ||
+      !isSubscribed ||
+      !selectedStudent?.id
+    ) {
+      return;
+    }
+
+    if (selectedStudent.id === "ai-assistant") {
+      return;
+    }
 
     const studentId = selectedStudent.id;
 
     const channel = supabase
-      .channel(`tutor-open-chat-${tutorUser.id}-${studentId}`)
+      .channel(
+        `tutor-open-chat-${tutorUser.id}-${studentId}`
+      )
       .on(
         "postgres_changes",
         {
@@ -941,16 +902,15 @@ export default function TutorMessages({ onNavigate }) {
           if (newMessage.student_id !== studentId) return;
 
           setMessages((previous) => {
-            // handleSend() already adds the tutor's own message locally.
-            // Ignore the same INSERT from Realtime to prevent duplicates.
             if (newMessage.sender_type === "tutor") {
               return previous;
             }
 
-            // Student messages are added immediately through Realtime.
             if (
               previous.some(
-                (message) => String(message.id) === String(newMessage.id)
+                (message) =>
+                  String(message.id) ===
+                  String(newMessage.id)
               )
             ) {
               return previous;
@@ -975,14 +935,20 @@ export default function TutorMessages({ onNavigate }) {
       )
       .subscribe((status) => {
         if (status === "CHANNEL_ERROR") {
-          console.error("Open chat realtime channel error.");
+          console.error(
+            "Open chat realtime channel error."
+          );
         }
       });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [tutorUser?.id, isSubscribed, selectedStudent?.id]);
+  }, [
+    tutorUser?.id,
+    isSubscribed,
+    selectedStudent?.id,
+  ]);
 
   // =========================================================
   // FILE
@@ -1007,9 +973,7 @@ export default function TutorMessages({ onNavigate }) {
   // =========================================================
 
   const handleEmojiClick = (emoji) => {
-    setInputText(
-      (current) => `${current}${emoji}`
-    );
+    setInputText((current) => `${current}${emoji}`);
   };
 
   // =========================================================
@@ -1019,10 +983,7 @@ export default function TutorMessages({ onNavigate }) {
   const handleSend = async (event) => {
     event.preventDefault();
 
-    if (
-      !inputText.trim() &&
-      !selectedFile
-    ) {
+    if (!inputText.trim() && !selectedFile) {
       return;
     }
 
@@ -1031,8 +992,7 @@ export default function TutorMessages({ onNavigate }) {
       return;
     }
 
-    let finalMessageText =
-      inputText.trim();
+    let finalMessageText = inputText.trim();
 
     // -------------------------------------------------------
     // UPLOAD ATTACHMENT
@@ -1042,26 +1002,17 @@ export default function TutorMessages({ onNavigate }) {
       setIsUploading(true);
 
       try {
-        const fileExt =
-          selectedFile.name
-            .split(".")
-            .pop();
+        const fileExt = selectedFile.name.split(".").pop();
 
         const fileName = `${Math.random()
           .toString(36)
           .substring(2)}.${fileExt}`;
 
-        const filePath =
-          `chat_attachments/${tutorUser.id}-${Date.now()}-${fileName}`;
+        const filePath = `chat_attachments/${tutorUser.id}-${Date.now()}-${fileName}`;
 
-        const {
-          error: uploadError,
-        } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from("avatars")
-          .upload(
-            filePath,
-            selectedFile
-          );
+          .upload(filePath, selectedFile);
 
         if (uploadError) {
           console.error(
@@ -1069,34 +1020,24 @@ export default function TutorMessages({ onNavigate }) {
             uploadError
           );
 
-          alert(
-            "Failed to upload file."
-          );
-
+          alert("Failed to upload file.");
           return;
         }
 
-        const {
-          data: publicURLData,
-        } = supabase.storage
+        const { data: publicURLData } = supabase.storage
           .from("avatars")
           .getPublicUrl(filePath);
 
-        const fileUrl =
-          publicURLData?.publicUrl;
+        const fileUrl = publicURLData?.publicUrl;
 
         if (!fileUrl) {
-          alert(
-            "Could not create file URL."
-          );
-
+          alert("Could not create file URL.");
           return;
         }
 
-        finalMessageText =
-          inputText.trim()
-            ? `${fileUrl}\n${inputText.trim()}`
-            : fileUrl;
+        finalMessageText = inputText.trim()
+          ? `${fileUrl}\n${inputText.trim()}`
+          : fileUrl;
       } catch (err) {
         console.error(
           "File upload execution error:",
@@ -1113,14 +1054,10 @@ export default function TutorMessages({ onNavigate }) {
       return;
     }
 
-    const timestamp =
-      new Date().toLocaleTimeString(
-        [],
-        {
-          hour: "2-digit",
-          minute: "2-digit",
-        }
-      );
+    const timestamp = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
     const outgoingMessage = {
       id: Date.now(),
@@ -1141,19 +1078,14 @@ export default function TutorMessages({ onNavigate }) {
       selectedStudent &&
       selectedStudent.id !== "ai-assistant"
     ) {
-      const {
-        error: insertError,
-      } = await supabase
+      const { error: insertError } = await supabase
         .from("messages")
         .insert([
           {
-            student_id:
-              selectedStudent.id,
-            tutor_identifier:
-              tutorUser.id,
+            student_id: selectedStudent.id,
+            tutor_identifier: tutorUser.id,
             sender_type: "tutor",
-            message_text:
-              finalMessageText,
+            message_text: finalMessageText,
           },
         ]);
 
@@ -1163,19 +1095,14 @@ export default function TutorMessages({ onNavigate }) {
           insertError
         );
 
-        alert(
-          "Failed to send message."
-        );
-
+        alert("Failed to send message.");
         return;
       }
 
-      setMessages(
-        (previous) => [
-          ...previous,
-          outgoingMessage,
-        ]
-      );
+      setMessages((previous) => [
+        ...previous,
+        outgoingMessage,
+      ]);
 
       return;
     }
@@ -1184,83 +1111,63 @@ export default function TutorMessages({ onNavigate }) {
     // AI MESSAGE
     // -------------------------------------------------------
 
-    setMessages(
-      (previous) => [
-        ...previous,
-        outgoingMessage,
-      ]
-    );
+    setMessages((previous) => [
+      ...previous,
+      outgoingMessage,
+    ]);
 
     setIsGenerating(true);
 
     try {
       const completion =
-        await groq.chat.completions.create(
-          {
-            model:
-              "llama-3.3-70b-versatile",
+        await groq.chat.completions.create({
+          model: "llama-3.3-70b-versatile",
 
-            messages: [
-              {
-                role: "system",
-                content:
-                  "You are a helpful AI assistant for a professional tutor platform called TeachHub. Answer the teacher's query concisely and helpfully.",
-              },
-              {
-                role: "user",
-                content:
-                  finalMessageText,
-              },
-            ],
-          }
-        );
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a helpful AI assistant for a professional tutor platform called TeachHub. Answer the teacher's query concisely and helpfully.",
+            },
+            {
+              role: "user",
+              content: finalMessageText,
+            },
+          ],
+        });
 
       const reply =
-        completion.choices?.[0]
-          ?.message?.content ||
+        completion.choices?.[0]?.message?.content ||
         "I am here to help you with your tutoring workflow.";
 
-      setMessages(
-        (previous) => [
-          ...previous,
-          {
-            id: Date.now() + 1,
-            sender: "student",
-            text: reply,
-            time: new Date().toLocaleTimeString(
-              [],
-              {
-                hour: "2-digit",
-                minute: "2-digit",
-              }
-            ),
-          },
-        ]
-      );
+      setMessages((previous) => [
+        ...previous,
+        {
+          id: Date.now() + 1,
+          sender: "student",
+          text: reply,
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ]);
     } catch (error) {
-      console.error(
-        "AI reply failed:",
-        error
-      );
+      console.error("AI reply failed:", error);
 
-      setMessages(
-        (previous) => [
-          ...previous,
-          {
-            id: Date.now() + 1,
-            sender: "student",
-            text:
-              "Sorry, I couldn't connect to the AI assistant right now.",
-            time: new Date().toLocaleTimeString(
-              [],
-              {
-                hour: "2-digit",
-                minute: "2-digit",
-              }
-            ),
-          },
-        ]
-      );
+      setMessages((previous) => [
+        ...previous,
+        {
+          id: Date.now() + 1,
+          sender: "student",
+          text:
+            "Sorry, I couldn't connect to the AI assistant right now.",
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ]);
     } finally {
       setIsGenerating(false);
     }
@@ -1270,16 +1177,12 @@ export default function TutorMessages({ onNavigate }) {
   // RENDER MESSAGE
   // =========================================================
 
-  const renderMessageContent = (
-    text
-  ) => {
+  const renderMessageContent = (text) => {
     if (!text) return null;
 
-    const urlRegex =
-      /(https?:\/\/[^\s]+)/g;
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
 
-    const parts =
-      text.split(urlRegex);
+    const parts = text.split(urlRegex);
 
     return parts.map((part, i) => {
       if (part.match(urlRegex)) {
@@ -1333,13 +1236,10 @@ export default function TutorMessages({ onNavigate }) {
                 alignItems: "center",
                 gap: "6px",
                 color: "inherit",
-                textDecoration:
-                  "underline",
+                textDecoration: "underline",
               }}
             >
-              <HiOutlineDocumentText
-                size={18}
-              />
+              <HiOutlineDocumentText size={18} />
 
               <span>
                 Download Attachment
@@ -1370,9 +1270,7 @@ export default function TutorMessages({ onNavigate }) {
   ].filter((item) =>
     item.full_name
       .toLowerCase()
-      .includes(
-        searchQuery.toLowerCase()
-      )
+      .includes(searchQuery.toLowerCase())
   );
 
   // =========================================================
@@ -1394,7 +1292,9 @@ export default function TutorMessages({ onNavigate }) {
   return (
     <div className="messages-container">
 
-      {/* SUBSCRIPTION LOCK */}
+      {/* =====================================================
+          SUBSCRIPTION LOCK
+      ===================================================== */}
 
       {!isSubscribed && (
         <div className="subscription-lock-overlay">
@@ -1421,9 +1321,7 @@ export default function TutorMessages({ onNavigate }) {
               className="upgrade-btn"
               onClick={() =>
                 onNavigate
-                  ? onNavigate(
-                      "subscription"
-                    )
+                  ? onNavigate("subscription")
                   : (window.location.href =
                       "/tutor/settings")
               }
@@ -1435,17 +1333,19 @@ export default function TutorMessages({ onNavigate }) {
         </div>
       )}
 
-      {/* MESSAGES CARD */}
+      {/* =====================================================
+          MESSAGES CARD
+      ===================================================== */}
 
       <div
         className={`messages-card ${
-          showChatMobile
-            ? "show-chat"
-            : ""
+          showChatMobile ? "show-chat" : ""
         }`}
       >
 
-        {/* SIDEBAR */}
+        {/* ===================================================
+            SIDEBAR
+        =================================================== */}
 
         <div className="conversation-sidebar">
 
@@ -1472,8 +1372,7 @@ export default function TutorMessages({ onNavigate }) {
 
           <div className="conversation-list">
 
-            {filteredConversations.length ===
-            0 ? (
+            {filteredConversations.length === 0 ? (
               <div className="no-messages-msg">
                 No conversations found.
               </div>
@@ -1482,9 +1381,7 @@ export default function TutorMessages({ onNavigate }) {
                 (conversation) => (
                   <button
                     type="button"
-                    key={
-                      conversation.id
-                    }
+                    key={conversation.id}
                     className={`conversation-item ${
                       activeChat.id ===
                       conversation.id
@@ -1525,9 +1422,7 @@ export default function TutorMessages({ onNavigate }) {
                       <div className="item-top">
 
                         <span className="name">
-                          {
-                            conversation.full_name
-                          }
+                          {conversation.full_name}
                         </span>
 
                         {conversation.id ===
@@ -1556,11 +1451,15 @@ export default function TutorMessages({ onNavigate }) {
 
         </div>
 
-        {/* CHAT AREA */}
+        {/* ===================================================
+            CHAT AREA
+        =================================================== */}
 
         <div className="chat-area">
 
-          {/* HEADER */}
+          {/* =================================================
+              CHAT HEADER
+          ================================================= */}
 
           <div className="chat-header">
 
@@ -1570,9 +1469,7 @@ export default function TutorMessages({ onNavigate }) {
                 type="button"
                 className="mobile-back-btn"
                 onClick={() =>
-                  setShowChatMobile(
-                    false
-                  )
+                  setShowChatMobile(false)
                 }
                 title="Back to conversations"
               >
@@ -1615,8 +1512,7 @@ export default function TutorMessages({ onNavigate }) {
 
             </div>
 
-            {activeChat.id !==
-              "ai-assistant" && (
+            {activeChat.id !== "ai-assistant" && (
               <div className="header-actions">
 
                 <button
@@ -1654,7 +1550,9 @@ export default function TutorMessages({ onNavigate }) {
 
           </div>
 
-          {/* CHAT BODY */}
+          {/* =================================================
+              CHAT BODY
+          ================================================= */}
 
           <div className="chat-body">
 
@@ -1673,6 +1571,7 @@ export default function TutorMessages({ onNavigate }) {
                   key={message.id}
                   className={`message-row ${message.sender}`}
                 >
+
                   <div className="bubble">
 
                     <div className="bubble-text-content">
@@ -1686,6 +1585,7 @@ export default function TutorMessages({ onNavigate }) {
                     </span>
 
                   </div>
+
                 </div>
               ))
             )}
@@ -1706,7 +1606,9 @@ export default function TutorMessages({ onNavigate }) {
 
           </div>
 
-          {/* FILE PREVIEW */}
+          {/* =================================================
+              FILE PREVIEW
+          ================================================= */}
 
           {selectedFile && (
             <div className="file-preview-bar">
@@ -1739,7 +1641,9 @@ export default function TutorMessages({ onNavigate }) {
             </div>
           )}
 
-          {/* INPUT */}
+          {/* =================================================
+              INPUT
+          ================================================= */}
 
           <form
             className="chat-input-container"
@@ -1752,9 +1656,7 @@ export default function TutorMessages({ onNavigate }) {
               style={{
                 display: "none",
               }}
-              onChange={
-                handleFileChange
-              }
+              onChange={handleFileChange}
             />
 
             <button
@@ -1862,7 +1764,9 @@ export default function TutorMessages({ onNavigate }) {
 
       </div>
 
-      {/* IMAGE PREVIEW */}
+      {/* =====================================================
+          IMAGE PREVIEW
+      ===================================================== */}
 
       {previewImage && (
         <div
@@ -1927,15 +1831,11 @@ export default function TutorMessages({ onNavigate }) {
                 download
                 rel="noopener noreferrer"
                 style={{
-                  backgroundColor:
-                    "#fff",
+                  backgroundColor: "#fff",
                   color: "#333",
-                  padding:
-                    "8px 16px",
-                  borderRadius:
-                    "6px",
-                  textDecoration:
-                    "none",
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  textDecoration: "none",
                   fontWeight: "600",
                   fontSize: "14px",
                 }}
@@ -1954,10 +1854,8 @@ export default function TutorMessages({ onNavigate }) {
                   color: "#fff",
                   border:
                     "1px solid #fff",
-                  padding:
-                    "8px 16px",
-                  borderRadius:
-                    "6px",
+                  padding: "8px 16px",
+                  borderRadius: "6px",
                   cursor: "pointer",
                   fontWeight: "600",
                 }}
@@ -1972,25 +1870,40 @@ export default function TutorMessages({ onNavigate }) {
         </div>
       )}
 
-      {/* REMOTE AUDIO PLAYBACK
-          This is required for voice calls. Video elements can play remote
-          audio automatically, but an audio-only call needs its own element. */}
+      {/* =====================================================
+          REMOTE AUDIO PLAYBACK
+      ===================================================== */}
+
       <audio
         ref={remoteAudioRef}
         autoPlay
         playsInline
-        style={{ display: "none" }}
+        style={{
+          display: "none",
+        }}
       />
 
-      {/* OUTGOING / ACTIVE CALL */}
-      {(callState === "outgoing" || callState === "active") && (
+      {/* =====================================================
+          OUTGOING / ACTIVE CALL
+      ===================================================== */}
+
+      {(callState === "outgoing" ||
+        callState === "active") && (
         <div className="call-overlay">
-          <div className={`call-modal premium-call-modal ${activeCall}`}>
+
+          <div
+            className={`call-modal premium-call-modal ${activeCall}`}
+          >
+
+            {/* =================================================
+                VIDEO CALL
+            ================================================= */}
 
             {activeCall === "video" ? (
               <div className="premium-video-stage">
 
                 {/* MAIN REMOTE VIDEO */}
+
                 {!isVideoOff ? (
                   <video
                     ref={remoteVideoRef}
@@ -2000,40 +1913,65 @@ export default function TutorMessages({ onNavigate }) {
                   />
                 ) : (
                   <div className="video-off-screen">
+
                     <div className="video-off-avatar">
-                      {activeChat.full_name?.charAt(0)?.toUpperCase()}
+                      {activeChat.full_name
+                        ?.charAt(0)
+                        ?.toUpperCase()}
                     </div>
 
-                    <h3>{activeChat.full_name}</h3>
-                    <p>Camera is off</p>
+                    <h3>
+                      {activeChat.full_name}
+                    </h3>
+
+                    <p>
+                      Camera is off
+                    </p>
+
                   </div>
                 )}
 
                 {/* TOP BAR */}
+
                 <div className="video-top-bar">
+
                   <div className="video-participant-info">
+
                     <div className="participant-avatar">
-                      {activeChat.full_name?.charAt(0)?.toUpperCase()}
+                      {activeChat.full_name
+                        ?.charAt(0)
+                        ?.toUpperCase()}
                     </div>
 
                     <div>
-                      <strong>{activeChat.full_name}</strong>
+
+                      <strong>
+                        {activeChat.full_name}
+                      </strong>
+
                       <span>
                         {callState === "outgoing"
                           ? "Calling..."
-                          : formatTime(callTimer)}
+                          : formatTime(
+                              callTimer
+                            )}
                       </span>
+
                     </div>
+
                   </div>
 
                   <div className="call-security">
                     <HiOutlineLockClosed />
                     Secure call
                   </div>
+
                 </div>
 
                 {/* LOCAL VIDEO */}
+
                 <div className="local-video-wrapper">
+
                   <video
                     ref={localVideoRef}
                     autoPlay
@@ -2045,49 +1983,84 @@ export default function TutorMessages({ onNavigate }) {
                   {isVideoOff && (
                     <div className="local-video-off">
                       <div>
-                        {tutorUser?.user_metadata?.full_name
+                        {tutorUser
+                          ?.user_metadata
+                          ?.full_name
                           ?.charAt(0)
-                          ?.toUpperCase() || "T"}
+                          ?.toUpperCase() ||
+                          "T"}
                       </div>
                     </div>
                   )}
 
-                  <span className="you-label">You</span>
+                  <span className="you-label">
+                    You
+                  </span>
+
                 </div>
 
                 {/* BOTTOM BAR */}
+
                 <div className="video-bottom-bar">
+
                   <div className="call-status-text">
+
                     <span className="live-dot"></span>
 
                     {callState === "outgoing"
                       ? `Calling ${activeChat.full_name}...`
-                      : formatTime(callTimer)}
+                      : formatTime(
+                          callTimer
+                        )}
+
                   </div>
 
                   <div className="premium-call-controls">
 
                     {/* MICROPHONE */}
+
                     <button
                       type="button"
                       className={`premium-control-btn ${
-                        isMuted ? "control-off" : ""
+                        isMuted
+                          ? "control-off"
+                          : ""
                       }`}
-                      onClick={toggleMute}
-                      title={isMuted ? "Unmute microphone" : "Mute microphone"}
+                      onClick={
+                        toggleMute
+                      }
+                      title={
+                        isMuted
+                          ? "Unmute microphone"
+                          : "Mute microphone"
+                      }
                     >
                       <HiOutlineMicrophone />
-                      <span>{isMuted ? "Unmute" : "Mute"}</span>
+
+                      <span>
+                        {isMuted
+                          ? "Unmute"
+                          : "Mute"}
+                      </span>
                     </button>
 
                     {/* CAMERA */}
+
                     <button
                       type="button"
                       className={`premium-control-btn ${
-                        isVideoOff ? "control-off" : ""
+                        isVideoOff
+                          ? "control-off"
+                          : ""
                       }`}
-                      onClick={toggleVideo}
-                      title={isVideoOff ? "Turn camera on" : "Turn camera off"}
+                      onClick={
+                        toggleVideo
+                      }
+                      title={
+                        isVideoOff
+                          ? "Turn camera on"
+                          : "Turn camera off"
+                      }
                     >
                       {isVideoOff ? (
                         <HiOutlineVideoCameraSlash />
@@ -2096,104 +2069,181 @@ export default function TutorMessages({ onNavigate }) {
                       )}
 
                       <span>
-                        {isVideoOff ? "Camera on" : "Camera"}
+                        {isVideoOff
+                          ? "Camera on"
+                          : "Camera"}
                       </span>
                     </button>
 
                     {/* END CALL */}
+
                     <button
                       type="button"
                       className="premium-end-call"
-                      onClick={() => endCall(true)}
+                      onClick={() =>
+                        endCall(true)
+                      }
                       title="End call"
                     >
                       <HiOutlinePhoneXMark />
-                      <span>End</span>
+
+                      <span>
+                        End
+                      </span>
                     </button>
+
                   </div>
 
                   <div className="call-empty-space"></div>
+
                 </div>
+
               </div>
             ) : (
-              /* AUDIO CALL */
+
+              /* =================================================
+                 AUDIO CALL
+              ================================================= */
+
               <div className="premium-audio-call">
+
                 <div className="audio-call-glow"></div>
 
                 <div className="audio-avatar-large">
-                  {activeChat.full_name?.charAt(0)?.toUpperCase()}
+                  {activeChat.full_name
+                    ?.charAt(0)
+                    ?.toUpperCase()}
                 </div>
 
-                <h2>{activeChat.full_name}</h2>
+                <h2>
+                  {activeChat.full_name}
+                </h2>
 
                 <p>
                   {callState === "outgoing"
                     ? "Calling..."
-                    : formatTime(callTimer)}
+                    : formatTime(
+                        callTimer
+                      )}
                 </p>
 
                 <div className="premium-call-controls">
+
                   <button
                     type="button"
                     className={`premium-control-btn ${
-                      isMuted ? "control-off" : ""
+                      isMuted
+                        ? "control-off"
+                        : ""
                     }`}
-                    onClick={toggleMute}
-                    title={isMuted ? "Unmute" : "Mute"}
+                    onClick={
+                      toggleMute
+                    }
+                    title={
+                      isMuted
+                        ? "Unmute"
+                        : "Mute"
+                    }
                   >
                     <HiOutlineMicrophone />
-                    <span>{isMuted ? "Unmute" : "Mute"}</span>
+
+                    <span>
+                      {isMuted
+                        ? "Unmute"
+                        : "Mute"}
+                    </span>
                   </button>
 
                   <button
                     type="button"
                     className="premium-end-call"
-                    onClick={() => endCall(true)}
+                    onClick={() =>
+                      endCall(true)
+                    }
                     title="End call"
                   >
                     <HiOutlinePhoneXMark />
-                    <span>End</span>
+
+                    <span>
+                      End
+                    </span>
                   </button>
+
                 </div>
+
               </div>
             )}
+
           </div>
+
         </div>
       )}
 
-      {/* INCOMING CALL */}
+      {/* =====================================================
+          PREMIUM INCOMING CALL
+      ===================================================== */}
 
       {callState === "incoming" &&
         incomingCall && (
-          <div className="call-overlay">
+          <div className="premium-incoming-overlay">
 
-            <div
-              className="call-modal audio"
-              style={{
-                textAlign:
-                  "center",
-              }}
-            >
+            <div className="premium-incoming-modal">
 
-              <div className="audio-call-preview">
+              {/* TOP BAR */}
 
-                <div className="avatar-large ai-avatar">
-                  {incomingCall.fromName?.charAt(
-                    0
-                  )}
+              <div className="premium-incoming-topbar">
+
+                <div className="incoming-call-badge">
+                  <span className="incoming-live-dot"></span>
+
+                  <span>
+                    Incoming Call
+                  </span>
+                </div>
+
+                <div className="incoming-secure">
+                  <HiOutlineLockClosed />
+
+                  <span>
+                    End-to-end encrypted
+                  </span>
                 </div>
 
               </div>
 
-              <div className="call-info">
+              {/* CALLER */}
+
+              <div className="premium-incoming-caller">
+
+                <div className="premium-avatar-wrapper">
+
+                  <div className="premium-avatar-ring ring-one"></div>
+
+                  <div className="premium-avatar-ring ring-two"></div>
+
+                  <div className="premium-avatar-ring ring-three"></div>
+
+                  <div className="premium-incoming-avatar">
+                    {incomingCall.fromName
+                      ?.charAt(0)
+                      ?.toUpperCase() ||
+                      "T"}
+                  </div>
+
+                </div>
 
                 <h2>
-                  {
-                    incomingCall.fromName
-                  }
+
+                  {incomingCall.fromName ||
+                    "Student"}
+
+                  <span className="verified-badge">
+                    <HiOutlineCheck />
+                  </span>
+
                 </h2>
 
-                <p className="call-status-label">
+                <p className="incoming-call-description">
                   Incoming{" "}
                   {incomingCall.type ===
                   "video"
@@ -2202,37 +2252,107 @@ export default function TutorMessages({ onNavigate }) {
                   call...
                 </p>
 
+                {/* CALL TYPE */}
+
+                <div className="incoming-call-type">
+
+                  {incomingCall.type ===
+                  "video" ? (
+                    <>
+                      <HiOutlineVideoCamera />
+
+                      <span>
+                        Video Call
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <HiOutlinePhone />
+
+                      <span>
+                        Voice Call
+                      </span>
+                    </>
+                  )}
+
+                </div>
+
               </div>
 
-              <div className="call-controls">
+              {/* ACTION BUTTONS */}
 
-                <button
-                  type="button"
-                  className="control-btn end-call-btn"
-                  onClick={
-                    declineCall
-                  }
-                  title="Decline"
-                >
-                  <HiOutlinePhoneXMark />
-                </button>
+              <div className="premium-incoming-actions">
 
-                <button
-                  type="button"
-                  className="control-btn"
-                  onClick={
-                    acceptCall
-                  }
-                  title="Accept"
-                  style={{
-                    background:
-                      "#10b981",
-                    color:
-                      "#fff",
-                  }}
-                >
-                  <HiOutlineCheck />
-                </button>
+                {/* DECLINE */}
+
+                <div className="premium-action-wrapper">
+
+                  <button
+                    type="button"
+                    className="premium-incoming-btn premium-decline-btn"
+                    onClick={declineCall}
+                    title="Decline call"
+                  >
+                    <HiOutlinePhoneXMark />
+                  </button>
+
+                  <strong>
+                    Decline
+                  </strong>
+
+                  <span>
+                    End Call
+                  </span>
+
+                </div>
+
+                {/* ACCEPT */}
+
+                <div className="premium-action-wrapper">
+
+                  <button
+                    type="button"
+                    className="premium-incoming-btn premium-accept-btn"
+                    onClick={acceptCall}
+                    title="Accept call"
+                  >
+                    {incomingCall.type ===
+                    "video" ? (
+                      <HiOutlineVideoCamera />
+                    ) : (
+                      <HiOutlinePhone />
+                    )}
+                  </button>
+
+                  <strong>
+                    Accept
+                  </strong>
+
+                  <span>
+                    Answer Call
+                  </span>
+
+                </div>
+
+              </div>
+
+              {/* BOTTOM SECURITY */}
+
+              <div className="premium-incoming-security">
+
+                <div className="security-line"></div>
+
+                <div className="security-content">
+
+                  <HiOutlineLockClosed />
+
+                  <span>
+                    Secure connection
+                  </span>
+
+                </div>
+
+                <div className="security-line"></div>
 
               </div>
 

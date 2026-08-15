@@ -1288,3 +1288,391 @@
     height: 54px;
   }
 }
+
+/* =========================================================
+   PREMIUM INCOMING CALL — FINAL PREMIUM BUTTON FIX
+========================================================= */
+
+.premium-incoming-modal {
+  position: relative;
+
+  width: min(760px, 94vw) !important;
+  min-height: 720px !important;
+
+  padding: 32px 46px 28px !important;
+
+  border-radius: 30px !important;
+
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(16, 185, 129, 0.08),
+      transparent 32%
+    ),
+    linear-gradient(
+      145deg,
+      #0b1620 0%,
+      #0b141d 48%,
+      #081017 100%
+    ) !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.60),
+    0 0 80px rgba(16, 185, 129, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+
+  color: #ffffff !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  overflow: hidden !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   INCOMING CALL ACTION AREA
+========================================================= */
+
+.premium-incoming-actions {
+  position: relative !important;
+  z-index: 10 !important;
+
+  width: 100% !important;
+
+  display: flex !important;
+  flex-direction: row !important;
+
+  align-items: flex-start !important;
+  justify-content: center !important;
+
+  gap: 110px !important;
+
+  margin-top: 30px !important;
+  padding: 0 0 30px !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   ACTION WRAPPER
+========================================================= */
+
+.premium-action-wrapper {
+  width: 150px !important;
+  min-width: 150px !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  align-items: center !important;
+  justify-content: flex-start !important;
+
+  text-align: center !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   PREMIUM ACCEPT / DECLINE BUTTON
+========================================================= */
+
+.premium-incoming-btn {
+  position: relative !important;
+
+  width: 112px !important;
+  min-width: 112px !important;
+
+  height: 112px !important;
+  min-height: 112px !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border: none !important;
+  border-radius: 50% !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  cursor: pointer !important;
+
+  color: #ffffff !important;
+
+  box-sizing: border-box !important;
+
+  flex-shrink: 0 !important;
+
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    filter 0.22s ease !important;
+
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+/* =========================================================
+   ICON SIZE
+========================================================= */
+
+.premium-incoming-btn svg {
+  width: 44px !important;
+  height: 44px !important;
+
+  min-width: 44px !important;
+  min-height: 44px !important;
+
+  display: block !important;
+
+  stroke-width: 2.3 !important;
+
+  color: #ffffff !important;
+
+  flex-shrink: 0 !important;
+}
+
+
+/* =========================================================
+   DECLINE BUTTON
+========================================================= */
+
+.premium-decline-btn {
+  background:
+    radial-gradient(
+      circle at 35% 25%,
+      #ff7777 0%,
+      #ef3030 42%,
+      #c91515 100%
+    ) !important;
+
+  border: 2px solid rgba(255, 255, 255, 0.28) !important;
+
+  box-shadow:
+    0 0 0 8px rgba(239, 48, 48, 0.08),
+    0 0 35px rgba(239, 48, 48, 0.42),
+    0 18px 35px rgba(0, 0, 0, 0.35),
+    inset 0 2px 5px rgba(255, 255, 255, 0.22) !important;
+}
+
+
+.premium-decline-btn:hover {
+  transform: translateY(-5px) scale(1.06) !important;
+
+  filter: brightness(1.08) !important;
+
+  box-shadow:
+    0 0 0 10px rgba(239, 48, 48, 0.09),
+    0 0 50px rgba(239, 48, 48, 0.58),
+    0 22px 40px rgba(0, 0, 0, 0.40) !important;
+}
+
+
+.premium-decline-btn:active {
+  transform: scale(0.94) !important;
+}
+
+
+/* =========================================================
+   ACCEPT BUTTON
+========================================================= */
+
+.premium-accept-btn {
+  background:
+    radial-gradient(
+      circle at 35% 25%,
+      #72f0b4 0%,
+      #28c983 42%,
+      #0d9f62 100%
+    ) !important;
+
+  border: 2px solid rgba(255, 255, 255, 0.30) !important;
+
+  box-shadow:
+    0 0 0 8px rgba(16, 185, 129, 0.08),
+    0 0 35px rgba(16, 185, 129, 0.42),
+    0 18px 35px rgba(0, 0, 0, 0.35),
+    inset 0 2px 5px rgba(255, 255, 255, 0.25) !important;
+
+  animation: acceptButtonGlow 2s infinite !important;
+}
+
+
+.premium-accept-btn:hover {
+  transform: translateY(-5px) scale(1.06) !important;
+
+  filter: brightness(1.08) !important;
+
+  box-shadow:
+    0 0 0 10px rgba(16, 185, 129, 0.09),
+    0 0 50px rgba(16, 185, 129, 0.58),
+    0 22px 40px rgba(0, 0, 0, 0.40),
+    inset 0 2px 5px rgba(255, 255, 255, 0.25) !important;
+}
+
+
+.premium-accept-btn:active {
+  transform: scale(0.94) !important;
+}
+
+
+/* =========================================================
+   BUTTON LABELS
+========================================================= */
+
+.premium-action-wrapper strong {
+  display: block !important;
+
+  margin-top: 18px !important;
+
+  color: #ffffff !important;
+
+  font-size: 20px !important;
+  line-height: 1.2 !important;
+
+  font-weight: 750 !important;
+}
+
+
+.premium-action-wrapper span {
+  display: block !important;
+
+  margin-top: 5px !important;
+
+  color: rgba(203, 213, 225, 0.62) !important;
+
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+
+  font-weight: 500 !important;
+}
+
+
+/* =========================================================
+   ACCEPT BUTTON GLOW
+========================================================= */
+
+@keyframes acceptButtonGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 8px rgba(16, 185, 129, 0.08),
+      0 0 35px rgba(16, 185, 129, 0.42),
+      0 18px 35px rgba(0, 0, 0, 0.35),
+      inset 0 2px 5px rgba(255, 255, 255, 0.25);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 12px rgba(16, 185, 129, 0.06),
+      0 0 55px rgba(16, 185, 129, 0.58),
+      0 18px 42px rgba(0, 0, 0, 0.38),
+      inset 0 2px 5px rgba(255, 255, 255, 0.25);
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+  .premium-incoming-modal {
+    width: 100% !important;
+    min-height: auto !important;
+
+    padding: 24px 20px 22px !important;
+
+    border-radius: 24px !important;
+  }
+
+  .premium-incoming-actions {
+    gap: 55px !important;
+
+    margin-top: 24px !important;
+
+    padding-bottom: 20px !important;
+  }
+
+  .premium-action-wrapper {
+    width: 120px !important;
+    min-width: 120px !important;
+  }
+
+  .premium-incoming-btn {
+    width: 96px !important;
+    min-width: 96px !important;
+
+    height: 96px !important;
+    min-height: 96px !important;
+  }
+
+  .premium-incoming-btn svg {
+    width: 38px !important;
+    height: 38px !important;
+
+    min-width: 38px !important;
+    min-height: 38px !important;
+  }
+
+  .premium-action-wrapper strong {
+    font-size: 17px !important;
+  }
+
+  .premium-action-wrapper span {
+    font-size: 12px !important;
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONES
+========================================================= */
+
+@media (max-width: 420px) {
+
+  .premium-incoming-modal {
+    padding: 20px 14px 18px !important;
+  }
+
+  .premium-incoming-actions {
+    gap: 35px !important;
+  }
+
+  .premium-action-wrapper {
+    width: 105px !important;
+    min-width: 105px !important;
+  }
+
+  .premium-incoming-btn {
+    width: 82px !important;
+    min-width: 82px !important;
+
+    height: 82px !important;
+    min-height: 82px !important;
+  }
+
+  .premium-incoming-btn svg {
+    width: 32px !important;
+    height: 32px !important;
+
+    min-width: 32px !important;
+    min-height: 32px !important;
+  }
+
+  .premium-action-wrapper strong {
+    font-size: 15px !important;
+  }
+
+  .premium-action-wrapper span {
+    font-size: 11px !important;
+  }
+}

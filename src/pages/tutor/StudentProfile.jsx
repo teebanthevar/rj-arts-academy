@@ -1,23 +1,113 @@
-import React, { useState } from "react";
-import { 
-  FaEnvelope, 
-  FaPhoneAlt, 
-  FaCalendarAlt, 
-  FaBookOpen, 
-  FaChartLine, 
-  FaCheckCircle, 
-  FaCreditCard, 
-  FaStickyNote, 
-  FaAward 
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import {
+  FaEnvelope,
+  FaPhoneAlt,
+  FaCalendarAlt,
+  FaBookOpen,
+  FaChartLine,
+  FaCheckCircle,
+  FaCreditCard,
+  FaStickyNote,
+  FaAward,
 } from "react-icons/fa";
+import { supabase } from "../../lib/supabase";
 import "./StudentProfile.css";
 
 export default function StudentProfile() {
+  const { id } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
+
+  const [student, setStudent] = useState(null);
+  const [enrollments, setEnrollments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (id) fetchData();
+  }, [id]);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setError("You must be logged in to view this page.");
+        setLoading(false);
+        return;
+      }
+
+      const { data: profileData, error: profileErr } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, avatar_url, created_at")
+        .eq("id", id)
+        .single();
+
+      if (profileErr || !profileData) {
+        setError("Student not found.");
+        setLoading(false);
+        return;
+      }
+
+      setStudent(profileData);
+
+      const { data: enrollData, error: enrollErr } = await supabase
+        .from("enrollments")
+        .select("*")
+        .eq("student_id", id)
+        .eq("tutor_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (!enrollErr && enrollData) {
+        setEnrollments(enrollData);
+      }
+    } catch (err) {
+      console.error("Error loading student profile:", err);
+      setError("Something went wrong loading this profile.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="profile-loading">Loading student profile...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="profile-error">
+        <p>{error}</p>
+        <Link to="/tutor/students">← Back to Students</Link>
+      </div>
+    );
+  }
+
+  const initials = (student.full_name || "S")
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const joinedDate = student.created_at
+    ? new Date(student.created_at).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : "Unknown";
+
+  const activeCourseCount = enrollments.filter(
+    (e) => e.status === "approved"
+  ).length;
 
   return (
     <div className="tutor-student-profile">
-      
       {/* Header Banner */}
       <div className="profile-header-banner">
         <h1>Student Profile</h1>
@@ -26,19 +116,30 @@ export default function StudentProfile() {
 
       {/* Main Layout Grid */}
       <div className="profile-grid">
-        
         {/* Left Column: Student Bio */}
         <div className="profile-card avatar-card">
-          <div className="avatar-circle">EL</div>
-          <h2>Emma Lee</h2>
-          <span className="role-badge">IELTS English Student</span>
+          <div className="avatar-circle">
+            {student.avatar_url ? (
+              <img
+                src={student.avatar_url}
+                alt={student.full_name}
+                style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
+              />
+            ) : (
+              initials
+            )}
+          </div>
+          <h2>{student.full_name || "Unnamed Student"}</h2>
+          <span className="role-badge">
+            {enrollments[0]?.course_title || "Student"}
+          </span>
 
           <div className="contact-list">
             <div className="contact-item">
               <FaEnvelope />
               <div>
                 <small>Email</small>
-                <p>emma@gmail.com</p>
+                <p>{student.email || "Not provided"}</p>
               </div>
             </div>
 
@@ -46,7 +147,7 @@ export default function StudentProfile() {
               <FaPhoneAlt />
               <div>
                 <small>Phone</small>
-                <p>+60 12-3456789</p>
+                <p>Not available</p>
               </div>
             </div>
 
@@ -54,7 +155,7 @@ export default function StudentProfile() {
               <FaCalendarAlt />
               <div>
                 <small>Joined</small>
-                <p>12 July 2026</p>
+                <p>{joinedDate}</p>
               </div>
             </div>
           </div>
@@ -62,13 +163,12 @@ export default function StudentProfile() {
 
         {/* Right Column Details */}
         <div className="profile-main-details">
-          
           {/* Stats Section */}
           <div className="metrics-row">
             <div className="profile-card metric-card">
               <div className="metric-icon"><FaChartLine /></div>
               <div>
-                <h3>78%</h3>
+                <h3>—</h3>
                 <p>Progress</p>
               </div>
             </div>
@@ -76,7 +176,7 @@ export default function StudentProfile() {
             <div className="profile-card metric-card">
               <div className="metric-icon"><FaCheckCircle /></div>
               <div>
-                <h3>95%</h3>
+                <h3>—</h3>
                 <p>Attendance</p>
               </div>
             </div>
@@ -84,7 +184,7 @@ export default function StudentProfile() {
             <div className="profile-card metric-card">
               <div className="metric-icon"><FaCreditCard /></div>
               <div>
-                <h3>Paid</h3>
+                <h3>—</h3>
                 <p>Fee Status</p>
               </div>
             </div>
@@ -92,8 +192,8 @@ export default function StudentProfile() {
             <div className="profile-card metric-card">
               <div className="metric-icon"><FaBookOpen /></div>
               <div>
-                <h3>4</h3>
-                <p>Courses</p>
+                <h3>{activeCourseCount}</h3>
+                <p>Active Courses</p>
               </div>
             </div>
           </div>
@@ -108,17 +208,17 @@ export default function StudentProfile() {
             </button>
 
             <button
+              className={activeTab === "enrollments" ? "active" : ""}
+              onClick={() => setActiveTab("enrollments")}
+            >
+              Enrollments
+            </button>
+
+            <button
               className={activeTab === "attendance" ? "active" : ""}
               onClick={() => setActiveTab("attendance")}
             >
               Attendance
-            </button>
-
-            <button
-              className={activeTab === "assignments" ? "active" : ""}
-              onClick={() => setActiveTab("assignments")}
-            >
-              Assignments
             </button>
 
             <button
@@ -127,16 +227,9 @@ export default function StudentProfile() {
             >
               Payments
             </button>
-
-            <button
-              className={activeTab === "messages" ? "active" : ""}
-              onClick={() => setActiveTab("messages")}
-            >
-              Messages
-            </button>
           </div>
 
-          {/* Tab 1: Overview Content */}
+          {/* Tab 1: Overview */}
           {activeTab === "overview" && (
             <div className="student-sections">
               <div className="info-sections-grid">
@@ -145,9 +238,7 @@ export default function StudentProfile() {
                     <FaStickyNote />
                     <h3>Tutor Notes</h3>
                   </div>
-                  <p>
-                    Emma is improving every week. Her speaking confidence has increased significantly. Focus more on writing and vocabulary practice.
-                  </p>
+                  <p>No notes added yet for this student.</p>
                 </div>
 
                 <div className="profile-card section-card">
@@ -155,100 +246,70 @@ export default function StudentProfile() {
                     <FaAward />
                     <h3>Certificates</h3>
                   </div>
-                  <div className="certificate-badge">
-                    <FaAward />
-                    <span>IELTS Prep Completion</span>
-                  </div>
+                  <p>No certificates issued yet.</p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Tab 2: Attendance Content */}
+          {/* Tab 2: Enrollments (real data) */}
+          {activeTab === "enrollments" && (
+            <div className="section-box">
+              <h3>Enrollments with You</h3>
+              {enrollments.length === 0 ? (
+                <p>No enrollment records found.</p>
+              ) : (
+                <table className="profile-table">
+                  <thead>
+                    <tr>
+                      <th>Course</th>
+                      <th>Status</th>
+                      <th>Preferred Day</th>
+                      <th>Preferred Time</th>
+                      <th>Applied</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {enrollments.map((e) => (
+                      <tr key={e.id}>
+                        <td>{e.course_title || "General Mentorship Program"}</td>
+                        <td>{e.status || "pending"}</td>
+                        <td>{e.preferred_day || "—"}</td>
+                        <td>{e.preferred_time || "—"}</td>
+                        <td>
+                          {e.created_at
+                            ? new Date(e.created_at).toLocaleDateString("en-GB", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })
+                            : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+
+          {/* Tab 3: Attendance - not yet tracked */}
           {activeTab === "attendance" && (
             <div className="section-box">
               <h3>Attendance History</h3>
-              <table className="profile-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Duration</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>12 Jul 2026</td>
-                    <td>Present</td>
-                    <td>2 Hours</td>
-                  </tr>
-                  <tr>
-                    <td>10 Jul 2026</td>
-                    <td>Present</td>
-                    <td>2 Hours</td>
-                  </tr>
-                  <tr>
-                    <td>8 Jul 2026</td>
-                    <td>Absent</td>
-                    <td>-</td>
-                  </tr>
-                </tbody>
-              </table>
+              <p>Attendance tracking isn't set up yet for this student.</p>
             </div>
           )}
 
-          {/* Tab 3: Assignments Content */}
-          {activeTab === "assignments" && (
-            <div className="section-box">
-              <h3>Assignments</h3>
-              <ul className="assignment-list">
-                <li>Essay Writing ✔ Submitted</li>
-                <li>Speaking Practice ✔ Submitted</li>
-                <li>Vocabulary Quiz ⏳ Pending</li>
-              </ul>
-            </div>
-          )}
-
-          {/* Tab 4: Payments Content */}
+          {/* Tab 4: Payments - not yet tracked */}
           {activeTab === "payments" && (
             <div className="section-box">
               <h3>Payment History</h3>
-              <table className="profile-table">
-                <thead>
-                  <tr>
-                    <th>Month</th>
-                    <th>Status</th>
-                    <th>Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>July</td>
-                    <td>Paid</td>
-                    <td>RM180</td>
-                  </tr>
-                  <tr>
-                    <td>June</td>
-                    <td>Paid</td>
-                    <td>RM180</td>
-                  </tr>
-                </tbody>
-              </table>
+              <p>No payment records available yet.</p>
             </div>
           )}
-
-          {/* Tab 5: Messages Content */}
-          {activeTab === "messages" && (
-            <div className="section-box">
-              <h3>Messages</h3>
-              <p>No new messages.</p>
-            </div>
-          )}
-
         </div>
-
       </div>
-
     </div>
   );
 }

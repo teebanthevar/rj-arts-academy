@@ -35,14 +35,44 @@ export default function MyCourses() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      // 1. Fetch this tutor's courses
+      const { data: courseData, error: courseError } = await supabase
         .from("courses")
         .select("*")
         .eq("tutor_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      setCourses(data || []);
+      if (courseError) throw courseError;
+      const courseList = courseData || [];
+      const courseIds = courseList.map((c) => c.id);
+
+      // 2. Fetch real enrollments for those courses, so student counts
+      //    always reflect actual enrollment rows instead of a stale
+      //    "students" column on the course itself.
+      let enrollmentsList = [];
+      if (courseIds.length > 0) {
+        const { data: enrData, error: enrError } = await supabase
+          .from("enrollments")
+          .select("id, course_id, student_id")
+          .in("course_id", courseIds);
+
+        if (enrError) throw enrError;
+        enrollmentsList = enrData || [];
+      }
+
+      // 3. Merge real enrollment counts onto each course
+      const enhancedCourses = courseList.map((course) => {
+        const courseEnrollments = enrollmentsList.filter(
+          (e) => e.course_id === course.id
+        );
+
+        return {
+          ...course,
+          realStudents: courseEnrollments.length,
+        };
+      });
+
+      setCourses(enhancedCourses);
     } catch (err) {
       console.error("Error fetching courses:", err.message);
     } finally {
@@ -115,8 +145,8 @@ export default function MyCourses() {
   };
 
   const totalCourses = courses.length;
-  const totalStudents = courses.reduce((acc, curr) => acc + (curr.students || 0), 0);
-  
+  const totalStudents = courses.reduce((acc, curr) => acc + (curr.realStudents || 0), 0);
+
   const totalRevenue = courses.reduce((acc, curr) => {
     let priceVal = 0;
     if (typeof curr.price === "number") {
@@ -124,9 +154,9 @@ export default function MyCourses() {
     } else if (typeof curr.price === "string") {
       priceVal = parseFloat(curr.price.replace(/[^0-9.]/g, "")) || 0;
     }
-    return acc + priceVal * (curr.students || 0);
+    return acc + priceVal * (curr.realStudents || 0);
   }, 0);
-  
+
   const avgRating = totalCourses > 0
     ? (courses.reduce((acc, curr) => acc + (parseFloat(curr.rating) || 0), 0) / totalCourses).toFixed(1)
     : "0.0";
@@ -238,7 +268,7 @@ export default function MyCourses() {
 
                 <div className="courseInfo">
                   <span>⭐ {course.rating || "5.0"}</span>
-                  <span>👨 {course.students || 0}</span>
+                  <span>👨 {course.realStudents || 0}</span>
                 </div>
 
                 <h4>{course.price ? `RM${course.price} / month` : "Free"}</h4>
@@ -302,7 +332,7 @@ export default function MyCourses() {
             <div className="modalStats">
               <div>
                 <h4>Students</h4>
-                <span>{selectedCourse.students || 0}</span>
+                <span>{selectedCourse.realStudents || 0}</span>
               </div>
 
               <div>

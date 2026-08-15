@@ -2,8 +2,6 @@ import TutorStats from "../../components/tutor/TutorStats";
 import TutorAnalytics from "../../components/tutor/TutorAnalytics";
 import RecentStudents from "../../components/tutor/RecentStudents";
 import RevenueAnalytics from "../../components/tutor/RevenueAnalytics";
-import TutorMessages from "../../components/tutor/TutorMessages";
-
 function TutorDashboard() {
   return (
     <>
@@ -12,7 +10,6 @@ function TutorDashboard() {
       <TutorStats />
       <RecentStudents />
       <RevenueAnalytics />
-      <TutorMessages />
       <TutorAnalytics />
     </>
   );

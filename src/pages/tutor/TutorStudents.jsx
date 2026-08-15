@@ -1,18 +1,32 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import "./TutorStudents.css";
 import { FaSearch } from "react-icons/fa";
 
 function TutorStudents() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const highlightStudentId = searchParams.get("student");
+
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const cardRefs = useRef({});
+
   useEffect(() => {
     fetchStudents();
   }, []);
+
+  useEffect(() => {
+    if (!loading && highlightStudentId && cardRefs.current[highlightStudentId]) {
+      cardRefs.current[highlightStudentId].scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [loading, highlightStudentId]);
 
   const fetchStudents = async () => {
     try {
@@ -196,8 +210,27 @@ function TutorStudents() {
               badgeText = "Declined";
             }
 
+            const isHighlighted =
+              highlightStudentId && student.id === highlightStudentId;
+
             return (
-              <div className="student-card" key={item.id} style={{ position: "relative" }}>
+              <div
+                className="student-card"
+                key={item.id}
+                ref={(el) => {
+                  if (student.id) cardRefs.current[student.id] = el;
+                }}
+                style={{
+                  position: "relative",
+                  ...(isHighlighted
+                    ? {
+                        outline: "3px solid #c5a059",
+                        outlineOffset: "2px",
+                        boxShadow: "0 0 0 6px rgba(197, 160, 89, 0.15)",
+                      }
+                    : {}),
+                }}
+              >
                 <span style={{
                   position: "absolute",
                   top: "12px",

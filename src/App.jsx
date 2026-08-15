@@ -170,7 +170,7 @@ export default function App() {
           />
 
           <Route
-            path="/tutor/student-profile"
+            path="/tutor/student-profile/:id"
             element={<StudentProfile />}
           />
 

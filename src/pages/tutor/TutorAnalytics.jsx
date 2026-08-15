@@ -318,34 +318,36 @@ export default function TutorAnalytics({ onNavigate }) {
 
           <div className="chart-card">
             <h3>Course Performance</h3>
-            <table className="analytics-table">
-              <thead>
-                <tr>
-                  <th>Course</th>
-                  <th>Students</th>
-                  <th>Rating</th>
-                  <th>Revenue</th>
-                </tr>
-              </thead>
-              <tbody>
-                {coursesData.length === 0 ? (
+            <div className="analytics-table-scroll">
+              <table className="analytics-table">
+                <thead>
                   <tr>
-                    <td colSpan="4" style={{ textAlign: "center", padding: "20px", color: "#666" }}>
-                      No courses published yet.
-                    </td>
+                    <th>Course</th>
+                    <th>Students</th>
+                    <th>Rating</th>
+                    <th>Revenue</th>
                   </tr>
-                ) : (
-                  coursesData.map((course) => (
-                    <tr key={course.id}>
-                      <td>{course.title}</td>
-                      <td>{course.realStudents}</td>
-                      <td>{course.rating || "5.0"} ⭐</td>
-                      <td>RM {course.realRevenue.toLocaleString()}</td>
+                </thead>
+                <tbody>
+                  {coursesData.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" style={{ textAlign: "center", padding: "20px", color: "#666" }}>
+                        No courses published yet.
+                      </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    coursesData.map((course) => (
+                      <tr key={course.id}>
+                        <td>{course.title}</td>
+                        <td>{course.realStudents}</td>
+                        <td>{course.rating || "5.0"} ⭐</td>
+                        <td>RM {course.realRevenue.toLocaleString()}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FaBars,
   FaSearch,
@@ -10,6 +11,8 @@ import { supabase } from "../../lib/supabase";
 import "../../styles/TutorHeader.css";
 
 function TutorHeader({ toggleSidebar }) {
+  const navigate = useNavigate();
+
   const [profile, setProfile] = useState({
     fullName: "Tutor",
     profession: "Premium Tutor",
@@ -127,11 +130,60 @@ function TutorHeader({ toggleSidebar }) {
     setMessages(data || []);
   };
 
+  // Marks all currently-unread messages as read, both in Supabase and
+  // in local state, then zeroes out the header badge.
+  const markMessagesAsRead = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("messages")
+      .update({ is_read: true })
+      .eq("tutor_identifier", user.id)
+      .eq("is_read", false);
+
+    if (error) {
+      console.error("markMessagesAsRead error:", error);
+      return;
+    }
+
+    setMessages((prev) => prev.map((m) => ({ ...m, is_read: true })));
+    setUnreadMessages(0);
+  };
+
+  // Marks all currently-unread notifications as read, both in Supabase
+  // and in local state, then zeroes out the header badge.
+  const markNotificationsAsRead = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("user_id", user.id)
+      .eq("is_read", false);
+
+    if (error) {
+      console.error("markNotificationsAsRead error:", error);
+      return;
+    }
+
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    setUnreadNotifications(0);
+  };
+
   const handleBellClick = () => {
     setShowMsgPanel(false);
     setShowNotifPanel((prev) => {
       const next = !prev;
-      if (next) fetchNotificationList();
+      if (next) {
+        fetchNotificationList();
+        markNotificationsAsRead();
+      }
       return next;
     });
   };
@@ -140,9 +192,16 @@ function TutorHeader({ toggleSidebar }) {
     setShowNotifPanel(false);
     setShowMsgPanel((prev) => {
       const next = !prev;
-      if (next) fetchMessageList();
+      if (next) {
+        fetchMessageList();
+        markMessagesAsRead();
+      }
       return next;
     });
+  };
+
+  const handleProfileClick = () => {
+    navigate("/tutor/settings");
   };
 
   useEffect(() => {
@@ -257,7 +316,12 @@ function TutorHeader({ toggleSidebar }) {
           )}
         </div>
 
-        <div className="tutor-profile">
+        <div
+          className="tutor-profile"
+          onClick={handleProfileClick}
+          style={{ cursor: "pointer" }}
+          title="Go to Settings"
+        >
           <img
             src={displayAvatar}
             alt={profile.fullName}

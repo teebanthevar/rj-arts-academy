@@ -10,6 +10,11 @@ import {
   HiOutlineCheck,
   HiOutlineChevronLeft,
   HiOutlineXMark,
+  HiOutlineLink,
+  HiOutlineSquares2X2,
+  HiOutlinePlus,
+  HiOutlinePencil,
+  HiOutlineTrash,
 } from "react-icons/hi2";
 import "../styles/StudentPublicProfile.css";
 
@@ -53,6 +58,7 @@ export default function StudentPublicProfile() {
   const navigate = useNavigate();
   const chatBottomRef = useRef(null);
   const fileInputRef = useRef(null);
+  const avatarFileInputRef = useRef(null);
 
   const [student, setStudent] = useState(null);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
@@ -64,10 +70,12 @@ export default function StudentPublicProfile() {
 
   const [editForm, setEditForm] = useState({ full_name: "", avatar_url: "" });
   const [updatingProfile, setUpdatingProfile] = useState(false);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [newProject, setNewProject] = useState({ title: "", image_url: "" });
+  const [newProject, setNewProject] = useState({ title: "", image_url: "", category_id: "" });
   const [newProjectFile, setNewProjectFile] = useState(null);
   const [uploadingProj, setUploadingProj] = useState(false);
 
@@ -75,6 +83,20 @@ export default function StudentPublicProfile() {
   const [editTitleValue, setEditTitleValue] = useState("");
   const [savingArtId, setSavingArtId] = useState(null);
   const [deletingArtId, setDeletingArtId] = useState(null);
+
+  // ---- PORTFOLIO CATEGORIES STATE ----
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("all");
+  const [copiedArtId, setCopiedArtId] = useState(null);
+
+  const [showManageCategoriesModal, setShowManageCategoriesModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [editCategoryNameValue, setEditCategoryNameValue] = useState("");
+  const [savingCategoryId, setSavingCategoryId] = useState(null);
+  const [deletingCategoryId, setDeletingCategoryId] = useState(null);
 
   const [messages, setMessages] = useState([]);
   const [conversations, setConversations] = useState([
@@ -135,6 +157,7 @@ export default function StudentPublicProfile() {
   useEffect(() => {
     fetchStudentData();
     fetchMessages();
+    fetchCategories();
 
     const messageSubscription = supabase
       .channel("public:messages")
@@ -575,6 +598,147 @@ export default function StudentPublicProfile() {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const { data, error } = await supabase
+        .from("portfolio_categories")
+        .select("*")
+        .eq("student_id", id)
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (err) {
+      console.error("Error fetching portfolio categories:", err);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
+  const handleAddCategory = async (e) => {
+    if (e) e.preventDefault();
+    const trimmed = newCategoryName.trim();
+    if (!trimmed) return;
+
+    try {
+      setAddingCategory(true);
+      const { data, error } = await supabase
+        .from("portfolio_categories")
+        .insert([{ student_id: id, name: trimmed }])
+        .select();
+
+      if (error) throw error;
+
+      if (data) {
+        setCategories((prev) => [...prev, data[0]]);
+      }
+      setNewCategoryName("");
+    } catch (err) {
+      console.error("Error adding category:", err);
+      alert("Failed to add category.");
+    } finally {
+      setAddingCategory(false);
+    }
+  };
+
+  const handleStartEditCategory = (cat) => {
+    setEditingCategoryId(cat.id);
+    setEditCategoryNameValue(cat.name || "");
+  };
+
+  const handleCancelEditCategory = () => {
+    setEditingCategoryId(null);
+    setEditCategoryNameValue("");
+  };
+
+  const handleSaveEditCategory = async (cat) => {
+    const trimmed = editCategoryNameValue.trim();
+    if (!trimmed) {
+      alert("Category name cannot be empty.");
+      return;
+    }
+
+    try {
+      setSavingCategoryId(cat.id);
+      const { error } = await supabase
+        .from("portfolio_categories")
+        .update({ name: trimmed })
+        .eq("id", cat.id);
+
+      if (error) throw error;
+
+      setCategories((prev) =>
+        prev.map((c) => (c.id === cat.id ? { ...c, name: trimmed } : c))
+      );
+      setEditingCategoryId(null);
+      setEditCategoryNameValue("");
+    } catch (err) {
+      console.error("Error updating category:", err);
+      alert("Failed to update category.");
+    } finally {
+      setSavingCategoryId(null);
+    }
+  };
+
+  const handleDeleteCategory = async (cat) => {
+    const confirmDelete = window.confirm(`Delete category "${cat.name}"? Projects in this category will move to Uncategorized.`);
+    if (!confirmDelete) return;
+
+    try {
+      setDeletingCategoryId(cat.id);
+
+      // Unassign this category from any artworks using it first
+      await supabase
+        .from("artworks")
+        .update({ category_id: null })
+        .eq("category_id", cat.id);
+
+      const { error } = await supabase
+        .from("portfolio_categories")
+        .delete()
+        .eq("id", cat.id);
+
+      if (error) throw error;
+
+      setCategories((prev) => prev.filter((c) => c.id !== cat.id));
+      setArtworks((prev) =>
+        prev.map((a) => (a.category_id === cat.id ? { ...a, category_id: null } : a))
+      );
+      if (selectedCategoryFilter === cat.id) {
+        setSelectedCategoryFilter("all");
+      }
+    } catch (err) {
+      console.error("Error deleting category:", err);
+      alert("Failed to delete category.");
+    } finally {
+      setDeletingCategoryId(null);
+    }
+  };
+
+  const handleCopyLink = async (art) => {
+    const linkToCopy = art.image_url;
+    if (!linkToCopy) return;
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(linkToCopy);
+      } else {
+        const tempInput = document.createElement("input");
+        tempInput.value = linkToCopy;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+      }
+      setCopiedArtId(art.id);
+      setTimeout(() => setCopiedArtId((prev) => (prev === art.id ? null : prev)), 2000);
+    } catch (err) {
+      console.error("Error copying link:", err);
+      alert("Failed to copy link.");
+    }
+  };
+
   const handleDismissDeclined = async (enrollmentId) => {
     try {
       const { error } = await supabase
@@ -589,20 +753,50 @@ export default function StudentPublicProfile() {
     }
   };
 
+  const handleAvatarFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
       setUpdatingProfile(true);
+
+      let finalAvatarUrl = editForm.avatar_url;
+
+      if (avatarFile) {
+        const fileExt = avatarFile.name.split(".").pop();
+        const fileName = `avatar-${id}-${Date.now()}.${fileExt}`;
+        const filePath = `profile_avatars/${fileName}`;
+
+        const { error: uploadErr } = await supabase.storage
+          .from("avatars")
+          .upload(filePath, avatarFile);
+
+        if (uploadErr) throw uploadErr;
+
+        const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+        finalAvatarUrl = urlData.publicUrl;
+      }
+
       const { error } = await supabase
         .from("profiles")
         .update({
           full_name: editForm.full_name,
-          avatar_url: editForm.avatar_url
+          avatar_url: finalAvatarUrl
         })
         .eq("id", id);
 
       if (error) throw error;
-      setStudent((prev) => ({ ...prev, ...editForm }));
+
+      setStudent((prev) => ({ ...prev, full_name: editForm.full_name, avatar_url: finalAvatarUrl }));
+      setEditForm((prev) => ({ ...prev, avatar_url: finalAvatarUrl }));
+      setAvatarFile(null);
+      setAvatarPreview(null);
       alert("Profile updated successfully!");
     } catch (err) {
       console.error("Error updating profile:", err);
@@ -643,6 +837,7 @@ export default function StudentPublicProfile() {
         student_id: id,
         title: newProject.title,
         image_url: finalImageUrl,
+        category_id: newProject.category_id || null,
         created_at: new Date().toISOString()
       };
 
@@ -657,7 +852,7 @@ export default function StudentPublicProfile() {
         setArtworks((prev) => [data[0], ...prev]);
       }
 
-      setNewProject({ title: "", image_url: "" });
+      setNewProject({ title: "", image_url: "", category_id: "" });
       setNewProjectFile(null);
       setShowUploadModal(false);
       alert("Project uploaded successfully!");
@@ -920,6 +1115,12 @@ export default function StudentPublicProfile() {
   const activeContact = conversations.find(c => c.id === selectedConversation) || conversations[0];
   const activeMessages = messages.filter(m => m.tutor_identifier === selectedConversation);
 
+  const filteredProjectArtworks = selectedCategoryFilter === "all"
+    ? artworks
+    : selectedCategoryFilter === "uncategorized"
+    ? artworks.filter((a) => !a.category_id)
+    : artworks.filter((a) => a.category_id === selectedCategoryFilter);
+
   const handleSelectConversation = (convoId) => {
     setSelectedConversation(convoId);
     setIsMobileChatOpen(true);
@@ -941,10 +1142,17 @@ export default function StudentPublicProfile() {
     }
   };
 
+  const getCategoryName = (categoryId) => {
+    if (!categoryId) return "Uncategorized";
+    const found = categories.find((c) => c.id === categoryId);
+    return found ? found.name : "Uncategorized";
+  };
+
   const renderArtworkCard = (art) => {
     const isEditing = editingArtId === art.id;
     const isSaving = savingArtId === art.id;
     const isDeleting = deletingArtId === art.id;
+    const isCopied = copiedArtId === art.id;
 
     return (
       <div
@@ -985,6 +1193,27 @@ export default function StudentPublicProfile() {
               }}
             >
               ✎
+            </button>
+            <button
+              type="button"
+              onClick={() => handleCopyLink(art)}
+              title="Copy share link"
+              style={{
+                width: "30px",
+                height: "30px",
+                borderRadius: "50%",
+                border: "none",
+                background: isCopied ? "#059669" : "rgba(255,255,255,0.95)",
+                color: isCopied ? "#fff" : "#064e3b",
+                cursor: "pointer",
+                fontSize: "14px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.25)"
+              }}
+            >
+              {isCopied ? <HiOutlineCheck size={14} /> : <HiOutlineLink size={14} />}
             </button>
             <button
               type="button"
@@ -1070,8 +1299,24 @@ export default function StudentPublicProfile() {
           ) : (
             <>
               <h4 style={{ margin: 0 }}>{art.title}</h4>
+              <span
+                style={{
+                  display: "inline-block",
+                  marginTop: "6px",
+                  padding: "2px 8px",
+                  borderRadius: "999px",
+                  background: "#eefaf5",
+                  color: "#064e3b",
+                  fontSize: "10px",
+                  fontWeight: "700",
+                  letterSpacing: "0.3px",
+                  textTransform: "uppercase"
+                }}
+              >
+                {getCategoryName(art.category_id)}
+              </span>
               {art.created_at && (
-                <p style={{ fontSize: "11px", color: "#9ca3af", margin: "4px 0 0 0" }}>
+                <p style={{ fontSize: "11px", color: "#9ca3af", margin: "6px 0 0 0" }}>
                   Uploaded {formatArtDate(art.created_at)}
                 </p>
               )}
@@ -1546,7 +1791,7 @@ export default function StudentPublicProfile() {
 
       <aside className={isSidebarOpen ? "sidebar-open" : ""}>
         <div className="sidebar-brand">
-          <h2>TeachHub</h2>
+          <h2><span className="brand-teach">Teach</span><span className="brand-hub">Hub</span></h2>
           <p>Student Learning Portal</p>
         </div>
 
@@ -1721,16 +1966,49 @@ export default function StudentPublicProfile() {
 
           {activeView === "projects" && (
             <div className="content-section-box">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "10px" }}>
-                <h3>Projects & Assignments</h3>
-                <button onClick={() => setShowUploadModal(true)} className="upload-portfolio-trigger-btn">+ Add Portfolio Item</button>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
+                <h3 style={{ margin: 0 }}>Projects & Assignments</h3>
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                  <button onClick={() => setShowManageCategoriesModal(true)} className="manage-categories-btn">
+                    <HiOutlineSquares2X2 size={15} /> Manage Categories
+                  </button>
+                  <button onClick={() => setShowUploadModal(true)} className="upload-portfolio-trigger-btn">+ Add Portfolio Item</button>
+                </div>
               </div>
-              {artworks.length > 0 ? (
+
+              <div className="category-filter-tabs">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategoryFilter("all")}
+                  className={`category-tab ${selectedCategoryFilter === "all" ? "active" : ""}`}
+                >
+                  All ({artworks.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategoryFilter("uncategorized")}
+                  className={`category-tab ${selectedCategoryFilter === "uncategorized" ? "active" : ""}`}
+                >
+                  Uncategorized ({artworks.filter((a) => !a.category_id).length})
+                </button>
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setSelectedCategoryFilter(cat.id)}
+                    className={`category-tab ${selectedCategoryFilter === cat.id ? "active" : ""}`}
+                  >
+                    {cat.name} ({artworks.filter((a) => a.category_id === cat.id).length})
+                  </button>
+                ))}
+              </div>
+
+              {filteredProjectArtworks.length > 0 ? (
                 <div className="student-art-grid">
-                  {artworks.map((art) => renderArtworkCard(art))}
+                  {filteredProjectArtworks.map((art) => renderArtworkCard(art))}
                 </div>
               ) : (
-                <p className="no-data-text">No projects submitted yet.</p>
+                <p className="no-data-text">No projects in this category yet.</p>
               )}
             </div>
           )}
@@ -1762,13 +2040,60 @@ export default function StudentPublicProfile() {
                   />
                 </div>
                 <div style={{ marginBottom: "20px" }}>
-                  <label style={{ fontSize: "13px", fontWeight: "600", display: "block", marginBottom: "5px" }}>Avatar Image URL</label>
-                  <input
-                    type="text"
-                    value={editForm.avatar_url}
-                    onChange={(e) => setEditForm({ ...editForm, avatar_url: e.target.value })}
-                    style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #d1d5db", boxSizing: "border-box" }}
-                  />
+                  <label style={{ fontSize: "13px", fontWeight: "600", display: "block", marginBottom: "8px" }}>
+                    Profile Picture
+                  </label>
+                  <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                    <div style={{ position: "relative", width: "80px", height: "80px", flexShrink: 0 }}>
+                      <img
+                        src={avatarPreview || editForm.avatar_url || "https://via.placeholder.com/80"}
+                        alt="Avatar preview"
+                        style={{ width: "80px", height: "80px", borderRadius: "50%", objectFit: "cover", border: "2px solid #d1d5db" }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => avatarFileInputRef.current?.click()}
+                        title="Change photo"
+                        style={{
+                          position: "absolute",
+                          bottom: "-2px",
+                          right: "-2px",
+                          width: "28px",
+                          height: "28px",
+                          borderRadius: "50%",
+                          border: "2px solid #fff",
+                          background: "#064e3b",
+                          color: "#fff",
+                          fontSize: "13px",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center"
+                        }}
+                      >
+                        ✎
+                      </button>
+                    </div>
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        ref={avatarFileInputRef}
+                        onChange={handleAvatarFileSelect}
+                        style={{ display: "none" }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => avatarFileInputRef.current?.click()}
+                        style={{ padding: "8px 14px", background: "#f3f4f6", border: "1px solid #d1d5db", borderRadius: "6px", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
+                      >
+                        Choose from Gallery / Files
+                      </button>
+                      {avatarFile && (
+                        <p style={{ fontSize: "11px", color: "#059669", margin: "6px 0 0 0" }}>Selected: {avatarFile.name}</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <button
                   type="submit"
@@ -1832,6 +2157,26 @@ export default function StudentPublicProfile() {
                   required
                 />
               </div>
+              <div style={{ marginBottom: "12px" }}>
+                <label style={{ fontSize: "12px", fontWeight: "600", display: "block", marginBottom: "4px" }}>Category</label>
+                <select
+                  value={newProject.category_id}
+                  onChange={(e) => setNewProject({ ...newProject, category_id: e.target.value })}
+                  style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #d1d5db", boxSizing: "border-box", background: "#fff" }}
+                >
+                  <option value="">Uncategorized</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => { setShowUploadModal(false); setShowManageCategoriesModal(true); }}
+                  style={{ marginTop: "6px", background: "none", border: "none", color: "#059669", fontSize: "11px", fontWeight: "600", cursor: "pointer", padding: 0 }}
+                >
+                  + Create new category
+                </button>
+              </div>
               <div style={{ marginBottom: "16px" }}>
                 <label style={{ fontSize: "12px", fontWeight: "600", display: "block", marginBottom: "4px" }}>Upload from Device</label>
                 <input
@@ -1855,12 +2200,113 @@ export default function StudentPublicProfile() {
                 />
               </div>
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
-                <button type="button" onClick={() => { setShowUploadModal(false); setNewProjectFile(null); }} style={{ padding: "8px 14px", background: "#f3f4f6", border: "none", borderRadius: "4px", cursor: "pointer" }}>Cancel</button>
+                <button type="button" onClick={() => { setShowUploadModal(false); setNewProjectFile(null); setNewProject({ title: "", image_url: "", category_id: "" }); }} style={{ padding: "8px 14px", background: "#f3f4f6", border: "none", borderRadius: "4px", cursor: "pointer" }}>Cancel</button>
                 <button type="submit" disabled={uploadingProj} style={{ padding: "8px 14px", background: "#064e3b", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "600" }}>
                   {uploadingProj ? "Uploading..." : "Upload"}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showManageCategoriesModal && (
+        <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10000, padding: "16px", boxSizing: "border-box" }}>
+          <div style={{ background: "#fff", padding: "24px", borderRadius: "8px", width: "100%", maxWidth: "420px", boxSizing: "border-box" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ margin: 0 }}>Manage Categories</h3>
+              <button
+                type="button"
+                onClick={() => setShowManageCategoriesModal(false)}
+                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "18px", color: "#6b7280" }}
+              >
+                <HiOutlineXMark size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddCategory} style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+              <input
+                type="text"
+                placeholder="New category name..."
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                style={{ flex: 1, padding: "8px", borderRadius: "4px", border: "1px solid #d1d5db", boxSizing: "border-box" }}
+              />
+              <button
+                type="submit"
+                disabled={addingCategory}
+                style={{ padding: "8px 14px", background: "#064e3b", color: "#fff", border: "none", borderRadius: "4px", fontWeight: "600", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
+              >
+                <HiOutlinePlus size={14} /> {addingCategory ? "Adding..." : "Add"}
+              </button>
+            </form>
+
+            {loadingCategories ? (
+              <p style={{ fontSize: "13px", color: "#6b7280" }}>Loading categories...</p>
+            ) : categories.length === 0 ? (
+              <p style={{ fontSize: "13px", color: "#6b7280", fontStyle: "italic" }}>No custom categories yet. Add one above.</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "300px", overflowY: "auto" }}>
+                {categories.map((cat) => {
+                  const isEditing = editingCategoryId === cat.id;
+                  const isSaving = savingCategoryId === cat.id;
+                  const isDeleting = deletingCategoryId === cat.id;
+                  return (
+                    <div key={cat.id} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 10px", background: "#f8faf9", borderRadius: "6px", border: "1px solid #e5e7eb" }}>
+                      {isEditing ? (
+                        <>
+                          <input
+                            type="text"
+                            value={editCategoryNameValue}
+                            onChange={(e) => setEditCategoryNameValue(e.target.value)}
+                            autoFocus
+                            style={{ flex: 1, padding: "6px 8px", borderRadius: "4px", border: "1px solid #d1d5db", fontSize: "13px", boxSizing: "border-box" }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleSaveEditCategory(cat)}
+                            disabled={isSaving}
+                            style={{ padding: "6px 10px", background: "#064e3b", color: "#fff", border: "none", borderRadius: "4px", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
+                          >
+                            {isSaving ? "..." : "Save"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleCancelEditCategory}
+                            disabled={isSaving}
+                            style={{ padding: "6px 10px", background: "#f3f4f6", border: "none", borderRadius: "4px", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <span style={{ flex: 1, fontSize: "13px", fontWeight: "600", color: "#111827" }}>{cat.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleStartEditCategory(cat)}
+                            title="Rename"
+                            disabled={isDeleting}
+                            style={{ width: "28px", height: "28px", borderRadius: "50%", border: "1px solid #e5e7eb", background: "#fff", color: "#064e3b", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                          >
+                            <HiOutlinePencil size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteCategory(cat)}
+                            title="Delete"
+                            disabled={isDeleting}
+                            style={{ width: "28px", height: "28px", borderRadius: "50%", border: "1px solid #e5e7eb", background: "#fff", color: "#ef4444", cursor: isDeleting ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: isDeleting ? 0.6 : 1 }}
+                          >
+                            {isDeleting ? "…" : <HiOutlineTrash size={13} />}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}

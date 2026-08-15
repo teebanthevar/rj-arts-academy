@@ -137,16 +137,6 @@ function TutorSidebar({ sidebarOpen, setSidebarOpen }) {
 
         {/* Bottom Section */}
         <div className="sidebar-footer">
-
-          <div className="premium-card">
-            <FaGem className="premium-icon" />
-
-            <div>
-              <h4>Premium Tutor</h4>
-              <p>Unlock advanced teaching tools</p>
-            </div>
-          </div>
-
           <button className="logout-btn" onClick={handleLogout}>
             <FaSignOutAlt />
             <span>Logout</span>

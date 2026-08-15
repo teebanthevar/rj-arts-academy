@@ -10,241 +10,684 @@ import {
   Area,
   AreaChart,
 } from "recharts";
-import { HiOutlineArrowsPointingOut, HiOutlineXMark } from "react-icons/hi2";
+import {
+  HiOutlineArrowsPointingOut,
+  HiOutlineXMark,
+} from "react-icons/hi2";
 import { supabase } from "../../lib/supabase";
 import "./TutorAnalytics.css";
 
-const CustomTooltip = ({ active, payload, label, prefix = "", suffix = "" }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="glass-tooltip">
-        <p className="tooltip-month">{label}</p>
-        <p className="tooltip-value">
-          {prefix}
-          {payload[0].value.toLocaleString()}
-          {suffix}
-        </p>
-      </div>
-    );
+/* =========================================================
+   CUSTOM TOOLTIP
+========================================================= */
+
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+  prefix = "",
+  suffix = "",
+}) => {
+  if (!active || !payload || !payload.length) {
+    return null;
   }
-  return null;
+
+  const value = Number(payload[0]?.value || 0);
+
+  return (
+    <div className="glass-tooltip">
+      <p className="tooltip-month">{label}</p>
+
+      <p className="tooltip-value">
+        {prefix}
+        {value.toLocaleString()}
+        {suffix}
+      </p>
+    </div>
+  );
 };
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+const getDateFromRecord = (record) => {
+  const possibleDates = [
+    record?.created_at,
+    record?.enrolled_at,
+    record?.join_date,
+    record?.joined_at,
+    record?.joined_date,
+    record?.registration_date,
+    record?.date,
+  ];
+
+  for (const value of possibleDates) {
+    if (value) {
+      const date = new Date(value);
+
+      if (!Number.isNaN(date.getTime())) {
+        return date;
+      }
+    }
+  }
+
+  return new Date();
+};
+
+const getRecordAmount = (record, coursePriceMap = {}) => {
+  const possibleAmounts = [
+    record?.amount,
+    record?.price,
+    record?.fee,
+    record?.course_price,
+    record?.payment_amount,
+    record?.total_amount,
+  ];
+
+  for (const amount of possibleAmounts) {
+    const number = Number(amount);
+
+    if (!Number.isNaN(number) && number > 0) {
+      return number;
+    }
+  }
+
+  const courseId =
+    record?.course_id ||
+    record?.courseId ||
+    record?.course;
+
+  return Number(coursePriceMap[courseId] || 0);
+};
+
+/* =========================================================
+   MAIN COMPONENT
+========================================================= */
 
 function TutorAnalytics() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [activeModal, setActiveModal] = useState(null);
+
   const [totalStudents, setTotalStudents] = useState(0);
   const [peakRevenue, setPeakRevenue] = useState(0);
 
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const [totalCourses, setTotalCourses] = useState(0);
+
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  /* =======================================================
+     LOAD DATA
+  ======================================================= */
 
   useEffect(() => {
     fetchAnalyticsData();
   }, []);
 
+  /* =======================================================
+     ESC KEY
+  ======================================================= */
+
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") setActiveModal(null);
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setActiveModal(null);
+      }
     };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
+  /* =======================================================
+     MAIN ANALYTICS FUNCTION
+
+     Fully automatic — every logged-in tutor's own auth id
+     (user.id) is fetched live from the session on every page
+     load, and used directly against enrollments.tutor_id.
+     No manual lookups or SQL are ever required for this to
+     work; each tutor simply sees their own real data.
+  ======================================================= */
+
   const fetchAnalyticsData = async () => {
+    console.log("========================================");
+    console.log("STARTING TUTOR ANALYTICS");
+    console.log("========================================");
+
     try {
       setLoading(true);
 
+      /* ---------------------------------------------------
+         1. GET CURRENT AUTH USER
+      --------------------------------------------------- */
+
       const {
         data: { user },
+        error: authError,
       } = await supabase.auth.getUser();
 
+      if (authError) {
+        console.error("Auth error:", authError);
+      }
+
       if (!user) {
+        console.warn("No logged-in tutor found.");
         setupFallbackData();
-        setLoading(false);
         return;
       }
 
-      // 1. Fetch tutor's courses safely without column guessing errors
-      const { data: allCourses, error: courseErr } = await supabase
-        .from("courses")
-        .select("*");
+      console.log("Logged-in tutor Auth ID:", user.id, user.email);
 
-      if (courseErr || !allCourses) {
-        setupFallbackData();
-        setLoading(false);
-        return;
-      }
+      /* ---------------------------------------------------
+         2. GET THIS TUTOR'S ENROLLMENTS DIRECTLY
 
-      const tutorCourses = allCourses.filter(
-        (c) =>
-          c.tutor_id === user.id ||
-          c.instructor_id === user.id ||
-          c.user_id === user.id ||
-          c.created_by === user.id ||
-          c.creator_id === user.id
-      );
+         enrollments has its own tutor_id column — this is
+         the reliable source of truth for which students
+         belong to this tutor.
+      --------------------------------------------------- */
 
-      if (tutorCourses.length === 0) {
-        setupFallbackData();
-        setLoading(false);
-        return;
-      }
-
-      const courseIds = tutorCourses.map((c) => c.id);
-      const coursePriceMap = {};
-      tutorCourses.forEach((c) => {
-        coursePriceMap[c.id] = Number(c.price) || 0;
-      });
-
-      // 2. Fetch all enrollments for these courses
-      const { data: enrollments, error: enrollErr } = await supabase
+      const {
+        data: enrollmentRecords,
+        error: enrollmentError,
+      } = await supabase
         .from("enrollments")
         .select("*")
-        .in("course_id", courseIds);
+        .eq("tutor_id", user.id);
 
-      if (enrollErr || !enrollments) {
+      if (enrollmentError) {
+        console.error("Enrollment fetch error:", enrollmentError);
         setupFallbackData();
-        setLoading(false);
         return;
       }
 
-      // 3. Process enrollments per month (for current year)
+      const enrollments = enrollmentRecords || [];
+
+      console.log("TUTOR ENROLLMENTS:", enrollments);
+      console.log("Total enrollment records:", enrollments.length);
+
+      /* ---------------------------------------------------
+         3. GET TUTOR'S COURSES (for revenue price lookup)
+      --------------------------------------------------- */
+
+      const {
+        data: tutorCourses,
+        error: courseError,
+      } = await supabase
+        .from("courses")
+        .select("*")
+        .eq("tutor_id", user.id);
+
+      if (courseError) {
+        console.warn("Courses fetch error:", courseError);
+      }
+
+      console.log("TUTOR COURSES:", tutorCourses);
+
+      setTotalCourses((tutorCourses || []).length);
+
+      const coursePriceMap = {};
+
+      (tutorCourses || []).forEach((course) => {
+        const id = course?.id;
+
+        if (!id) {
+          return;
+        }
+
+        coursePriceMap[id] =
+          Number(
+            course?.price ??
+              course?.course_price ??
+              course?.fee ??
+              course?.amount ??
+              0
+          ) || 0;
+      });
+
+      console.log("Course price map:", coursePriceMap);
+
+      /* ---------------------------------------------------
+         4. UNIQUE STUDENTS FOR THIS TUTOR
+      --------------------------------------------------- */
+
+      const uniqueStudentIds = [
+        ...new Set(
+          enrollments.map((e) => e.student_id).filter(Boolean)
+        ),
+      ];
+
+      const finalTotalStudents = uniqueStudentIds.length;
+
+      console.log("UNIQUE STUDENT IDS:", uniqueStudentIds);
+      console.log("FINAL TOTAL STUDENTS:", finalTotalStudents);
+
+      /* ---------------------------------------------------
+         5. CURRENT YEAR MONTHLY BUCKETS
+      --------------------------------------------------- */
+
       const currentYear = new Date().getFullYear();
+
       const studentMonthly = Array(12).fill(0);
       const revenueMonthly = Array(12).fill(0);
 
-      enrollments.forEach((item) => {
-        const dateStr = item.created_at || item.enrolled_at;
-        const date = dateStr ? new Date(dateStr) : new Date();
-        const price = Number(item.amount) || Number(item.price) || coursePriceMap[item.course_id] || 0;
+      /*
+        Track each student's first enrollment date so a
+        student is only counted once, in the month they
+        first joined (not once per enrollment row).
+      */
 
-        if (date.getFullYear() === currentYear) {
-          const m = date.getMonth();
-          studentMonthly[m] += 1;
-          revenueMonthly[m] += price;
+      const firstSeenByStudent = {};
+
+      enrollments.forEach((enrollment) => {
+        const date = getDateFromRecord(enrollment);
+        const sid = enrollment.student_id;
+
+        if (!sid) {
+          return;
+        }
+
+        if (
+          !firstSeenByStudent[sid] ||
+          date < firstSeenByStudent[sid]
+        ) {
+          firstSeenByStudent[sid] = date;
         }
       });
 
-      // Show up to current month (minimum Jan-Jun for smooth chart UI)
-      const maxMonthIndex = Math.max(new Date().getMonth(), 5);
+      Object.values(firstSeenByStudent).forEach((date) => {
+        if (date.getFullYear() === currentYear) {
+          studentMonthly[date.getMonth()] += 1;
+        }
+      });
+
+      /* ---------------------------------------------------
+         6. REVENUE FROM EVERY ENROLLMENT RECORD
+      --------------------------------------------------- */
+
+      enrollments.forEach((enrollment) => {
+        const date = getDateFromRecord(enrollment);
+
+        if (date.getFullYear() !== currentYear) {
+          return;
+        }
+
+        const month = date.getMonth();
+
+        const amount = getRecordAmount(
+          enrollment,
+          coursePriceMap
+        );
+
+        revenueMonthly[month] += amount;
+      });
+
+      /* ---------------------------------------------------
+         7. BUILD CUMULATIVE STUDENT CHART DATA
+      --------------------------------------------------- */
+
+      const currentMonthIndex = new Date().getMonth();
+
+      const maxMonthIndex = Math.max(currentMonthIndex, 5);
+
       let cumulativeStudents = 0;
 
       const formattedChartData = monthNames
         .slice(0, maxMonthIndex + 1)
-        .map((monthName, idx) => {
-          cumulativeStudents += studentMonthly[idx];
+        .map((monthName, index) => {
+          cumulativeStudents += studentMonthly[index];
+
           return {
             month: monthName,
             students: cumulativeStudents,
-            revenue: revenueMonthly[idx],
+            revenue: revenueMonthly[index],
           };
         });
 
-      const maxRev = Math.max(...formattedChartData.map((d) => d.revenue), 0);
+      /*
+        If enrollment dates fall outside the current year
+        (e.g. seed data with old/odd timestamps), still
+        surface the real total on the last point so the
+        KPI card isn't stuck at 0.
+      */
+
+      if (
+        formattedChartData.length > 0 &&
+        finalTotalStudents > 0 &&
+        cumulativeStudents === 0
+      ) {
+        formattedChartData[
+          formattedChartData.length - 1
+        ].students = finalTotalStudents;
+      }
+
+      /*
+        Ensure chart never goes backwards.
+      */
+
+      let runningStudentCount = 0;
+
+      formattedChartData.forEach((item) => {
+        if (item.students < runningStudentCount) {
+          item.students = runningStudentCount;
+        }
+
+        runningStudentCount = item.students;
+      });
+
+      /* ---------------------------------------------------
+         8. PEAK REVENUE
+      --------------------------------------------------- */
+
+      const maxRevenue = Math.max(
+        ...formattedChartData.map(
+          (item) => Number(item.revenue) || 0
+        ),
+        0
+      );
+
+      /* ---------------------------------------------------
+         9. FINAL STATE
+      --------------------------------------------------- */
 
       setData(formattedChartData);
-      setTotalStudents(cumulativeStudents);
-      setPeakRevenue(maxRev);
-    } catch (err) {
-      console.error("Error fetching analytics data:", err);
+
+      setTotalStudents(finalTotalStudents);
+
+      setPeakRevenue(maxRevenue);
+
+      console.log("FINAL CHART DATA:", formattedChartData);
+      console.log("FINAL PEAK REVENUE:", maxRevenue);
+      console.log("========================================");
+      console.log("ANALYTICS COMPLETE");
+      console.log("========================================");
+    } catch (error) {
+      console.error("CRITICAL ANALYTICS ERROR:", error);
+
       setupFallbackData();
     } finally {
       setLoading(false);
     }
   };
 
+  /* =======================================================
+     FALLBACK
+  ======================================================= */
+
   const setupFallbackData = () => {
-    const emptyData = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"].map((m) => ({
-      month: m,
+    const fallback = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+    ].map((month) => ({
+      month,
       students: 0,
       revenue: 0,
     }));
-    setData(emptyData);
+
+    setData(fallback);
     setTotalStudents(0);
     setPeakRevenue(0);
   };
 
+  /* =======================================================
+     LOADING
+  ======================================================= */
+
   if (loading) {
     return (
       <section className="analytics-grid">
-        <p className="analytics-loading">Loading real-time analytics...</p>
+        <p className="analytics-loading">
+          Loading real-time analytics...
+        </p>
       </section>
     );
   }
 
+  /* =======================================================
+     UI
+  ======================================================= */
+
   return (
     <>
       <section className="analytics-grid">
-        {/* Student Growth Card */}
+
+        {/* =================================================
+            STUDENT GROWTH
+        ================================================= */}
+
         <div
           className="analytics-card clickable"
-          onClick={() => setActiveModal("students")}
+          onClick={() =>
+            setActiveModal("students")
+          }
         >
           <div className="analytics-card-header">
             <div>
               <h2>Student Growth</h2>
-              <p>Active enrolled students trend</p>
+
+              <p>
+                Active enrolled students trend
+              </p>
             </div>
+
             <div className="header-right">
-              <span className="analytics-badge">+{totalStudents} Total</span>
-              <button className="expand-btn" title="Expand Fullscreen">
+              <span className="analytics-badge">
+                {totalStudents} Total
+              </span>
+
+              <button
+                className="expand-btn"
+                title="Expand Fullscreen"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setActiveModal("students");
+                }}
+              >
                 <HiOutlineArrowsPointingOut />
               </button>
             </div>
           </div>
 
           <div className="chart-container">
-            <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="4 4" stroke="rgba(15, 61, 46, 0.07)" vertical={false} />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#64748B", fontSize: 12, fontWeight: 600 }} />
-                <YAxis width={40} axisLine={false} tickLine={false} tick={{ fill: "#64748B", fontSize: 12, fontWeight: 600 }} />
-                <Tooltip content={<CustomTooltip suffix=" Students" />} />
+            <ResponsiveContainer
+              width="100%"
+              height={240}
+            >
+              <LineChart
+                data={data}
+                margin={{
+                  top: 10,
+                  right: 10,
+                  left: -20,
+                  bottom: 0,
+                }}
+              >
+                <CartesianGrid
+                  strokeDasharray="4 4"
+                  stroke="rgba(15, 61, 46, 0.07)"
+                  vertical={false}
+                />
+
+                <XAxis
+                  dataKey="month"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{
+                    fill: "#64748B",
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}
+                />
+
+                <YAxis
+                  width={40}
+                  axisLine={false}
+                  tickLine={false}
+                  allowDecimals={false}
+                  tick={{
+                    fill: "#64748B",
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}
+                />
+
+                <Tooltip
+                  content={
+                    <CustomTooltip suffix=" Students" />
+                  }
+                />
+
                 <Line
                   type="monotone"
                   dataKey="students"
                   stroke="#0F3D2E"
                   strokeWidth={3.5}
-                  dot={{ fill: "#0F3D2E", r: 4, strokeWidth: 2, stroke: "#FFFFFF" }}
-                  activeDot={{ r: 7, fill: "#C5A059", stroke: "#FFFFFF", strokeWidth: 3 }}
+                  dot={{
+                    fill: "#0F3D2E",
+                    r: 4,
+                    strokeWidth: 2,
+                    stroke: "#FFFFFF",
+                  }}
+                  activeDot={{
+                    r: 7,
+                    fill: "#C5A059",
+                    stroke: "#FFFFFF",
+                    strokeWidth: 3,
+                  }}
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Monthly Revenue Card */}
+        {/* =================================================
+            MONTHLY REVENUE
+        ================================================= */}
+
         <div
           className="analytics-card clickable"
-          onClick={() => setActiveModal("revenue")}
+          onClick={() =>
+            setActiveModal("revenue")
+          }
         >
           <div className="analytics-card-header">
             <div>
               <h2>Monthly Revenue</h2>
-              <p>Earnings breakdown ($)</p>
+
+              <p>
+                Earnings breakdown (RM)
+              </p>
             </div>
+
             <div className="header-right">
-              <span className="analytics-badge gold">+${peakRevenue.toLocaleString()} Peak</span>
-              <button className="expand-btn" title="Expand Fullscreen">
+              <span className="analytics-badge gold">
+                RM {peakRevenue.toLocaleString()} Peak
+              </span>
+
+              <button
+                className="expand-btn"
+                title="Expand Fullscreen"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setActiveModal("revenue");
+                }}
+              >
                 <HiOutlineArrowsPointingOut />
               </button>
             </div>
           </div>
 
           <div className="chart-container">
-            <ResponsiveContainer width="100%" height={240}>
-              <AreaChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+            <ResponsiveContainer
+              width="100%"
+              height={240}
+            >
+              <AreaChart
+                data={data}
+                margin={{
+                  top: 10,
+                  right: 10,
+                  left: -10,
+                  bottom: 0,
+                }}
+              >
                 <defs>
-                  <linearGradient id="goldGlassGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#C5A059" stopOpacity={0.6} />
-                    <stop offset="95%" stopColor="#C5A059" stopOpacity={0.02} />
+                  <linearGradient
+                    id="goldGlassGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="0%"
+                      stopColor="#C5A059"
+                      stopOpacity={0.6}
+                    />
+
+                    <stop
+                      offset="95%"
+                      stopColor="#C5A059"
+                      stopOpacity={0.02}
+                    />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="4 4" stroke="rgba(197, 160, 89, 0.12)" vertical={false} />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#64748B", fontSize: 12, fontWeight: 600 }} />
-                <YAxis width={45} axisLine={false} tickLine={false} tick={{ fill: "#64748B", fontSize: 12, fontWeight: 600 }} />
-                <Tooltip content={<CustomTooltip prefix="$" />} />
+
+                <CartesianGrid
+                  strokeDasharray="4 4"
+                  stroke="rgba(197, 160, 89, 0.12)"
+                  vertical={false}
+                />
+
+                <XAxis
+                  dataKey="month"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{
+                    fill: "#64748B",
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}
+                />
+
+                <YAxis
+                  width={55}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{
+                    fill: "#64748B",
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}
+                />
+
+                <Tooltip
+                  content={
+                    <CustomTooltip prefix="RM " />
+                  }
+                />
+
                 <Area
                   type="monotone"
                   dataKey="revenue"
@@ -252,7 +695,12 @@ function TutorAnalytics() {
                   strokeWidth={3}
                   fillOpacity={1}
                   fill="url(#goldGlassGradient)"
-                  activeDot={{ r: 7, fill: "#0F3D2E", stroke: "#FFFFFF", strokeWidth: 3 }}
+                  activeDot={{
+                    r: 7,
+                    fill: "#0F3D2E",
+                    stroke: "#FFFFFF",
+                    strokeWidth: 3,
+                  }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -260,73 +708,250 @@ function TutorAnalytics() {
         </div>
       </section>
 
-      {/* Fullscreen Glass Modal */}
+      {/* ===================================================
+          FULLSCREEN MODAL
+      =================================================== */}
+
       {activeModal && (
-        <div className="fullscreen-modal-backdrop" onClick={() => setActiveModal(null)}>
-          <div className="fullscreen-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fullscreen-modal-backdrop"
+          onClick={() =>
+            setActiveModal(null)
+          }
+        >
+          <div
+            className="fullscreen-modal-content"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
             <div className="modal-header">
               <div>
-                <h2>{activeModal === "students" ? "Student Growth Detailed View" : "Monthly Revenue Detailed View"}</h2>
-                <p>Complete historical analytical data overview</p>
+                <h2>
+                  {activeModal === "students"
+                    ? "Student Growth Detailed View"
+                    : "Monthly Revenue Detailed View"}
+                </h2>
+
+                <p>
+                  Complete historical analytical
+                  data overview
+                </p>
               </div>
-              <button className="close-modal-btn" onClick={() => setActiveModal(null)}>
+
+              <button
+                className="close-modal-btn"
+                onClick={() =>
+                  setActiveModal(null)
+                }
+              >
                 <HiOutlineXMark />
               </button>
             </div>
 
             <div className="modal-chart-wrapper">
-              <ResponsiveContainer width="100%" height={260}>
+              <ResponsiveContainer
+                width="100%"
+                height={260}
+              >
                 {activeModal === "students" ? (
-                  <LineChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="4 4" stroke="rgba(15, 61, 46, 0.1)" />
-                    <XAxis dataKey="month" tick={{ fill: "#0F3D2E", fontSize: 12, fontWeight: 700 }} />
-                    <YAxis tick={{ fill: "#0F3D2E", fontSize: 12, fontWeight: 700 }} />
-                    <Tooltip content={<CustomTooltip suffix=" Enrolled Students" />} />
+                  <LineChart
+                    data={data}
+                    margin={{
+                      top: 10,
+                      right: 10,
+                      left: -10,
+                      bottom: 0,
+                    }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="4 4"
+                      stroke="rgba(15, 61, 46, 0.1)"
+                    />
+
+                    <XAxis
+                      dataKey="month"
+                      tick={{
+                        fill: "#0F3D2E",
+                        fontSize: 12,
+                        fontWeight: 700,
+                      }}
+                    />
+
+                    <YAxis
+                      allowDecimals={false}
+                      tick={{
+                        fill: "#0F3D2E",
+                        fontSize: 12,
+                        fontWeight: 700,
+                      }}
+                    />
+
+                    <Tooltip
+                      content={
+                        <CustomTooltip
+                          suffix=" Enrolled Students"
+                        />
+                      }
+                    />
+
                     <Line
                       type="monotone"
                       dataKey="students"
                       stroke="#0F3D2E"
                       strokeWidth={3.5}
-                      dot={{ fill: "#0F3D2E", r: 5 }}
-                      activeDot={{ r: 8, fill: "#C5A059" }}
+                      dot={{
+                        fill: "#0F3D2E",
+                        r: 5,
+                      }}
+                      activeDot={{
+                        r: 8,
+                        fill: "#C5A059",
+                      }}
                     />
                   </LineChart>
                 ) : (
-                  <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <AreaChart
+                    data={data}
+                    margin={{
+                      top: 10,
+                      right: 10,
+                      left: 0,
+                      bottom: 0,
+                    }}
+                  >
                     <defs>
-                      <linearGradient id="modalGoldGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#C5A059" stopOpacity={0.8} />
-                        <stop offset="100%" stopColor="#C5A059" stopOpacity={0.05} />
+                      <linearGradient
+                        id="modalGoldGradient"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="0%"
+                          stopColor="#C5A059"
+                          stopOpacity={0.8}
+                        />
+
+                        <stop
+                          offset="100%"
+                          stopColor="#C5A059"
+                          stopOpacity={0.05}
+                        />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="4 4" stroke="rgba(197, 160, 89, 0.15)" />
-                    <XAxis dataKey="month" tick={{ fill: "#0F3D2E", fontSize: 12, fontWeight: 700 }} />
-                    <YAxis tick={{ fill: "#0F3D2E", fontSize: 12, fontWeight: 700 }} />
-                    <Tooltip content={<CustomTooltip prefix="$" />} />
+
+                    <CartesianGrid
+                      strokeDasharray="4 4"
+                      stroke="rgba(197, 160, 89, 0.15)"
+                    />
+
+                    <XAxis
+                      dataKey="month"
+                      tick={{
+                        fill: "#0F3D2E",
+                        fontSize: 12,
+                        fontWeight: 700,
+                      }}
+                    />
+
+                    <YAxis
+                      tick={{
+                        fill: "#0F3D2E",
+                        fontSize: 12,
+                        fontWeight: 700,
+                      }}
+                    />
+
+                    <Tooltip
+                      content={
+                        <CustomTooltip prefix="RM " />
+                      }
+                    />
+
                     <Area
                       type="monotone"
                       dataKey="revenue"
                       stroke="#C5A059"
                       strokeWidth={3.5}
                       fill="url(#modalGoldGradient)"
-                      activeDot={{ r: 8, fill: "#0F3D2E" }}
+                      activeDot={{
+                        r: 8,
+                        fill: "#0F3D2E",
+                      }}
                     />
                   </AreaChart>
                 )}
               </ResponsiveContainer>
             </div>
 
+            {/* =================================================
+                DATA TABLE
+            ================================================= */}
+
             <div className="modal-data-table">
-              <h3>Monthly Data Breakdown</h3>
+              <h3>
+                Monthly Data Breakdown
+              </h3>
+
               <div className="table-grid">
                 {data.map((item) => (
-                  <div className="data-pill" key={item.month}>
-                    <span>{item.month}</span>
+                  <div
+                    className="data-pill"
+                    key={item.month}
+                  >
+                    <span>
+                      {item.month}
+                    </span>
+
                     <strong>
-                      {activeModal === "students" ? `${item.students} Students` : `$${item.revenue.toLocaleString()}`}
+                      {activeModal ===
+                      "students"
+                        ? `${item.students} Students`
+                        : `RM ${Number(
+                            item.revenue || 0
+                          ).toLocaleString()}`}
                     </strong>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* =================================================
+                SUMMARY
+            ================================================= */}
+
+            <div className="analytics-modal-summary">
+              <div>
+                <span>
+                  Total Students
+                </span>
+
+                <strong>
+                  {totalStudents}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Tutor Courses
+                </span>
+
+                <strong>
+                  {totalCourses}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Peak Revenue
+                </span>
+
+                <strong>
+                  RM{" "}
+                  {peakRevenue.toLocaleString()}
+                </strong>
               </div>
             </div>
           </div>

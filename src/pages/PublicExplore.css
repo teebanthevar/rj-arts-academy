@@ -31,10 +31,16 @@
 }
 
 .public-nav .logo {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: #0f3d2e;
-  letter-spacing: 0.5px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #064e3b;
+  letter-spacing: -0.5px;
+  display: inline-flex;
+}
+
+.logo-hub {
+  color: #d4af37;
 }
 
 .nav-actions {
@@ -820,3 +826,7 @@
   }
 }
 
+.logo-hub {
+  color: #d4af37;
+  margin-left: -11px;
+}

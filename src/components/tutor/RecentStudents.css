@@ -1,5 +1,3 @@
-
-
 /* Main Glass Card Container */
 .studentsCard {
   /* Reduced white opacity so background shows through */
@@ -221,4 +219,55 @@
   background: #0f3d2e;
   color: #ffffff;
   border-color: #0f3d2e;
+}
+
+/* Responsive - stack rows on narrow screens */
+@media (max-width: 640px) {
+  .studentsCard {
+    padding: 18px;
+  }
+
+  .studentsHeader {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .studentRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .studentLeft {
+    flex: none;
+    width: 100%;
+  }
+
+  .studentMiddle {
+    flex: none;
+    width: 100%;
+    padding: 0;
+  }
+
+  .studentRight {
+    flex: none;
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .lastClass {
+    min-width: unset;
+    text-align: left;
+  }
+}
+
+/* Empty State */
+.no-students-msg {
+  text-align: center;
+  padding: 32px 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 500;
 }

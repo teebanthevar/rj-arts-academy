@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { FaUserGraduate, FaGraduationCap, FaHeart, FaStar } from "react-icons/fa";
+import {
+  FaUserGraduate,
+  FaGraduationCap,
+  FaHeart,
+  FaStar,
+} from "react-icons/fa";
 import { supabase } from "../../lib/supabase";
 import "./TutorStats.css";
 
@@ -11,6 +16,7 @@ function TutorStats() {
     rating: "0.0",
     hasReviews: false,
   });
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,68 +27,140 @@ function TutorStats() {
     try {
       setLoading(true);
 
+      // Get currently logged-in tutor
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser();
 
-      if (!user) return;
+      if (userError) {
+        console.error("Error getting tutor:", userError);
+        return;
+      }
 
-      // 1. Fetch courses safely with select("*") to prevent 400 Bad Request errors
+      if (!user) {
+        console.error("No logged-in tutor found.");
+        return;
+      }
+
+      /* =========================================================
+         1. FETCH TUTOR COURSES
+         ========================================================= */
+
       const { data: allCourses, error: courseErr } = await supabase
         .from("courses")
         .select("*");
 
       let tutorCourses = [];
+
       if (!courseErr && allCourses) {
         tutorCourses = allCourses.filter(
-          (c) =>
-            c.tutor_id === user.id ||
-            c.instructor_id === user.id ||
-            c.user_id === user.id ||
-            c.created_by === user.id ||
-            c.creator_id === user.id
+          (course) =>
+            course.tutor_id === user.id ||
+            course.instructor_id === user.id ||
+            course.user_id === user.id ||
+            course.created_by === user.id ||
+            course.creator_id === user.id
         );
       }
 
       const courseCount = tutorCourses.length;
 
-      // 2. Fetch total enrolled students safely with guard condition
-      let totalStudents = 0;
-      if (courseCount > 0) {
-        const courseIds = tutorCourses.map((c) => c.id).filter(Boolean);
-        
-        if (courseIds.length > 0) {
-          const { count } = await supabase
-            .from("enrollments")
-            .select("id", { count: "exact", head: true })
-            .in("course_id", courseIds);
+      /* =========================================================
+         2. FETCH UNIQUE STUDENTS FOR THIS TUTOR
+         
+         IMPORTANT:
+         TutorStudents.jsx uses:
+         
+         enrollments
+         .eq("tutor_id", user.id)
+         
+         So the stats card now uses the SAME relationship.
+         ========================================================= */
 
-          totalStudents = count || 0;
-        }
+      const { data: enrollmentStudents, error: studentErr } =
+        await supabase
+          .from("enrollments")
+          .select("student_id")
+          .eq("tutor_id", user.id);
+
+      if (studentErr) {
+        console.error(
+          "Error fetching tutor students:",
+          studentErr
+        );
       }
 
-      // 3. Fetch followers from the "follows" table
-      let followerCount = 0;
-      const { count: fCount } = await supabase
-        .from("follows")
-        .select("id", { count: "exact", head: true })
-        .eq("tutor_id", user.id);
-      followerCount = fCount || 0;
+      // Count UNIQUE students
+      const uniqueStudentIds = new Set(
+        (enrollmentStudents || [])
+          .map((enrollment) => enrollment.student_id)
+          .filter(Boolean)
+      );
 
-      // 4. Calculate average rating
-      const { data: ratingData } = await supabase
-        .from("tutor_reviews")
-        .select("rating")
-        .eq("tutor_id", user.id);
+      const totalStudents = uniqueStudentIds.size;
+
+      /* =========================================================
+         3. FETCH FOLLOWERS
+         ========================================================= */
+
+      let followerCount = 0;
+
+      const { count: fCount, error: followerError } =
+        await supabase
+          .from("follows")
+          .select("id", {
+            count: "exact",
+            head: true,
+          })
+          .eq("tutor_id", user.id);
+
+      if (followerError) {
+        console.error(
+          "Error fetching followers:",
+          followerError
+        );
+      } else {
+        followerCount = fCount || 0;
+      }
+
+      /* =========================================================
+         4. CALCULATE AVERAGE RATING
+         ========================================================= */
+
+      const { data: ratingData, error: ratingError } =
+        await supabase
+          .from("tutor_reviews")
+          .select("rating")
+          .eq("tutor_id", user.id);
+
+      if (ratingError) {
+        console.error(
+          "Error fetching tutor reviews:",
+          ratingError
+        );
+      }
 
       let avgRating = "0.0";
       let reviewsExist = false;
 
       if (ratingData && ratingData.length > 0) {
         reviewsExist = true;
-        const total = ratingData.reduce((acc, curr) => acc + (Number(curr.rating) || 0), 0);
-        avgRating = (total / ratingData.length).toFixed(1);
+
+        const totalRating = ratingData.reduce(
+          (accumulator, review) =>
+            accumulator + (Number(review.rating) || 0),
+          0
+        );
+
+        avgRating = (
+          totalRating / ratingData.length
+        ).toFixed(1);
       }
+
+      /* =========================================================
+         5. UPDATE STATS
+         ========================================================= */
 
       setStats({
         students: totalStudents,
@@ -92,89 +170,179 @@ function TutorStats() {
         hasReviews: reviewsExist,
       });
     } catch (error) {
-      console.error("Error fetching tutor stats:", error);
+      console.error(
+        "Error fetching tutor stats:",
+        error
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return <div className="loading-stats">Loading stats...</div>;
+  /* =========================================================
+     LOADING STATE
+     ========================================================= */
+
+  if (loading) {
+    return (
+      <div className="loading-stats">
+        Loading stats...
+      </div>
+    );
+  }
 
   return (
     <div className="glass-stats-grid">
-      {/* 1. Students Card */}
+
+      {/* =====================================================
+          1. STUDENTS
+          ===================================================== */}
+
       <div className="glass-card">
         <div className="glass-card-header">
+
           <div className="rj-circle-icon">
             <FaUserGraduate />
           </div>
+
           <span className="glass-badge badge-green">
-            {stats.students > 0 ? "+Active" : "0"}
+            {stats.students > 0
+              ? `${stats.students} Active`
+              : "0"}
           </span>
+
         </div>
+
         <div className="glass-card-body">
-          <span className="stat-number">{stats.students}</span>
-          <span className="stat-label">Students</span>
+
+          <span className="stat-number">
+            {stats.students}
+          </span>
+
+          <span className="stat-label">
+            Students
+          </span>
+
         </div>
-        <p className="glass-updated">Updated just now</p>
+
+        <p className="glass-updated">
+          Updated just now
+        </p>
       </div>
 
-      {/* 2. Courses Card */}
+      {/* =====================================================
+          2. COURSES
+          ===================================================== */}
+
       <div className="glass-card">
         <div className="glass-card-header">
+
           <div className="rj-circle-icon">
             <FaGraduationCap />
           </div>
+
           <span className="glass-badge badge-beige">
-            {stats.courses > 0 ? `${stats.courses} Active` : "0"}
+            {stats.courses > 0
+              ? `${stats.courses} Active`
+              : "0"}
           </span>
+
         </div>
+
         <div className="glass-card-body">
-          <span className="stat-number">{stats.courses}</span>
-          <span className="stat-label">Courses</span>
+
+          <span className="stat-number">
+            {stats.courses}
+          </span>
+
+          <span className="stat-label">
+            Courses
+          </span>
+
         </div>
-        <p className="glass-updated">Updated just now</p>
+
+        <p className="glass-updated">
+          Updated just now
+        </p>
       </div>
 
-      {/* 3. Followers Card */}
+      {/* =====================================================
+          3. FOLLOWERS
+          ===================================================== */}
+
       <div className="glass-card">
         <div className="glass-card-header">
+
           <div className="rj-circle-icon">
             <FaHeart />
           </div>
+
           <span className="glass-badge badge-beige">
-            {stats.followers > 0 ? "+Growing" : "0"}
+            {stats.followers > 0
+              ? "+Growing"
+              : "0"}
           </span>
+
         </div>
+
         <div className="glass-card-body">
+
           <span className="stat-number">
             {stats.followers >= 1000
               ? `${(stats.followers / 1000).toFixed(1)}K`
               : stats.followers}
           </span>
-          <span className="stat-label">Followers</span>
+
+          <span className="stat-label">
+            Followers
+          </span>
+
         </div>
-        <p className="glass-updated">Updated just now</p>
+
+        <p className="glass-updated">
+          Updated just now
+        </p>
       </div>
 
-      {/* 4. Rating Card */}
+      {/* =====================================================
+          4. RATING
+          ===================================================== */}
+
       <div className="glass-card">
         <div className="glass-card-header">
+
           <div className="rj-circle-icon">
             <FaStar />
           </div>
+
           <span className="glass-badge badge-beige">
-            {stats.hasReviews ? "Verified" : "New Tutor"}
+            {stats.hasReviews
+              ? "Verified"
+              : "New Tutor"}
           </span>
+
         </div>
+
         <div className="glass-card-body">
-          <span className="stat-number">{stats.rating}</span>
-          <span className="stat-label">Rating</span>
+
+          <span className="stat-number">
+            {stats.rating}
+          </span>
+
+          <span className="stat-label">
+            Rating
+          </span>
+
         </div>
+
         <p className="glass-updated">
-          {stats.hasReviews ? "Based on student reviews" : "No reviews yet"}
+          {stats.hasReviews
+            ? "Based on student reviews"
+            : "No reviews yet"}
         </p>
+
       </div>
+
     </div>
   );
 }
