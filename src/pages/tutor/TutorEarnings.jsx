@@ -20,11 +20,13 @@ export default function TutorEarnings() {
     pendingPayout: 0,
     totalPaidOut: 0,
     avgPerCourse: 0,
+    referralBonus: 0, // total credited from completed referrals
   });
   const [transactions, setTransactions] = useState([]);
   const [referralCode, setReferralCode] = useState("");
   const [referralLink, setReferralLink] = useState("");
   const [copied, setCopied] = useState(false);
+  const [referralCount, setReferralCount] = useState(0); // how many friends completed
 
   useEffect(() => {
     fetchEarningsData();
@@ -41,10 +43,33 @@ export default function TutorEarnings() {
         return;
       }
 
-      // Build a simple referral code/link from the tutor's own id
-      const code = user.id.slice(0, 8).toUpperCase();
+      // 1a. Referral code + link come from the tutor's own row in
+      //     `tutors` (set by the DB default / referrals_schema.sql
+      //     migration), not a client-side slice of the user id.
+      //     Link points at the real signup route: /tutor-register
+      const { data: tutorRow } = await supabase
+        .from("tutors")
+        .select("referral_code")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const code = tutorRow?.referral_code || "";
       setReferralCode(code);
-      setReferralLink(`${window.location.origin}/signup?ref=${code}`);
+      setReferralLink(code ? `${window.location.origin}/tutor-register?ref=${code}` : "");
+
+      // 1b. Sum up completed referral rewards for this tutor.
+      const { data: referralRows, error: referralErr } = await supabase
+        .from("referral_earnings")
+        .select("amount")
+        .eq("tutor_id", user.id);
+
+      if (referralErr) console.error("Error loading referral earnings:", referralErr.message);
+
+      const referralTotal = (referralRows || []).reduce(
+        (sum, row) => sum + (parseFloat(row.amount) || 0),
+        0
+      );
+      setReferralCount((referralRows || []).length);
 
       // 2. Fetch only courses belonging to THIS specific tutor
       const { data: courses, error: courseErr } = await supabase
@@ -58,13 +83,16 @@ export default function TutorEarnings() {
 
       if (courseIds.length === 0) {
         // If the tutor has no courses yet, keep metrics at 0
+        // (but still reflect any referral bonus, which is independent
+        // of course revenue)
         setTransactions([]);
         setMetrics({
           thisMonth: 0,
-          totalEarnings: 0,
+          totalEarnings: referralTotal,
           pendingPayout: 0,
-          totalPaidOut: 0,
+          totalPaidOut: referralTotal,
           avgPerCourse: 0,
+          referralBonus: referralTotal,
         });
         setLoading(false);
         return;
@@ -158,16 +186,20 @@ export default function TutorEarnings() {
         };
       });
 
-      const paidRev = totalRev; // "Total Paid Out" mirrors actual collected revenue
+      // Referral bonuses are real, already-credited money - fold them
+      // into totalEarnings / totalPaidOut, but keep them broken out too
+      // (referralBonus) so the UI can show it separately.
+      const paidRev = totalRev + referralTotal;
       const avgCourse = courseList.length > 0 ? totalRev / courseList.length : 0;
 
       setTransactions(formattedTxns);
       setMetrics({
         thisMonth: monthRev,
-        totalEarnings: totalRev,
+        totalEarnings: totalRev + referralTotal,
         pendingPayout: pendingRev,
         totalPaidOut: paidRev,
         avgPerCourse: avgCourse,
+        referralBonus: referralTotal,
       });
     } catch (err) {
       console.error("Error loading tutor earnings:", err.message);
@@ -311,6 +343,10 @@ export default function TutorEarnings() {
               Share your referral link with a friend. Once they sign up and
               subscribe to Premium in their Dashboard, RM 10 will be added
               to your earnings automatically.
+              {referralCount > 0 && (
+                <> You've earned <strong>RM {metrics.referralBonus.toFixed(2)}</strong> from{" "}
+                {referralCount} completed referral{referralCount !== 1 ? "s" : ""} so far.</>
+              )}
             </p>
 
             <div className="referral-link-row">
@@ -321,11 +357,11 @@ export default function TutorEarnings() {
                 className="referral-link-input"
                 onFocus={(e) => e.target.select()}
               />
-              <button className="referral-btn copy" onClick={handleCopyReferral}>
+              <button className="referral-btn copy" onClick={handleCopyReferral} disabled={!referralLink}>
                 <HiOutlineClipboard />
                 {copied ? "Copied!" : "Copy"}
               </button>
-              <button className="referral-btn share" onClick={handleShareReferral}>
+              <button className="referral-btn share" onClick={handleShareReferral} disabled={!referralLink}>
                 <HiOutlineShare />
                 Share
               </button>

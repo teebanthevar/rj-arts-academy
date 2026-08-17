@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaBars,
-  FaSearch,
   FaBell,
   FaEnvelope,
   FaGraduationCap
@@ -232,24 +231,19 @@ function TutorHeader({ toggleSidebar }) {
         <button className="menu-btn" onClick={toggleSidebar}>
           <FaBars />
         </button>
-        <div className="search-box">
-          <FaSearch />
-          <input type="text" placeholder="Search students, courses..." />
-        </div>
-      </div>
 
-      <div className="header-right">
         <button
           type="button"
           className="trial-box"
           onClick={() => navigate("/teachhub")}
           title="Back to TeachHub"
-          style={{ cursor: "pointer", border: "none", font: "inherit", color: "inherit" }}
         >
           <FaGraduationCap />
           <span>TeachHub</span>
         </button>
+      </div>
 
+      <div className="header-right">
         {/* Messages / Envelope Button */}
         <div className="icon-dropdown-wrapper" ref={msgRef}>
           <button
@@ -319,12 +313,6 @@ function TutorHeader({ toggleSidebar }) {
           <img
             src={displayAvatar}
             alt={profile.fullName}
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "50%",
-              objectFit: "cover",
-            }}
           />
           <div>
             <h4>{profile.fullName}</h4>

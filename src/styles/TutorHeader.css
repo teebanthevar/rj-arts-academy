@@ -1,281 +1,154 @@
-.tutor-header{
+/* =========================================================
+   TUTOR HEADER — Standardized, mobile-first responsive CSS
+   NOTE: .tutor-profile must be a DIRECT CHILD of .tutor-header
+   (sibling of .header-left / .header-right), not nested inside
+   .header-right. This is required for true centering on mobile.
+   ========================================================= */
 
-height:85px;
-
-background:white;
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-padding:0 35px;
-
-box-shadow:0 3px 15px rgba(0,0,0,.05);
-
-position:sticky;
-
-top:0;
-
-z-index:20;
-
-}
-
-.header-left{
-
-display:flex;
-
-align-items:center;
-
-gap:20px;
-
-}
-
-.menu-btn{
-
-display:none;
-
-width:45px;
-
-height:45px;
-
-border:none;
-
-background:#0F3D2E;
-
-color:white;
-
-border-radius:12px;
-
-cursor:pointer;
-
-font-size:18px;
-
-}
-
-.search-box{
-
-display:flex;
-
-align-items:center;
-
-gap:12px;
-
-background:#F5F6FA;
-
-padding:14px 20px;
-
-border-radius:15px;
-
-width:360px;
-
-}
-
-.search-box svg{
-
-color:#999;
-
-}
-
-.search-box input{
-
-border:none;
-
-background:none;
-
-width:100%;
-
-outline:none;
-
-font-size:15px;
-
-}
-
-.header-right{
-
-display:flex;
-
-align-items:center;
-
-gap:18px;
-
-}
-
-.trial-box{
-
-display:flex;
-
-align-items:center;
-
-gap:10px;
-
-background:#FFF8E4;
-
-color:#B78500;
-
-padding:12px 20px;
-
-border-radius:30px;
-
-font-weight:700;
-
-}
-
-.icon-btn{
-
-position:relative;
-
-width:48px;
-
-height:48px;
-
-border:none;
-
-background:#F5F6FA;
-
-border-radius:15px;
-
-cursor:pointer;
-
-font-size:18px;
-
-}
-
-.icon-btn span{
-
-position:absolute;
-
-right:-3px;
-
-top:-3px;
-
-width:20px;
-
-height:20px;
-
-background:red;
-
-border-radius:50%;
-
-display:flex;
-
-justify-content:center;
-
-align-items:center;
-
-color:white;
-
-font-size:11px;
-
-font-weight:bold;
-
-}
-
-.tutor-profile{
-
-display:flex;
-
-align-items:center;
-
-gap:15px;
-
-cursor:pointer;
-
-}
-
-.tutor-profile img{
-
-width:50px;
-
-height:50px;
-
-border-radius:50%;
-
-object-fit:cover;
-
-}
-
-.tutor-profile h4{
-
-margin:0;
-
-font-size:16px;
-
-}
-
-.tutor-profile small{
-
-color:#777;
-
-}
-
-@media(max-width:992px){
-
-.menu-btn{
-
-display:flex;
-
-justify-content:center;
-
-align-items:center;
-
-}
-
-.search-box{
-
-width:180px;
-
-}
-
-.trial-box{
-
-display:none;
-
-}
-
-.tutor-header{
-
-padding:0 18px;
-
-}
-
-}
-
-@media(max-width:650px){
-
-.search-box{
-
-display:none;
-
-}
-
-.tutor-profile div{
-
-display:none;
-
-}
-
-}
-
-/* Ensure the header and its menu button stay above normal page content */
 .tutor-header {
-  position: relative;
+  height: 85px;
+  background: #fff;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, .05);
+  position: sticky;
+  top: 0;
   z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 35px;
+  gap: 16px;
 }
 
-/* Ensure the sidebar/hamburger drawer container (wherever it renders globally) has higher stack order than lock overlays */
-.sidebar, 
-.mobile-nav-drawer, 
-.tutor-sidebar {
-  z-index: 2000 !important;
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  order: 1;
 }
 
-/* Ensure lock overlays sit below active navigation drawers */
-.subscription-lock-overlay {
-  z-index: 1500 !important;
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  order: 3; /* sits after the profile on desktop */
 }
 
+/* Profile sits between left group and right group on desktop,
+   visually at the far right (order 2, right after header-left,
+   but header-right's justify-content:flex-end + gap on parent
+   keeps everything grouped correctly on wide screens) */
+.tutor-profile {
+  order: 2;
+  margin-left: auto; /* pushes profile + header-right to the right on desktop */
+}
+
+.menu-btn {
+  display: none;
+  width: 45px;
+  height: 45px;
+  border: none;
+  background: #0F3D2E;
+  color: white;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.trial-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #FFF8E4;
+  color: #B78500;
+  padding: 12px 20px;
+  border-radius: 30px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+}
+
+.trial-box:hover {
+  background: #FDF0C8;
+}
+
+.icon-btn {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: #F5F6FA;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.icon-btn span {
+  position: absolute;
+  right: -3px;
+  top: -3px;
+  width: 20px;
+  height: 20px;
+  background: red;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.tutor-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.tutor-profile img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #d4af37;
+  padding: 1px;
+  background: white;
+}
+
+.tutor-profile div {
+  min-width: 0;
+}
+
+.tutor-profile h4 {
+  margin: 0;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.tutor-profile small {
+  color: #777;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 160px;
+}
+
+/* =========================
+   Icon dropdown (mail/bell)
+   ========================= */
 .icon-dropdown-wrapper {
   position: relative;
 }
@@ -319,4 +192,147 @@ display:none;
   color: #888;
   font-size: 14px;
   padding: 8px 6px;
+}
+
+/* =========================
+   Stacking-context safety
+   ========================= */
+.sidebar,
+.mobile-nav-drawer,
+.tutor-sidebar {
+  z-index: 2000 !important;
+}
+
+.subscription-lock-overlay {
+  z-index: 1500 !important;
+}
+
+/* =========================================================
+   TABLET (≤992px)
+   ========================================================= */
+@media (max-width: 992px) {
+  .menu-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .tutor-header {
+    padding: 0 18px;
+    height: 72px;
+  }
+
+  .trial-box span {
+    display: none;
+  }
+
+  .trial-box {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .tutor-profile img {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+/* =========================================================
+   MOBILE (≤650px) — true centered profile via CSS Grid
+   ========================================================= */
+@media (max-width: 650px) {
+  .tutor-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    padding: 0 12px;
+    gap: 8px;
+    height: 64px;
+  }
+
+  .header-left {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .tutor-profile {
+    grid-column: 2;
+    justify-self: center;
+    margin-left: 0; /* undo desktop auto-margin trick */
+    text-align: center;
+  }
+
+  .header-right {
+    grid-column: 3;
+    justify-self: end;
+  }
+
+  .menu-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    font-size: 15px;
+  }
+
+  .trial-box {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 10px;
+  }
+
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 15px;
+    border-radius: 10px;
+  }
+
+  .tutor-profile img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .tutor-profile h4 {
+    font-size: 13px;
+    max-width: 80px;
+  }
+
+  .tutor-profile small {
+    font-size: 11px;
+    max-width: 80px;
+  }
+
+  .dropdown-panel {
+    width: 260px;
+    right: -40px;
+  }
+}
+
+/* =========================================================
+   VERY SMALL SCREENS (≤400px)
+   ========================================================= */
+@media (max-width: 400px) {
+  .tutor-profile small {
+    display: none;
+  }
+
+  .header-right {
+    gap: 8px;
+  }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .tutor-profile img {
+    width: 36px;
+    height: 36px;
+  }
 }

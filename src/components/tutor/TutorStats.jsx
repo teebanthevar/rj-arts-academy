@@ -65,40 +65,49 @@ function TutorStats() {
       }
 
       const courseCount = tutorCourses.length;
+      const tutorCourseIds = tutorCourses.map((c) => c.id);
 
       /* =========================================================
          2. FETCH UNIQUE STUDENTS FOR THIS TUTOR
-         
+
          IMPORTANT:
-         TutorStudents.jsx uses:
-         
-         enrollments
-         .eq("tutor_id", user.id)
-         
-         So the stats card now uses the SAME relationship.
+         Instead of trusting a denormalized `enrollments.tutor_id`
+         column (which may not be populated on every row), students
+         are derived the same reliable way TutorEarnings.jsx does:
+         pull enrollments for the course IDs this tutor actually
+         owns, and exclude declined enrollments - a declined
+         enrollment never became a real student.
          ========================================================= */
 
-      const { data: enrollmentStudents, error: studentErr } =
-        await supabase
-          .from("enrollments")
-          .select("student_id")
-          .eq("tutor_id", user.id);
+      let totalStudents = 0;
 
-      if (studentErr) {
-        console.error(
-          "Error fetching tutor students:",
-          studentErr
+      if (tutorCourseIds.length > 0) {
+        const { data: enrollmentStudents, error: studentErr } =
+          await supabase
+            .from("enrollments")
+            .select("student_id, status, course_id")
+            .in("course_id", tutorCourseIds);
+
+        if (studentErr) {
+          console.error(
+            "Error fetching tutor students:",
+            studentErr
+          );
+        }
+
+        const activeEnrollments = (enrollmentStudents || []).filter(
+          (enrollment) => enrollment.status !== "declined"
         );
+
+        // Count UNIQUE students
+        const uniqueStudentIds = new Set(
+          activeEnrollments
+            .map((enrollment) => enrollment.student_id)
+            .filter(Boolean)
+        );
+
+        totalStudents = uniqueStudentIds.size;
       }
-
-      // Count UNIQUE students
-      const uniqueStudentIds = new Set(
-        (enrollmentStudents || [])
-          .map((enrollment) => enrollment.student_id)
-          .filter(Boolean)
-      );
-
-      const totalStudents = uniqueStudentIds.size;
 
       /* =========================================================
          3. FETCH FOLLOWERS
