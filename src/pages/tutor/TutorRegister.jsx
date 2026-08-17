@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaArrowLeft, FaChalkboardTeacher, FaGlobe, FaChartLine } from "react-icons/fa";
 import { supabase } from "../../lib/supabase";
 import "../../styles/TutorRegister.css";
 
 function TutorRegister() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const refCode = searchParams.get("ref"); // e.g. /tutor-register?ref=AB12CD34
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,6 +17,48 @@ function TutorRegister() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  // Links this new tutor to whoever referred them, if a valid ?ref=
+  // code was present in the URL. Runs AFTER the "tutors" row already
+  // exists, since referrals.referred_id has to point at a real row.
+  // Never blocks or fails the signup flow - referral linking is
+  // best-effort only.
+  const linkReferralIfPresent = async (newTutorId) => {
+    if (!refCode || !newTutorId) return;
+
+    try {
+      const { data: referrer, error: referrerErr } = await supabase
+        .from("tutors")
+        .select("id")
+        .eq("referral_code", refCode)
+        .maybeSingle();
+
+      if (referrerErr || !referrer) {
+        console.warn("Referral code not found:", refCode);
+        return;
+      }
+
+      if (referrer.id === newTutorId) {
+        console.warn("Self-referral blocked");
+        return;
+      }
+
+      const { error: insertErr } = await supabase.from("referrals").insert({
+        referrer_id: referrer.id,
+        referred_id: newTutorId,
+        referral_code: refCode,
+        status: "pending",
+      });
+
+      // 23505 = unique_violation (this account was already referred
+      // by someone else) - safe to ignore, not a real error.
+      if (insertErr && insertErr.code !== "23505") {
+        console.error("Error linking referral:", insertErr.message);
+      }
+    } catch (err) {
+      console.error("Unexpected error linking referral:", err.message);
+    }
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -55,13 +100,16 @@ function TutorRegister() {
         { onConflict: "id" }
       );
 
-      setLoading(false);
-
       if (tutorError) {
+        setLoading(false);
         setErrorMessage(tutorError.message);
         return;
       }
 
+      // Tutor row now exists - safe to link the referral, if any.
+      await linkReferralIfPresent(authData.user.id);
+
+      setLoading(false);
       navigate("/tutor-dashboard");
     }
   };
@@ -122,6 +170,12 @@ function TutorRegister() {
             <h2>Create Tutor Account</h2>
             <p>Fill in your details to get started.</p>
           </div>
+
+          {refCode && (
+            <div className="referral-banner">
+              🎁 You were invited by a friend — join in to activate their reward!
+            </div>
+          )}
 
           {errorMessage && <div className="error-banner">{errorMessage}</div>}
 

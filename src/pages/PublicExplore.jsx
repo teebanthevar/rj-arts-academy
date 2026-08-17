@@ -6,6 +6,7 @@ import "./PublicExplore.css";
 export default function PublicExplore() {
   const navigate = useNavigate();
   const [tutors, setTutors] = useState([]);
+  const [tutorCourses, setTutorCourses] = useState({}); // { tutor_id: [title1, title2, ...] }
   const [featuredCourses, setFeaturedCourses] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,6 +21,7 @@ export default function PublicExplore() {
     checkUserSession();
     fetchPublicTutors();
     fetchFeaturedCourses();
+    fetchAllCoursesForSearch();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
@@ -52,7 +54,7 @@ export default function PublicExplore() {
         .select("*")
         .eq("id", userId)
         .single();
-      
+
       if (!error && data) {
         setStudentProfile(data);
       }
@@ -106,6 +108,28 @@ export default function PublicExplore() {
       setTutors(data || []);
     } catch (err) {
       console.error("Error fetching public tutors:", err);
+    }
+  };
+
+  // Pulls every course's title + tutor_id so we can search tutors by the
+  // actual subjects they teach (subjects live in `courses`, not `profiles`).
+  const fetchAllCoursesForSearch = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("courses")
+        .select("title, tutor_id");
+
+      if (error) throw error;
+
+      const grouped = {};
+      (data || []).forEach((course) => {
+        if (!course.tutor_id) return;
+        if (!grouped[course.tutor_id]) grouped[course.tutor_id] = [];
+        grouped[course.tutor_id].push(course.title);
+      });
+      setTutorCourses(grouped);
+    } catch (err) {
+      console.error("Error fetching courses for search:", err);
     }
   };
 
@@ -191,11 +215,16 @@ export default function PublicExplore() {
   };
 
   const filteredTutors = tutors.filter((tutor) => {
-    const matchesSearch = 
-      tutor.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tutor.profession?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tutor.city?.toLowerCase().includes(searchQuery.toLowerCase());
-    
+    const query = searchQuery.toLowerCase();
+    const subjects = tutorCourses[tutor.id] || [];
+
+    const matchesSearch =
+      tutor.full_name?.toLowerCase().includes(query) ||
+      tutor.profession?.toLowerCase().includes(query) ||
+      tutor.city?.toLowerCase().includes(query) ||
+      tutor.category?.toLowerCase().includes(query) ||
+      subjects.some((title) => title?.toLowerCase().includes(query));
+
     const matchesCategory = selectedCategory === "All" || tutor.category === selectedCategory;
 
     return matchesSearch && matchesCategory;
@@ -206,16 +235,16 @@ export default function PublicExplore() {
       {/* Navigation Bar */}
       <nav className="public-nav">
         <div className="logo">Teach<span className="logo-hub">Hub</span></div>
-        
+
         <div className="nav-actions">
           {currentUser ? (
             <div className="logged-in-user-panel">
               <span className="welcome-user-text">
                 Welcome, {studentProfile?.full_name || currentUser.email}
               </span>
-              
+
               <div className="user-menu-dropdown-wrapper">
-                <button 
+                <button
                   className="nav-dashboard-btn"
                   onClick={() => setShowUserMenu(!showUserMenu)}
                 >
@@ -225,15 +254,19 @@ export default function PublicExplore() {
                 {showUserMenu && (
                   <div className="user-dropdown-popup">
                     {studentProfile && (
-                      <Link 
-                        to={`/student-public-profile/${currentUser.id}`}
+                      <Link
+                        to={
+                          studentProfile.role === "tutor"
+                            ? "/tutor-dashboard"
+                            : `/student-public-profile/${currentUser.id}`
+                        }
                         className="dropdown-link-item"
                         onClick={() => setShowUserMenu(false)}
                       >
                         Dashboard Home
                       </Link>
                     )}
-                    <button 
+                    <button
                       onClick={() => {
                         setShowUserMenu(false);
                         handleLogout();
@@ -272,16 +305,16 @@ export default function PublicExplore() {
       <div className="public-hero">
         <div className="public-hero-content-wrapper">
           {currentCourse && (
-            <div 
+            <div
               className="featured-course-banner"
               style={{
-                ...(currentCourse.bg_image_url 
-                  ? { 
+                ...(currentCourse.bg_image_url
+                  ? {
                       backgroundImage: `url(${currentCourse.bg_image_url})`,
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                       backgroundRepeat: "no-repeat"
-                    } 
+                    }
                   : {
                       background: "linear-gradient(135deg, #0f3d2e 0%, #1b5e47 100%)"
                     }
@@ -297,7 +330,7 @@ export default function PublicExplore() {
                 </div>
               )}
 
-              <button 
+              <button
                 className="featured-explore-btn"
                 onClick={() => handleEnrollClick(currentCourse)}
               >
@@ -308,7 +341,7 @@ export default function PublicExplore() {
 
           <h1>Find Expert Tutors & Available Subjects</h1>
           <p>Explore professional educators worldwide and accelerate your learning journey.</p>
-          
+
           <div className="search-filter-bar">
             <input
               type="text"
@@ -339,7 +372,7 @@ export default function PublicExplore() {
                   <h3>{tutor.full_name}</h3>
                   <p className="tutor-profession">{tutor.profession || "Professional Tutor"}</p>
                   <span className="tutor-cat-tag">{tutor.category || "General"}</span>
-                  
+
                   <div className="tutor-action-container" style={{ margin: "12px 0" }}>
                     <button
                       onClick={(e) => handleToggleFollow(tutor.id, e)}
@@ -359,7 +392,7 @@ export default function PublicExplore() {
                     </button>
                   </div>
 
-                  <button 
+                  <button
                     className="book-session-btn"
                     onClick={() => handleViewProfile(tutor.id)}
                   >

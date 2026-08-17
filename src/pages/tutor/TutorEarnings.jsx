@@ -6,6 +6,9 @@ import {
   HiOutlineClock,
   HiOutlineCheckCircle,
   HiOutlineArrowTrendingUp,
+  HiOutlineGift,
+  HiOutlineClipboard,
+  HiOutlineShare,
 } from "react-icons/hi2";
 import "./TutorEarnings.css";
 
@@ -19,6 +22,9 @@ export default function TutorEarnings() {
     avgPerCourse: 0,
   });
   const [transactions, setTransactions] = useState([]);
+  const [referralCode, setReferralCode] = useState("");
+  const [referralLink, setReferralLink] = useState("");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetchEarningsData();
@@ -34,6 +40,11 @@ export default function TutorEarnings() {
         setLoading(false);
         return;
       }
+
+      // Build a simple referral code/link from the tutor's own id
+      const code = user.id.slice(0, 8).toUpperCase();
+      setReferralCode(code);
+      setReferralLink(`${window.location.origin}/signup?ref=${code}`);
 
       // 2. Fetch only courses belonging to THIS specific tutor
       const { data: courses, error: courseErr } = await supabase
@@ -59,14 +70,24 @@ export default function TutorEarnings() {
         return;
       }
 
-      // 3. Fetch enrollments strictly tied to this tutor's course IDs
+      // 3. Fetch enrollments strictly tied to this tutor's course IDs.
+      //    fee_status is the actual payment status ("Paid" / "Pending" /
+      //    "Overdue" / "Partial") set on the enrollment row - status is a
+      //    completely different field (the enrollment approval state:
+      //    null / "pending" / "approved" / "declined"). The two must never
+      //    be conflated, and a declined enrollment must never count as
+      //    revenue in any form.
       const { data: enrollments, error: enrErr } = await supabase
         .from("enrollments")
-        .select("id, created_at, status, student_id, course_id")
+        .select("id, created_at, status, fee_status, student_id, course_id")
         .in("course_id", courseIds);
 
       if (enrErr) throw enrErr;
-      const enrList = enrollments || [];
+      const rawEnrList = enrollments || [];
+
+      // A declined enrollment never generated any revenue - it's excluded
+      // completely, not just from "paid" bucketing.
+      const enrList = rawEnrList.filter((e) => e.status !== "declined");
 
       // 4. Enrich student profiles and map course details safely
       const enrListEnriched = await Promise.all(
@@ -93,10 +114,9 @@ export default function TutorEarnings() {
       );
 
       // 5. Calculate Real Financial Metrics
-      let totalRev = 0;
-      let monthRev = 0;
-      let pendingRev = 0;
-      let paidRev = 0;
+      let totalRev = 0;   // total actually collected (fee_status === "Paid")
+      let monthRev = 0;   // collected this calendar month
+      let pendingRev = 0; // not yet collected (Pending / Overdue / Partial)
 
       const currentDate = new Date();
       const currentMonth = currentDate.getMonth();
@@ -106,16 +126,19 @@ export default function TutorEarnings() {
         const price = parseFloat(item.courses?.price) || 0;
         const eDate = new Date(item.created_at || Date.now());
         const isThisMonth = eDate.getMonth() === currentMonth && eDate.getFullYear() === currentYear;
-        const status = item.status || "Paid";
 
-        totalRev += price;
-        if (isThisMonth) {
-          monthRev += price;
-        }
-        if (status.toLowerCase() === "pending") {
-          pendingRev += price;
+        // fee_status is the real payment status - default an unset value
+        // to "Pending" (unpaid), never to "Paid".
+        const feeStatus = item.fee_status || "Pending";
+        const isPaid = feeStatus === "Paid";
+
+        if (isPaid) {
+          totalRev += price;
+          if (isThisMonth) {
+            monthRev += price;
+          }
         } else {
-          paidRev += price;
+          pendingRev += price;
         }
 
         const dateStr = eDate.toLocaleDateString("en-GB", {
@@ -130,11 +153,12 @@ export default function TutorEarnings() {
           course: item.courses?.title || "Professional Course",
           amount: `RM ${price.toFixed(2)}`,
           date: dateStr,
-          status: status,
+          status: feeStatus,
           rawAmount: price,
         };
       });
 
+      const paidRev = totalRev; // "Total Paid Out" mirrors actual collected revenue
       const avgCourse = courseList.length > 0 ? totalRev / courseList.length : 0;
 
       setTransactions(formattedTxns);
@@ -149,6 +173,32 @@ export default function TutorEarnings() {
       console.error("Error loading tutor earnings:", err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCopyReferral = async () => {
+    try {
+      await navigator.clipboard.writeText(referralLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Could not copy referral link:", err);
+    }
+  };
+
+  const handleShareReferral = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Join TeachHub",
+          text: "Join me on TeachHub and get started with courses!",
+          url: referralLink,
+        });
+      } catch (err) {
+        // user cancelled share sheet - no action needed
+      }
+    } else {
+      handleCopyReferral();
     }
   };
 
@@ -238,6 +288,55 @@ export default function TutorEarnings() {
             </div>
             <p>
               Earnings and student fee statuses are updated automatically. Payouts are reviewed and credited directly by the administration on the 1st of every month.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Refer & Earn Section */}
+      <div className="earnings-card referral-card">
+        <div className="card-header">
+          <h3>Refer & Earn</h3>
+          <span className="payout-note">RM 10 per friend</span>
+        </div>
+
+        <div className="referral-body">
+          <div className="referral-icon-wrapper">
+            <HiOutlineGift />
+          </div>
+
+          <div className="referral-text">
+            <h4>Get RM 10 for every friend you invite</h4>
+            <p>
+              Share your referral link with a friend. Once they sign up and
+              subscribe to Premium in their Dashboard, RM 10 will be added
+              to your earnings automatically.
+            </p>
+
+            <div className="referral-link-row">
+              <input
+                type="text"
+                readOnly
+                value={referralLink}
+                className="referral-link-input"
+                onFocus={(e) => e.target.select()}
+              />
+              <button className="referral-btn copy" onClick={handleCopyReferral}>
+                <HiOutlineClipboard />
+                {copied ? "Copied!" : "Copy"}
+              </button>
+              <button className="referral-btn share" onClick={handleShareReferral}>
+                <HiOutlineShare />
+                Share
+              </button>
+            </div>
+
+            <p className="referral-terms">
+              <strong>Terms:</strong> Reward is credited only after your
+              referred friend creates a new account using your link and
+              successfully subscribes to a Premium plan in their Dashboard.
+              Rewards for accounts that already existed on TeachHub, or that
+              do not complete a Premium subscription, will not be paid out.
             </p>
           </div>
         </div>

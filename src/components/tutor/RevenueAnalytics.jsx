@@ -71,12 +71,20 @@ function RevenueAnalytics() {
         return;
       }
 
+      // Revenue should reflect money actually collected:
+      // - never count a declined enrollment
+      // - only count fee_status === "Paid" (Pending/Overdue/Partial haven't
+      //   actually been collected yet, so they shouldn't inflate the totals)
+      const paidEnrollments = enrollments.filter(
+        (e) => e.status !== "declined" && e.fee_status === "Paid"
+      );
+
       // 3. Aggregate totals
       const currentYear = new Date().getFullYear();
       const monthlyTotals = Array(12).fill(0);
       let grandTotal = 0;
 
-      enrollments.forEach((enrollment) => {
+      paidEnrollments.forEach((enrollment) => {
         const dateStr = enrollment.created_at || enrollment.enrolled_at;
         const date = dateStr ? new Date(dateStr) : new Date();
         const price = Number(enrollment.amount) || Number(enrollment.price) || coursePriceMap[enrollment.course_id] || 0;

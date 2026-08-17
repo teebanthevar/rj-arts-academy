@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import {
@@ -15,6 +16,14 @@ import {
   HiOutlinePlus,
   HiOutlinePencil,
   HiOutlineTrash,
+  HiOutlineComputerDesktop,
+  HiOutlineCloudArrowUp,
+  HiOutlineDocumentText,
+  HiOutlineAcademicCap,
+  HiOutlineMegaphone,
+  HiOutlineChartBar,
+  HiOutlineCheckCircle,
+  HiOutlineBanknotes,
 } from "react-icons/hi2";
 import "../styles/StudentPublicProfile.css";
 
@@ -98,6 +107,18 @@ export default function StudentPublicProfile() {
   const [savingCategoryId, setSavingCategoryId] = useState(null);
   const [deletingCategoryId, setDeletingCategoryId] = useState(null);
 
+  // ---- ASSIGNMENTS / TUTOR-LINKING STATE ----
+  const [projectsSubTab, setProjectsSubTab] = useState("portfolio"); // "portfolio" | "assignments"
+  const [tutorMap, setTutorMap] = useState({}); // tutor_id -> { name, avatar_url }
+  const [assignments, setAssignments] = useState([]);
+  const [selectedEnrollmentId, setSelectedEnrollmentId] = useState("");
+  const [assignmentFile, setAssignmentFile] = useState(null);
+  const [uploadingAssignment, setUploadingAssignment] = useState(false);
+  const [assignmentError, setAssignmentError] = useState("");
+
+  // ---- ANNOUNCEMENTS (tutor -> student notices) STATE ----
+  const [notices, setNotices] = useState([]);
+
   const [messages, setMessages] = useState([]);
   const [conversations, setConversations] = useState([
     { id: "ai-assistant", name: "TeachHub AI Assistant", role: "AI Support", avatar: "AI", online: true, lastMessage: "Hello student! How can I help you today?" }
@@ -122,6 +143,7 @@ export default function StudentPublicProfile() {
   const [callDuration, setCallDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -134,11 +156,25 @@ export default function StudentPublicProfile() {
   const pendingIceCandidatesRef = useRef([]);
   const activeCallPartnerIdRef = useRef(null);
   const callStateRef = useRef(null);
+  const screenStreamRef = useRef(null);
+  const cameraTrackRef = useRef(null);
 
   const emojisList = ["😀", "🚀", "💡", "🔥", "⭐", "🎨", "📚", "💻", "❤️", "👍", "🎯", "✨"];
 
   useEffect(() => {
     callStateRef.current = callState;
+  }, [callState]);
+
+  // Lock body scroll while any call UI (incoming/outgoing/active) is on screen
+  useEffect(() => {
+    if (callState === "outgoing" || callState === "active" || callState === "incoming") {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [callState]);
 
   useEffect(() => {
@@ -184,8 +220,49 @@ export default function StudentPublicProfile() {
       })
       .subscribe();
 
+    // Live updates for tutor announcements posted to this student
+    const noticeSubscription = supabase
+      .channel("public:student_notices")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "student_notices" },
+        (payload) => {
+          if (payload.new.student_id === id) {
+            setNotices((prev) => {
+              if (prev.some((n) => n.id === payload.new.id)) return prev;
+              return [payload.new, ...prev];
+            });
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "student_notices" },
+        (payload) => {
+          setNotices((prev) => prev.filter((n) => n.id !== payload.old.id));
+        }
+      )
+      .subscribe();
+
+    // Live updates when a tutor edits this student's progress / attendance /
+    // fee status on a specific enrollment (each tutor updates their own row).
+    const enrollmentSubscription = supabase
+      .channel("public:enrollments-student")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "enrollments", filter: `student_id=eq.${id}` },
+        (payload) => {
+          setEnrolledCourses((prev) =>
+            prev.map((c) => (c.id === payload.new.id ? { ...c, ...payload.new } : c))
+          );
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(messageSubscription);
+      supabase.removeChannel(noticeSubscription);
+      supabase.removeChannel(enrollmentSubscription);
     };
   }, [id]);
 
@@ -233,6 +310,10 @@ export default function StudentPublicProfile() {
       if (localStreamRef.current) {
         localStreamRef.current.getTracks().forEach((t) => t.stop());
         localStreamRef.current = null;
+      }
+      if (screenStreamRef.current) {
+        screenStreamRef.current.getTracks().forEach((t) => t.stop());
+        screenStreamRef.current = null;
       }
       if (peerSignalChannelRef.current) {
         supabase.removeChannel(peerSignalChannelRef.current.channel);
@@ -485,6 +566,13 @@ export default function StudentPublicProfile() {
       localStreamRef.current = null;
     }
 
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach((track) => track.stop());
+      screenStreamRef.current = null;
+    }
+    cameraTrackRef.current = null;
+    setIsScreenSharing(false);
+
     if (localVideoRef.current) localVideoRef.current.srcObject = null;
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
     if (remoteAudioRef.current) remoteAudioRef.current.srcObject = null;
@@ -519,6 +607,63 @@ export default function StudentPublicProfile() {
     });
     setIsCameraOff(!isCameraOff);
   };
+
+  const stopScreenShare = async () => {
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach((track) => track.stop());
+      screenStreamRef.current = null;
+    }
+
+    const sender = peerConnectionRef.current
+      ?.getSenders()
+      .find((s) => s.track && s.track.kind === "video");
+
+    if (sender && cameraTrackRef.current) {
+      try {
+        await sender.replaceTrack(cameraTrackRef.current);
+      } catch (err) {
+        console.error("Error reverting to camera track:", err);
+      }
+    }
+
+    setIsScreenSharing(false);
+  };
+
+  const toggleScreenShare = async () => {
+    if (!peerConnectionRef.current) return;
+
+    if (isScreenSharing) {
+      stopScreenShare();
+      return;
+    }
+
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false,
+      });
+      const screenTrack = screenStream.getVideoTracks()[0];
+      screenStreamRef.current = screenStream;
+
+      const sender = peerConnectionRef.current
+        .getSenders()
+        .find((s) => s.track && s.track.kind === "video");
+
+      if (sender) {
+        cameraTrackRef.current = sender.track;
+        await sender.replaceTrack(screenTrack);
+      }
+
+      // Auto-revert if the user stops sharing from the browser's own UI
+      screenTrack.onended = () => {
+        stopScreenShare();
+      };
+
+      setIsScreenSharing(true);
+    } catch (err) {
+      console.error("Error starting screen share:", err);
+    }
+  };
   // ---- END CALLING LOGIC ----
 
   const fetchStudentData = async () => {
@@ -541,7 +686,7 @@ export default function StudentPublicProfile() {
 
       const { data: coursesData, error: coursesError } = await supabase
         .from("enrollments")
-        .select("id, course_title, course_id, tutor_id, created_at, status")
+        .select("id, course_title, course_id, tutor_id, created_at, status, progress, attendance, fee_status")
         .eq("student_id", id);
 
       if (coursesError) {
@@ -551,6 +696,7 @@ export default function StudentPublicProfile() {
       setEnrolledCourses(coursesData || []);
 
       const tutorConversations = [];
+      const tutorNameMap = {};
       if (coursesData) {
         for (const course of coursesData) {
           if (course.tutor_id && !tutorConversations.some(t => t.id === course.tutor_id)) {
@@ -577,8 +723,56 @@ export default function StudentPublicProfile() {
               online: true,
               lastMessage: `Instructor for ${course.course_title}`
             });
+
+            tutorNameMap[course.tutor_id] = { name: tutorName, avatar_url: tutorProfile.avatar_url || null, initials };
           }
         }
+      }
+
+      // ---- Announcements (tutor -> student notices) ----
+      // Fetch every notice ever sent to this student (regardless of which
+      // tutor sent it), then make sure we have a display name for each
+      // sender - even ones the student isn't otherwise enrolled with.
+      const { data: noticeData, error: noticeError } = await supabase
+        .from("student_notices")
+        .select("*")
+        .eq("student_id", id)
+        .order("created_at", { ascending: false });
+
+      if (noticeError) {
+        console.error("Error fetching announcements:", noticeError);
+      }
+
+      if (noticeData && noticeData.length > 0) {
+        const missingTutorIds = [...new Set(noticeData.map((n) => n.tutor_id))].filter(
+          (tid) => tid && !tutorNameMap[tid]
+        );
+
+        if (missingTutorIds.length > 0) {
+          const { data: extraProfiles } = await supabase
+            .from("profiles")
+            .select("id, full_name")
+            .in("id", missingTutorIds);
+
+          (extraProfiles || []).forEach((p) => {
+            tutorNameMap[p.id] = { name: p.full_name || "Tutor" };
+          });
+        }
+
+        setNotices(noticeData);
+      } else {
+        setNotices([]);
+      }
+
+      setTutorMap(tutorNameMap);
+
+      // Default the assignment submission form to the student's first approved,
+      // tutor-linked enrollment so there's always a valid tutor_id to submit against.
+      const approvedForAssignments = (coursesData || []).filter(
+        (c) => (!c.status || c.status === "approved") && c.tutor_id
+      );
+      if (approvedForAssignments.length > 0) {
+        setSelectedEnrollmentId((prev) => prev || approvedForAssignments[0].id);
       }
 
       setConversations([
@@ -591,6 +785,16 @@ export default function StudentPublicProfile() {
         .select("*")
         .eq("student_id", id);
       setArtworks(artData || []);
+
+      const { data: assignmentData, error: assignmentError2 } = await supabase
+        .from("assignments")
+        .select("*")
+        .eq("student_id", id)
+        .order("submitted_at", { ascending: false });
+      if (assignmentError2) {
+        console.error("Error fetching assignments:", assignmentError2);
+      }
+      setAssignments(assignmentData || []);
     } catch (err) {
       console.error("Error loading dashboard details:", err);
     } finally {
@@ -864,6 +1068,71 @@ export default function StudentPublicProfile() {
     }
   };
 
+  const handleUploadAssignment = async () => {
+    setAssignmentError("");
+    if (!assignmentFile) {
+      setAssignmentError("Choose a file first.");
+      return;
+    }
+    const enrollment = enrolledCourses.find((e) => e.id === selectedEnrollmentId);
+    if (!enrollment || !enrollment.tutor_id) {
+      setAssignmentError("Select which course/tutor this assignment is for.");
+      return;
+    }
+
+    setUploadingAssignment(true);
+    try {
+      const path = `${id}/${Date.now()}-${assignmentFile.name}`;
+      const { error: uploadErr } = await supabase.storage
+        .from("assignments")
+        .upload(path, assignmentFile);
+      if (uploadErr) throw uploadErr;
+
+      const { data: publicUrlData } = supabase.storage
+        .from("assignments")
+        .getPublicUrl(path);
+
+      // tutor_id comes from the enrollment, not a free choice - this is what
+      // links the submission to the correct tutor's queue automatically.
+      const { data, error: insertErr } = await supabase
+        .from("assignments")
+        .insert({
+          student_id: id,
+          tutor_id: enrollment.tutor_id,
+          course_title: enrollment.course_title,
+          file_name: assignmentFile.name,
+          file_url: publicUrlData.publicUrl,
+        })
+        .select()
+        .single();
+      if (insertErr) throw insertErr;
+
+      setAssignments((prev) => [data, ...prev]);
+      setAssignmentFile(null);
+    } catch (err) {
+      console.error("Error uploading assignment:", err);
+      setAssignmentError("Upload failed. Try again.");
+    } finally {
+      setUploadingAssignment(false);
+    }
+  };
+
+  const getTutorName = (tutorId) => {
+    if (!tutorId) return "Unassigned";
+    return tutorMap[tutorId]?.name || "Course Instructor";
+  };
+
+  const formatAssignmentDateTime = (d) =>
+    d
+      ? new Date(d).toLocaleString("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "—";
+
   const handleDeleteArtwork = async (art) => {
     const confirmDelete = window.confirm(`Delete "${art.title || "this project"}"? This cannot be undone.`);
     if (!confirmDelete) return;
@@ -1108,6 +1377,12 @@ export default function StudentPublicProfile() {
     c.status === "pending" || c.status === "declined"
   );
 
+  // Approved enrollments with a confirmed tutor - these are the only ones a
+  // student can submit an assignment against (unaffected by the course search box).
+  const tutorLinkedEnrollments = enrolledCourses.filter(
+    (c) => (!c.status || c.status === "approved") && c.tutor_id
+  );
+
   const filteredConversations = conversations.filter(c =>
     c.name.toLowerCase().includes(chatSearchQuery.toLowerCase())
   );
@@ -1147,6 +1422,157 @@ export default function StudentPublicProfile() {
     const found = categories.find((c) => c.id === categoryId);
     return found ? found.name : "Uncategorized";
   };
+
+  const renderCourseCard = (enrollment) => (
+    <div
+      key={enrollment.id}
+      style={{
+        position: "relative",
+        background: "#fff",
+        borderRadius: "14px",
+        padding: "18px 18px 16px",
+        border: "1px solid #eef0f2",
+        boxShadow: "0 3px 12px rgba(6,78,59,0.05)",
+        overflow: "hidden",
+        transition: "transform 0.15s ease, box-shadow 0.15s ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow = "0 8px 22px rgba(6,78,59,0.1)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "0 3px 12px rgba(6,78,59,0.05)";
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          bottom: 0,
+          width: "4px",
+          background: "linear-gradient(180deg, #0d6b52, #064e3b)"
+        }}
+      />
+      <div
+        style={{
+          width: "36px",
+          height: "36px",
+          borderRadius: "10px",
+          background: "#eefaf5",
+          color: "#064e3b",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: "12px"
+        }}
+      >
+        <HiOutlineAcademicCap size={18} />
+      </div>
+      <h4
+        style={{
+          margin: "0 0 4px 0",
+          fontSize: "14.5px",
+          fontWeight: 700,
+          color: "#0f1f1a",
+          letterSpacing: "-0.01em"
+        }}
+      >
+        {enrollment.course_title || "Untitled Course"}
+      </h4>
+      <p
+        style={{
+          margin: "0 0 2px 0",
+          fontSize: "12px",
+          color: "#0d6b52",
+          fontWeight: 600
+        }}
+      >
+        Tutor: {getTutorName(enrollment.tutor_id)}
+      </p>
+      <p
+        style={{
+          margin: 0,
+          fontSize: "12px",
+          color: "#8a968e",
+          fontWeight: 500
+        }}
+      >
+        Enrolled {new Date(enrollment.created_at).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric"
+        })}
+      </p>
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "4px",
+          marginTop: "10px",
+          marginBottom: "12px",
+          padding: "3px 9px",
+          borderRadius: "999px",
+          background: "#eefaf5",
+          color: "#064e3b",
+          fontSize: "10px",
+          fontWeight: 700,
+          letterSpacing: "0.04em",
+          textTransform: "uppercase"
+        }}
+      >
+        <HiOutlineCheck size={11} /> Active
+      </span>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "8px",
+          paddingTop: "12px",
+          borderTop: "1px dashed #e5e7eb"
+        }}
+      >
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10.5px", fontWeight: 700, color: "#8a968e", textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: "3px" }}>
+            <span>Progress</span>
+            <span style={{ color: "#064e3b" }}>{enrollment.progress ?? 0}%</span>
+          </div>
+          <div style={{ height: "5px", borderRadius: "999px", background: "#eef0f2", overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${enrollment.progress ?? 0}%`, background: "linear-gradient(90deg, #0d6b52, #064e3b)", borderRadius: "999px" }} />
+          </div>
+        </div>
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10.5px", fontWeight: 700, color: "#8a968e", textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: "3px" }}>
+            <span>Attendance</span>
+            <span style={{ color: "#064e3b" }}>{enrollment.attendance ?? 0}%</span>
+          </div>
+          <div style={{ height: "5px", borderRadius: "999px", background: "#eef0f2", overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${enrollment.attendance ?? 0}%`, background: "linear-gradient(90deg, #0d6b52, #064e3b)", borderRadius: "999px" }} />
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: "10px" }}>
+        <span
+          style={{
+            display: "inline-block",
+            padding: "3px 10px",
+            borderRadius: "999px",
+            fontSize: "10.5px",
+            fontWeight: 700,
+            letterSpacing: "0.03em",
+            textTransform: "uppercase",
+            background: enrollment.fee_status === "Paid" ? "#eefaf5" : enrollment.fee_status === "Overdue" ? "#fee2e2" : "#fef3c7",
+            color: enrollment.fee_status === "Paid" ? "#064e3b" : enrollment.fee_status === "Overdue" ? "#b91c1c" : "#b45309"
+          }}
+        >
+          Fee: {enrollment.fee_status || "Pending"}
+        </span>
+      </div>
+    </div>
+  );
 
   const renderArtworkCard = (art) => {
     const isEditing = editingArtId === art.id;
@@ -1649,14 +2075,31 @@ export default function StudentPublicProfile() {
     const isVideo = callType === "video";
     const displayName = activeContact?.name || incomingCall?.fromName || "Unknown";
 
-    return (
+    return createPortal(
       <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "#0b0f10", zIndex: 10050, display: "flex", flexDirection: "column" }}>
-        <div style={{ padding: "16px", color: "#fff" }}>
-          <h3 style={{ margin: 0, fontSize: "16px" }}>{displayName}</h3>
-          <span style={{ fontSize: "12px", color: "#9ca3af" }}>
-            {callState === "outgoing" && "Calling..."}
-            {callState === "active" && formatDuration(callDuration)}
-          </span>
+        <div style={{ padding: "16px", color: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: "16px" }}>{displayName}</h3>
+            <span style={{ fontSize: "12px", color: "#9ca3af" }}>
+              {callState === "outgoing" && "Calling..."}
+              {callState === "active" && formatDuration(callDuration)}
+            </span>
+          </div>
+          {isScreenSharing && (
+            <span style={{
+              fontSize: "11px",
+              fontWeight: "700",
+              color: "#fff",
+              background: "#2563eb",
+              padding: "4px 10px",
+              borderRadius: "999px",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px"
+            }}>
+              <HiOutlineComputerDesktop size={13} /> Sharing screen
+            </span>
+          )}
         </div>
 
         <audio ref={remoteAudioRef} autoPlay playsInline style={{ display: "none" }} />
@@ -1723,7 +2166,7 @@ export default function StudentPublicProfile() {
           )}
         </div>
 
-        <div style={{ padding: "24px", display: "flex", justifyContent: "center", gap: "20px" }}>
+        <div style={{ padding: "24px", display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap" }}>
           <button onClick={toggleMute} style={callControlBtnStyle(isMuted ? "#ef4444" : "#374151")} title={isMuted ? "Unmute" : "Mute"} aria-label={isMuted ? "Unmute microphone" : "Mute microphone"}>
             <span style={{ position: "relative", display: "inline-flex" }}>
               <HiOutlineMicrophone size={23} />
@@ -1735,18 +2178,29 @@ export default function StudentPublicProfile() {
               {isCameraOff ? <HiOutlineVideoCameraSlash size={23} /> : <HiOutlineVideoCamera size={23} />}
             </button>
           )}
+          {isVideo && callState === "active" && !isMobileViewport && (
+            <button
+              onClick={toggleScreenShare}
+              style={callControlBtnStyle(isScreenSharing ? "#2563eb" : "#374151")}
+              title={isScreenSharing ? "Stop sharing" : "Share screen"}
+              aria-label={isScreenSharing ? "Stop screen share" : "Start screen share"}
+            >
+              <HiOutlineComputerDesktop size={22} />
+            </button>
+          )}
           <button onClick={() => handleEndCall(true)} style={callControlBtnStyle("#ef4444")} title="End call" aria-label="End call">
             <HiOutlinePhoneXMark size={24} />
           </button>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   };
 
   const renderIncomingCallBanner = () => {
     if (callState !== "incoming" || !incomingCall) return null;
 
-    return (
+    return createPortal(
       <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "rgba(0,0,0,0.6)", zIndex: 10060, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px", boxSizing: "border-box" }}>
         <div style={{ background: "#fff", borderRadius: "16px", padding: "28px", width: "100%", maxWidth: "320px", textAlign: "center" }}>
           <div style={{
@@ -1773,7 +2227,8 @@ export default function StudentPublicProfile() {
             <button onClick={handleAcceptCall} style={{ ...callControlBtnStyle("#10b981"), width: "52px", height: "52px" }} title="Accept" aria-label="Accept call"><HiOutlineCheck size={24} /></button>
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   };
 
@@ -1864,46 +2319,205 @@ export default function StudentPublicProfile() {
                 <button onClick={() => setShowUploadModal(true)} className="upload-portfolio-trigger-btn">+ Add Portfolio Item</button>
               </div>
 
-              <div className="dashboard-metrics-grid">
-                <div className="metric-card premium-metric-card">
-                  <div className="metric-info">
-                    <h3>{approvedCourses.length}</h3>
-                    <p>Enrolled Courses</p>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                  gap: "18px",
+                  marginBottom: "25px"
+                }}
+              >
+                {[
+                  {
+                    label: "Enrolled Courses",
+                    value: approvedCourses.length,
+                    icon: <HiOutlineAcademicCap size={22} />,
+                    accent: "#0d6b52"
+                  },
+                  {
+                    label: "Learning Portfolio",
+                    value: artworks.length,
+                    icon: <HiOutlineSquares2X2 size={22} />,
+                    accent: "#0d6b52"
+                  },
+                  {
+                    label: "Subscription Tier",
+                    value: student.subscription_tier || "Free Starter",
+                    icon: <HiOutlineDocumentText size={22} />,
+                    accent: "#b45309",
+                    isTier: true
+                  }
+                ].map((m, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      position: "relative",
+                      background: "#fff",
+                      borderRadius: "16px",
+                      padding: "22px 22px 20px",
+                      border: "1px solid #eef0f2",
+                      boxShadow: "0 4px 16px rgba(6,78,59,0.06)",
+                      overflow: "hidden",
+                      transition: "transform 0.15s ease, box-shadow 0.15s ease",
+                      cursor: "default"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.boxShadow = "0 10px 26px rgba(6,78,59,0.12)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = "0 4px 16px rgba(6,78,59,0.06)";
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: "4px",
+                        background: `linear-gradient(90deg, ${m.accent}, ${m.accent}99)`
+                      }}
+                    />
+
+                    <div
+                      style={{
+                        width: "44px",
+                        height: "44px",
+                        borderRadius: "12px",
+                        background: `${m.accent}14`,
+                        color: m.accent,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: "14px"
+                      }}
+                    >
+                      {m.icon}
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: m.isTier ? "22px" : "30px",
+                        fontWeight: 800,
+                        color: "#0f1f1a",
+                        letterSpacing: "-0.02em",
+                        lineHeight: 1.1,
+                        marginBottom: "4px"
+                      }}
+                    >
+                      {m.value}
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        color: "#8a968e",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em"
+                      }}
+                    >
+                      {m.label}
+                    </div>
+
+                    {m.isTier && (
+                      <span
+                        style={{
+                          display: "inline-block",
+                          marginTop: "10px",
+                          padding: "3px 10px",
+                          borderRadius: "999px",
+                          background: "#eefaf5",
+                          color: "#064e3b",
+                          fontSize: "10.5px",
+                          fontWeight: 700,
+                          letterSpacing: "0.03em"
+                        }}
+                      >
+                        ✦ Premium Access
+                      </span>
+                    )}
                   </div>
-                </div>
-                <div className="metric-card premium-metric-card">
-                  <div className="metric-info">
-                    <h3>{artworks.length}</h3>
-                    <p>Learning Portfolio</p>
-                  </div>
-                </div>
-                <div className="metric-card premium-metric-card">
-                  <div className="metric-info">
-                    <h3>{student.subscription_tier || "Free Starter"}</h3>
-                    <p>Subscription Tier</p>
-                  </div>
-                </div>
+                ))}
               </div>
 
               {pendingOrDeclinedRequests.length > 0 && (
                 <div className="content-section-box" style={{ marginBottom: "25px", borderLeft: "4px solid #f59e0b" }}>
                   <h3>Course Intake Request Status</h3>
-                  <div className="student-courses-grid" style={{ marginTop: "12px" }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                      gap: "16px",
+                      marginTop: "12px"
+                    }}
+                  >
                     {pendingOrDeclinedRequests.map((req) => {
                       const isDeclined = req.status === "declined";
+                      const accent = isDeclined ? "#dc2626" : "#d97706";
                       return (
-                        <div key={req.id} className="student-course-card" style={{ background: isDeclined ? "#fef2f2" : "#fffbeb", borderColor: isDeclined ? "#f87171" : "#fcd34d" }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                            <h4 style={{ margin: 0 }}>{req.course_title || "Course"}</h4>
-                            <span style={{ fontSize: "11px", fontWeight: "bold", padding: "2px 6px", borderRadius: "4px", background: isDeclined ? "#fee2e2" : "#fef3c7", color: isDeclined ? "#b91c1c" : "#d97706" }}>
-                              {isDeclined ? "Declined" : "Pending Tutor Approval"}
+                        <div
+                          key={req.id}
+                          style={{
+                            position: "relative",
+                            background: isDeclined ? "#fef2f2" : "#fffbeb",
+                            borderRadius: "14px",
+                            padding: "18px 18px 16px",
+                            border: `1px solid ${isDeclined ? "#fecaca" : "#fde68a"}`,
+                            overflow: "hidden"
+                          }}
+                        >
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              bottom: 0,
+                              width: "4px",
+                              background: accent
+                            }}
+                          />
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
+                            <h4 style={{ margin: 0, fontSize: "14.5px", fontWeight: 700, color: "#0f1f1a" }}>{req.course_title || "Course"}</h4>
+                            <span
+                              style={{
+                                flexShrink: 0,
+                                fontSize: "10px",
+                                fontWeight: 700,
+                                padding: "3px 9px",
+                                borderRadius: "999px",
+                                letterSpacing: "0.03em",
+                                textTransform: "uppercase",
+                                background: isDeclined ? "#fee2e2" : "#fef3c7",
+                                color: isDeclined ? "#b91c1c" : "#b45309"
+                              }}
+                            >
+                              {isDeclined ? "Declined" : "Pending Approval"}
                             </span>
                           </div>
-                          <p style={{ fontSize: "12px", color: "#6b7280", margin: "6px 0" }}>Requested: {new Date(req.created_at).toLocaleDateString()}</p>
+                          <p style={{ fontSize: "12px", color: "#8a968e", margin: "8px 0 0 0", fontWeight: 500 }}>
+                            Requested {new Date(req.created_at).toLocaleDateString(undefined, {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric"
+                            })}
+                          </p>
                           {isDeclined && (
                             <button
                               onClick={() => handleDismissDeclined(req.id)}
-                              style={{ background: "#ef4444", color: "#fff", border: "none", padding: "4px 10px", borderRadius: "4px", fontSize: "11px", cursor: "pointer", marginTop: "6px" }}
+                              style={{
+                                background: "#fff",
+                                color: "#b91c1c",
+                                border: "1px solid #fecaca",
+                                padding: "6px 12px",
+                                borderRadius: "8px",
+                                fontSize: "11.5px",
+                                fontWeight: 700,
+                                cursor: "pointer",
+                                marginTop: "12px"
+                              }}
                             >
                               Dismiss Notice
                             </button>
@@ -1915,17 +2529,49 @@ export default function StudentPublicProfile() {
                 </div>
               )}
 
+              {notices.length > 0 && (
+                <div className="content-section-box" style={{ marginBottom: "25px" }}>
+                  <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <HiOutlineMegaphone size={17} color="#064e3b" />
+                    Announcements
+                  </h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "12px" }}>
+                    {notices.map((n) => (
+                      <div
+                        key={n.id}
+                        style={{
+                          border: "1px solid #fcd34d",
+                          borderLeft: "4px solid #f59e0b",
+                          borderRadius: "10px",
+                          padding: "12px 16px",
+                          background: "#fffbeb",
+                        }}
+                      >
+                        <p style={{ margin: "0 0 6px 0", fontSize: "13.5px", color: "#1a1a1a", whiteSpace: "pre-wrap" }}>
+                          {n.message}
+                        </p>
+                        <p style={{ margin: 0, fontSize: "11.5px", color: "#8a968e" }}>
+                          From {getTutorName(n.tutor_id)} • {formatAssignmentDateTime(n.created_at)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="dashboard-single-column" style={{ width: "100%" }}>
                 <div className="content-section-box">
                   <h3>Enrolled Courses</h3>
                   {approvedCourses.length > 0 ? (
-                    <div className="student-courses-grid">
-                      {approvedCourses.map((enrollment) => (
-                        <div key={enrollment.id} className="student-course-card">
-                          <h4>{enrollment.course_title || "Untitled Course"}</h4>
-                          <p>Enrolled: {new Date(enrollment.created_at).toLocaleDateString()}</p>
-                        </div>
-                      ))}
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                        gap: "16px",
+                        marginTop: "12px"
+                      }}
+                    >
+                      {approvedCourses.map((enrollment) => renderCourseCard(enrollment))}
                     </div>
                   ) : (
                     <p className="no-data-text">No active approved course enrollments found.</p>
@@ -1950,13 +2596,15 @@ export default function StudentPublicProfile() {
             <div className="content-section-box">
               <h3>All Enrolled Courses</h3>
               {approvedCourses.length > 0 ? (
-                <div className="student-courses-grid">
-                  {approvedCourses.map((enrollment) => (
-                    <div key={enrollment.id} className="student-course-card">
-                      <h4>{enrollment.course_title || "Untitled Course"}</h4>
-                      <p>Enrolled: {new Date(enrollment.created_at).toLocaleDateString()}</p>
-                    </div>
-                  ))}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                    gap: "16px",
+                    marginTop: "12px"
+                  }}
+                >
+                  {approvedCourses.map((enrollment) => renderCourseCard(enrollment))}
                 </div>
               ) : (
                 <p className="no-data-text">You are not enrolled in any approved courses yet.</p>
@@ -1968,47 +2616,195 @@ export default function StudentPublicProfile() {
             <div className="content-section-box">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
                 <h3 style={{ margin: 0 }}>Projects & Assignments</h3>
-                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                  <button onClick={() => setShowManageCategoriesModal(true)} className="manage-categories-btn">
-                    <HiOutlineSquares2X2 size={15} /> Manage Categories
-                  </button>
-                  <button onClick={() => setShowUploadModal(true)} className="upload-portfolio-trigger-btn">+ Add Portfolio Item</button>
-                </div>
+                {projectsSubTab === "portfolio" && (
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    <button onClick={() => setShowManageCategoriesModal(true)} className="manage-categories-btn">
+                      <HiOutlineSquares2X2 size={15} /> Manage Categories
+                    </button>
+                    <button onClick={() => setShowUploadModal(true)} className="upload-portfolio-trigger-btn">+ Add Portfolio Item</button>
+                  </div>
+                )}
               </div>
 
-              <div className="category-filter-tabs">
+              <div className="category-filter-tabs" style={{ marginBottom: "18px" }}>
                 <button
                   type="button"
-                  onClick={() => setSelectedCategoryFilter("all")}
-                  className={`category-tab ${selectedCategoryFilter === "all" ? "active" : ""}`}
+                  onClick={() => setProjectsSubTab("portfolio")}
+                  className={`category-tab ${projectsSubTab === "portfolio" ? "active" : ""}`}
                 >
-                  All ({artworks.length})
+                  Portfolio ({artworks.length})
                 </button>
                 <button
                   type="button"
-                  onClick={() => setSelectedCategoryFilter("uncategorized")}
-                  className={`category-tab ${selectedCategoryFilter === "uncategorized" ? "active" : ""}`}
+                  onClick={() => setProjectsSubTab("assignments")}
+                  className={`category-tab ${projectsSubTab === "assignments" ? "active" : ""}`}
                 >
-                  Uncategorized ({artworks.filter((a) => !a.category_id).length})
+                  Assignments ({assignments.length})
                 </button>
-                {categories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setSelectedCategoryFilter(cat.id)}
-                    className={`category-tab ${selectedCategoryFilter === cat.id ? "active" : ""}`}
-                  >
-                    {cat.name} ({artworks.filter((a) => a.category_id === cat.id).length})
-                  </button>
-                ))}
               </div>
 
-              {filteredProjectArtworks.length > 0 ? (
-                <div className="student-art-grid">
-                  {filteredProjectArtworks.map((art) => renderArtworkCard(art))}
+              {projectsSubTab === "portfolio" && (
+                <>
+                  <div className="category-filter-tabs">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCategoryFilter("all")}
+                      className={`category-tab ${selectedCategoryFilter === "all" ? "active" : ""}`}
+                    >
+                      All ({artworks.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCategoryFilter("uncategorized")}
+                      className={`category-tab ${selectedCategoryFilter === "uncategorized" ? "active" : ""}`}
+                    >
+                      Uncategorized ({artworks.filter((a) => !a.category_id).length})
+                    </button>
+                    {categories.map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setSelectedCategoryFilter(cat.id)}
+                        className={`category-tab ${selectedCategoryFilter === cat.id ? "active" : ""}`}
+                      >
+                        {cat.name} ({artworks.filter((a) => a.category_id === cat.id).length})
+                      </button>
+                    ))}
+                  </div>
+
+                  {filteredProjectArtworks.length > 0 ? (
+                    <div className="student-art-grid">
+                      {filteredProjectArtworks.map((art) => renderArtworkCard(art))}
+                    </div>
+                  ) : (
+                    <p className="no-data-text">No projects in this category yet.</p>
+                  )}
+                </>
+              )}
+
+              {projectsSubTab === "assignments" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px" }}>
+                    <h4 style={{ margin: "0 0 12px 0", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px", color: "#064e3b" }}>
+                      <HiOutlineCloudArrowUp size={17} /> Submit an assignment
+                    </h4>
+
+                    {tutorLinkedEnrollments.length === 0 ? (
+                      <p className="no-data-text">You need an approved, tutor-linked enrollment before you can submit work.</p>
+                    ) : (
+                      <>
+                        <label style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.05em", textTransform: "uppercase", color: "#8a968e", display: "block", marginBottom: "6px" }}>
+                          Course / tutor
+                        </label>
+                        <select
+                          value={selectedEnrollmentId}
+                          onChange={(e) => setSelectedEnrollmentId(e.target.value)}
+                          style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #d1d5db", fontSize: "13.5px", marginBottom: "14px", background: "#fff" }}
+                        >
+                          {tutorLinkedEnrollments.map((e) => (
+                            <option key={e.id} value={e.id}>
+                              {(e.course_title || "General Mentorship Program")} — {getTutorName(e.tutor_id)}
+                            </option>
+                          ))}
+                        </select>
+
+                        <label
+                          htmlFor="assignment-file-input"
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            border: "1.5px dashed #d1d5db",
+                            borderRadius: "10px",
+                            padding: "18px",
+                            cursor: "pointer",
+                            color: "#55625b",
+                            fontSize: "13.5px",
+                            marginBottom: "12px"
+                          }}
+                        >
+                          <input
+                            id="assignment-file-input"
+                            type="file"
+                            onChange={(e) => setAssignmentFile(e.target.files?.[0] || null)}
+                            hidden
+                          />
+                          <HiOutlineDocumentText size={19} color="#064e3b" />
+                          <span>{assignmentFile ? assignmentFile.name : "Click to choose a file"}</span>
+                        </label>
+
+                        {assignmentError && (
+                          <p style={{ color: "#b91c1c", fontSize: "12.5px", margin: "0 0 12px 0" }}>{assignmentError}</p>
+                        )}
+
+                        <button
+                          type="button"
+                          disabled={uploadingAssignment}
+                          onClick={handleUploadAssignment}
+                          style={{
+                            background: "#064e3b",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "8px",
+                            padding: "11px 20px",
+                            fontSize: "13.5px",
+                            fontWeight: "600",
+                            cursor: uploadingAssignment ? "not-allowed" : "pointer",
+                            opacity: uploadingAssignment ? 0.6 : 1
+                          }}
+                        >
+                          {uploadingAssignment ? "Uploading..." : "Submit assignment"}
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  <div>
+                    <h4 style={{ margin: "0 0 12px 0", fontSize: "14px", color: "#064e3b" }}>Your submissions</h4>
+                    {assignments.length === 0 ? (
+                      <p className="no-data-text">Nothing submitted yet.</p>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                        {assignments.map((a) => (
+                          <div key={a.id} style={{ border: "1px solid #e5e7eb", borderRadius: "10px", padding: "14px 16px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", flexWrap: "wrap" }}>
+                              <div>
+                                <p style={{ margin: "0 0 3px 0", fontSize: "14px", fontWeight: "600", color: "#111827" }}>{a.file_name}</p>
+                                <p style={{ margin: 0, fontSize: "12px", color: "#8a968e", display: "flex", alignItems: "center", gap: "5px", flexWrap: "wrap" }}>
+                                  {a.course_title ? `${a.course_title} • ` : ""}
+                                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                                    <HiOutlineAcademicCap size={13} /> {getTutorName(a.tutor_id)}
+                                  </span>
+                                  {" • Submitted "}{formatAssignmentDateTime(a.submitted_at)}
+                                </p>
+                              </div>
+                              <span
+                                style={{
+                                  display: "inline-block",
+                                  padding: "3px 11px",
+                                  borderRadius: "999px",
+                                  fontSize: "11.5px",
+                                  fontWeight: "600",
+                                  textTransform: "capitalize",
+                                  flexShrink: 0,
+                                  background: a.status === "reviewed" ? "#eefaf5" : "#fef3c7",
+                                  color: a.status === "reviewed" ? "#064e3b" : "#b45309"
+                                }}
+                              >
+                                {a.status || "pending"}
+                              </span>
+                            </div>
+                            {a.tutor_remarks && (
+                              <div style={{ marginTop: "10px", paddingTop: "10px", borderTop: "1px dashed #e5e7eb", fontSize: "13px", color: "#55625b" }}>
+                                <strong style={{ color: "#064e3b" }}>Tutor feedback:</strong> {a.tutor_remarks}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              ) : (
-                <p className="no-data-text">No projects in this category yet.</p>
               )}
             </div>
           )}

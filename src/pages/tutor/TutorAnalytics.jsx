@@ -85,8 +85,11 @@ export default function TutorAnalytics({ onNavigate }) {
       const courseList = courses || [];
       const courseIds = courseList.map((c) => c.id);
 
-      // 2. Fetch all enrollments matching only this tutor's courses
-      let enrollmentsList = [];
+      // 2. Fetch all enrollments matching only this tutor's courses.
+      //    Pull status + fee_status too, so declined enrollments and
+      //    unpaid enrollments can be excluded from the metrics that
+      //    should reflect real students / real collected revenue.
+      let rawEnrollmentsList = [];
       if (courseIds.length > 0) {
         const { data: enrData, error: enrError } = await supabase
           .from("enrollments")
@@ -95,20 +98,35 @@ export default function TutorAnalytics({ onNavigate }) {
             created_at,
             course_id,
             student_id,
+            status,
+            fee_status,
             courses:course_id ( title, price )
           `)
           .in("course_id", courseIds);
 
         if (!enrError && enrData) {
-          enrollmentsList = enrData;
+          rawEnrollmentsList = enrData;
         }
       }
+
+      // A declined enrollment never actually became a student - exclude it
+      // everywhere below (student counts, course table, both charts).
+      const enrollmentsList = rawEnrollmentsList.filter(
+        (e) => e.status !== "declined"
+      );
+
+      // Of the active enrollments, only ones actually marked Paid count
+      // toward any revenue figure - Pending/Overdue/Partial haven't been
+      // collected yet.
+      const paidEnrollmentsList = enrollmentsList.filter(
+        (e) => e.fee_status === "Paid"
+      );
 
       // 3. Compute Real Metrics
       const uniqueStudents = new Set(enrollmentsList.map(e => e.student_id));
       const totalStudents = uniqueStudents.size;
 
-      const totalRevenue = enrollmentsList.reduce((acc, curr) => {
+      const totalRevenue = paidEnrollmentsList.reduce((acc, curr) => {
         const price = parseFloat(curr.courses?.price) || 0;
         return acc + price;
       }, 0);
@@ -129,12 +147,13 @@ export default function TutorAnalytics({ onNavigate }) {
       // 4. Populate Course Performance Table with Real Aggregations
       const enhancedCourses = courseList.map(course => {
         const courseEnrollments = enrollmentsList.filter(e => e.course_id === course.id);
+        const coursePaidEnrollments = paidEnrollmentsList.filter(e => e.course_id === course.id);
         const studentCount = courseEnrollments.length;
         const priceVal = parseFloat(course.price) || 0;
         return {
           ...course,
           realStudents: studentCount,
-          realRevenue: studentCount * priceVal
+          realRevenue: coursePaidEnrollments.length * priceVal
         };
       });
 
@@ -159,12 +178,12 @@ export default function TutorAnalytics({ onNavigate }) {
       const trackedStudentsSet = new Set();
 
       const dynamicEarnings = last6Months.map(m => {
-        const monthEnrollments = enrollmentsList.filter(e => {
+        const monthPaidEnrollments = paidEnrollmentsList.filter(e => {
           const eDate = new Date(e.created_at || Date.now());
           return eDate.getMonth() === m.monthIndex && eDate.getFullYear() === m.year;
         });
 
-        const monthRev = monthEnrollments.reduce((sum, e) => sum + (parseFloat(e.courses?.price) || 0), 0);
+        const monthRev = monthPaidEnrollments.reduce((sum, e) => sum + (parseFloat(e.courses?.price) || 0), 0);
         runningRev += monthRev;
 
         return { month: m.name, revenue: runningRev };

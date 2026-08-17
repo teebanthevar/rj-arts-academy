@@ -48,12 +48,14 @@ export default function MyCourses() {
 
       // 2. Fetch real enrollments for those courses, so student counts
       //    always reflect actual enrollment rows instead of a stale
-      //    "students" column on the course itself.
+      //    "students" column on the course itself. Also pull status and
+      //    fee_status so declined enrollments and unpaid enrollments can
+      //    be excluded from the counts that matter (students / revenue).
       let enrollmentsList = [];
       if (courseIds.length > 0) {
         const { data: enrData, error: enrError } = await supabase
           .from("enrollments")
-          .select("id, course_id, student_id")
+          .select("id, course_id, student_id, status, fee_status")
           .in("course_id", courseIds);
 
         if (enrError) throw enrError;
@@ -62,13 +64,23 @@ export default function MyCourses() {
 
       // 3. Merge real enrollment counts onto each course
       const enhancedCourses = courseList.map((course) => {
-        const courseEnrollments = enrollmentsList.filter(
-          (e) => e.course_id === course.id
+        // A declined enrollment never actually became a student - exclude
+        // it from every count below.
+        const activeEnrollments = enrollmentsList.filter(
+          (e) => e.course_id === course.id && e.status !== "declined"
+        );
+
+        // Of the active enrollments, only the ones actually marked Paid
+        // count toward revenue - Pending/Overdue/Partial haven't been
+        // collected yet.
+        const paidEnrollments = activeEnrollments.filter(
+          (e) => e.fee_status === "Paid"
         );
 
         return {
           ...course,
-          realStudents: courseEnrollments.length,
+          realStudents: activeEnrollments.length,
+          paidStudents: paidEnrollments.length,
         };
       });
 
@@ -147,6 +159,9 @@ export default function MyCourses() {
   const totalCourses = courses.length;
   const totalStudents = courses.reduce((acc, curr) => acc + (curr.realStudents || 0), 0);
 
+  // Revenue reflects money actually collected: price x only the students
+  // whose fee_status is "Paid" on that course (declined enrollments are
+  // already excluded upstream in fetchCourses).
   const totalRevenue = courses.reduce((acc, curr) => {
     let priceVal = 0;
     if (typeof curr.price === "number") {
@@ -154,7 +169,7 @@ export default function MyCourses() {
     } else if (typeof curr.price === "string") {
       priceVal = parseFloat(curr.price.replace(/[^0-9.]/g, "")) || 0;
     }
-    return acc + priceVal * (curr.realStudents || 0);
+    return acc + priceVal * (curr.paidStudents || 0);
   }, 0);
 
   const avgRating = totalCourses > 0

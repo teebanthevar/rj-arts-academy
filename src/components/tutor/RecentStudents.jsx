@@ -58,6 +58,11 @@ function RecentStudents() {
         return;
       }
 
+      // Exclude declined enrollments - a tutor declining a student shouldn't
+      // still show them in "Recent Enrolled Students". We fetch a slightly
+      // larger window than we display (15) before filtering + slicing to 5,
+      // since filtering happens after the DB query and we don't want a run
+      // of recent declines to leave the list looking emptier than it is.
       const { data: enrollments, error: enrollErr } = await supabase
         .from("enrollments")
         .select(`
@@ -65,11 +70,13 @@ function RecentStudents() {
           created_at,
           course_id,
           student_id,
+          status,
           courses (title)
         `)
         .in("course_id", courseIds)
+        .or("status.is.null,status.neq.declined")
         .order("created_at", { ascending: false })
-        .limit(5);
+        .limit(15);
 
       if (enrollErr || !enrollments) {
         setStudents([]);
@@ -77,8 +84,10 @@ function RecentStudents() {
         return;
       }
 
+      const visibleEnrollments = enrollments.slice(0, 5);
+
       const enrichedStudents = await Promise.all(
-        enrollments.map(async (item) => {
+        visibleEnrollments.map(async (item) => {
           let studentProfile = {};
           if (item.student_id) {
             const { data: profileData } = await supabase

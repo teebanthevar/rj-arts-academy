@@ -317,3 +317,135 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== Refer & Earn Section ===== */
+
+.referral-card {
+  margin-top: 24px;
+}
+
+.referral-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 8px 4px;
+}
+
+.referral-icon-wrapper {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: linear-gradient(135deg, #d9a441, #b9822b);
+  color: #ffffff;
+}
+
+.referral-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.referral-text h4 {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #17332b;
+}
+
+.referral-text > p {
+  margin: 0 0 16px 0;
+  color: #5b6b66;
+  font-size: 14.5px;
+  line-height: 1.5;
+  max-width: 640px;
+}
+
+.referral-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.referral-link-input {
+  flex: 1;
+  min-width: 220px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d8e0dc;
+  background: #f6f8f7;
+  color: #33443e;
+  font-size: 14px;
+  outline: none;
+}
+
+.referral-link-input:focus {
+  border-color: #d9a441;
+}
+
+.referral-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.12s ease;
+  white-space: nowrap;
+}
+
+.referral-btn:hover {
+  opacity: 0.9;
+}
+
+.referral-btn:active {
+  transform: scale(0.97);
+}
+
+.referral-btn.copy {
+  background: #eef4f1;
+  color: #17332b;
+  border: 1px solid #d8e0dc;
+}
+
+.referral-btn.share {
+  background: #17332b;
+  color: #ffffff;
+}
+
+.referral-terms {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #7c8985;
+  background: #f6f8f7;
+  border-left: 3px solid #d9a441;
+  padding: 10px 12px;
+  border-radius: 6px;
+  max-width: 640px;
+}
+
+.referral-terms strong {
+  color: #17332b;
+}
+
+@media (max-width: 640px) {
+  .referral-body {
+    flex-direction: column;
+  }
+
+  .referral-link-row {
+    flex-direction: column;
+  }
+
+  .referral-btn {
+    justify-content: center;
+  }
+}

@@ -5,7 +5,7 @@ import {
   FaSearch,
   FaBell,
   FaEnvelope,
-  FaGem
+  FaGraduationCap
 } from "react-icons/fa";
 import { supabase } from "../../lib/supabase";
 import "../../styles/TutorHeader.css";
@@ -18,7 +18,6 @@ function TutorHeader({ toggleSidebar }) {
     profession: "Premium Tutor",
     avatarUrl: "",
   });
-  const [trialDays, setTrialDays] = useState(28);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
@@ -57,18 +56,7 @@ function TutorHeader({ toggleSidebar }) {
         });
       }
 
-      // 2. Subscription trial days
-      const { data: subData, error: subError } = await supabase
-        .from("tutor_subscriptions")
-        .select("trial_days_remaining")
-        .eq("tutor_id", user.id)
-        .maybeSingle();
-
-      if (!subError && subData && subData.trial_days_remaining !== null) {
-        setTrialDays(subData.trial_days_remaining);
-      }
-
-      // 3. Unread messages count
+      // 2. Unread messages count
       const { count: msgCount, error: msgError } = await supabase
         .from("messages")
         .select("*", { count: "exact", head: true })
@@ -77,7 +65,7 @@ function TutorHeader({ toggleSidebar }) {
 
       if (!msgError) setUnreadMessages(msgCount || 0);
 
-      // 4. Unread notifications count
+      // 3. Unread notifications count
       const { count: notifCount, error: notifError } = await supabase
         .from("notifications")
         .select("*", { count: "exact", head: true })
@@ -251,10 +239,16 @@ function TutorHeader({ toggleSidebar }) {
       </div>
 
       <div className="header-right">
-        <div className="trial-box">
-          <FaGem />
-          <span>{trialDays} Days Free Trial</span>
-        </div>
+        <button
+          type="button"
+          className="trial-box"
+          onClick={() => navigate("/teachhub")}
+          title="Back to TeachHub"
+          style={{ cursor: "pointer", border: "none", font: "inherit", color: "inherit" }}
+        >
+          <FaGraduationCap />
+          <span>TeachHub</span>
+        </button>
 
         {/* Messages / Envelope Button */}
         <div className="icon-dropdown-wrapper" ref={msgRef}>

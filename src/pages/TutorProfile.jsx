@@ -6,6 +6,13 @@ import {
   FaRegStar,
   FaCheckCircle,
 } from "react-icons/fa";
+import {
+  HiOutlinePlus,
+  HiOutlinePencil,
+  HiOutlineTrash,
+  HiOutlineSquares2X2,
+  HiOutlineXMark,
+} from "react-icons/hi2";
 
 import "../styles/TutorProfile.css";
 
@@ -33,11 +40,188 @@ export default function TutorProfile() {
   const [reviewMessage, setReviewMessage] = useState("");
   const [currentUserReview, setCurrentUserReview] = useState(null);
 
+  // ---- PORTFOLIO STATE ----
+  const [isOwner, setIsOwner] = useState(false);
+  const [portfolioItems, setPortfolioItems] = useState([]);
+  const [loadingPortfolio, setLoadingPortfolio] = useState(false);
+  const [showPortfolioUploadModal, setShowPortfolioUploadModal] = useState(false);
+  const [newPortfolioItem, setNewPortfolioItem] = useState({
+    title: "",
+    category: "Work Sample",
+    image_url: "",
+  });
+  const [newPortfolioFile, setNewPortfolioFile] = useState(null);
+  const [uploadingPortfolioItem, setUploadingPortfolioItem] = useState(false);
+  const [editingPortfolioId, setEditingPortfolioId] = useState(null);
+  const [editPortfolioTitleValue, setEditPortfolioTitleValue] = useState("");
+  const [savingPortfolioId, setSavingPortfolioId] = useState(null);
+  const [deletingPortfolioId, setDeletingPortfolioId] = useState(null);
+  const [portfolioPreviewItem, setPortfolioPreviewItem] = useState(null);
+
   useEffect(() => {
     fetchTutorData();
     checkUserPremiumStatus();
     fetchReviews();
+    checkIfOwner();
+    fetchPortfolioItems();
   }, [id]);
+
+  const checkIfOwner = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      setIsOwner(!!(user && user.id === id));
+    } catch (err) {
+      console.error("Error checking profile ownership:", err);
+    }
+  };
+
+  const fetchPortfolioItems = async () => {
+    try {
+      setLoadingPortfolio(true);
+      const { data, error } = await supabase
+        .from("tutor_portfolio")
+        .select("*")
+        .eq("tutor_id", id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching tutor portfolio:", error);
+        setPortfolioItems([]);
+      } else {
+        setPortfolioItems(data || []);
+      }
+    } catch (err) {
+      console.error("Portfolio fetch error:", err);
+    } finally {
+      setLoadingPortfolio(false);
+    }
+  };
+
+  const handleUploadPortfolioItem = async (e) => {
+    e.preventDefault();
+    if (
+      !newPortfolioItem.title.trim() ||
+      (!newPortfolioItem.image_url.trim() && !newPortfolioFile)
+    ) {
+      alert("Please enter a title and either upload a file or paste an image URL.");
+      return;
+    }
+
+    try {
+      setUploadingPortfolioItem(true);
+
+      let finalImageUrl = newPortfolioItem.image_url;
+
+      if (newPortfolioFile) {
+        const fileExt = newPortfolioFile.name.split(".").pop();
+        const fileName = `tutor-portfolio-${id}-${Date.now()}.${fileExt}`;
+        const filePath = `tutor_portfolio/${fileName}`;
+
+        const { error: uploadErr } = await supabase.storage
+          .from("avatars")
+          .upload(filePath, newPortfolioFile);
+
+        if (uploadErr) throw uploadErr;
+
+        const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+        finalImageUrl = urlData.publicUrl;
+      }
+
+      const payload = {
+        tutor_id: id,
+        title: newPortfolioItem.title.trim(),
+        category: newPortfolioItem.category || "Work Sample",
+        image_url: finalImageUrl,
+        created_at: new Date().toISOString(),
+      };
+
+      const { data, error } = await supabase
+        .from("tutor_portfolio")
+        .insert([payload])
+        .select();
+
+      if (error) throw error;
+
+      if (data) {
+        setPortfolioItems((prev) => [data[0], ...prev]);
+      }
+
+      setNewPortfolioItem({ title: "", category: "Work Sample", image_url: "" });
+      setNewPortfolioFile(null);
+      setShowPortfolioUploadModal(false);
+    } catch (err) {
+      console.error("Error uploading portfolio item:", err);
+      alert("Failed to upload portfolio item.");
+    } finally {
+      setUploadingPortfolioItem(false);
+    }
+  };
+
+  const handleDeletePortfolioItem = async (item) => {
+    const confirmDelete = window.confirm(
+      `Delete "${item.title || "this item"}"? This cannot be undone.`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      setDeletingPortfolioId(item.id);
+      const { error } = await supabase
+        .from("tutor_portfolio")
+        .delete()
+        .eq("id", item.id);
+
+      if (error) throw error;
+
+      setPortfolioItems((prev) => prev.filter((p) => p.id !== item.id));
+    } catch (err) {
+      console.error("Error deleting portfolio item:", err);
+      alert("Failed to delete this item. Please try again.");
+    } finally {
+      setDeletingPortfolioId(null);
+    }
+  };
+
+  const handleStartEditPortfolioTitle = (item) => {
+    setEditingPortfolioId(item.id);
+    setEditPortfolioTitleValue(item.title || "");
+  };
+
+  const handleCancelEditPortfolioTitle = () => {
+    setEditingPortfolioId(null);
+    setEditPortfolioTitleValue("");
+  };
+
+  const handleSaveEditPortfolioTitle = async (item) => {
+    const trimmed = editPortfolioTitleValue.trim();
+    if (!trimmed) {
+      alert("Title cannot be empty.");
+      return;
+    }
+
+    try {
+      setSavingPortfolioId(item.id);
+      const { error } = await supabase
+        .from("tutor_portfolio")
+        .update({ title: trimmed })
+        .eq("id", item.id);
+
+      if (error) throw error;
+
+      setPortfolioItems((prev) =>
+        prev.map((p) => (p.id === item.id ? { ...p, title: trimmed } : p))
+      );
+      setEditingPortfolioId(null);
+      setEditPortfolioTitleValue("");
+    } catch (err) {
+      console.error("Error updating portfolio item title:", err);
+      alert("Failed to update the title. Please try again.");
+    } finally {
+      setSavingPortfolioId(null);
+    }
+  };
 
   const checkUserPremiumStatus = async () => {
     try {
@@ -557,6 +741,198 @@ export default function TutorProfile() {
         ).toFixed(1)
       : "0.0";
 
+  const renderPortfolioCard = (item) => {
+    const isEditing = editingPortfolioId === item.id;
+    const isSaving = savingPortfolioId === item.id;
+    const isDeleting = deletingPortfolioId === item.id;
+
+    return (
+      <div
+        key={item.id}
+        style={{
+          position: "relative",
+          background: "#fff",
+          borderRadius: "14px",
+          overflow: "hidden",
+          border: "1px solid #eef0f2",
+          boxShadow: "0 3px 12px rgba(6,78,59,0.05)",
+          transition: "transform 0.15s ease, box-shadow 0.15s ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = "translateY(-2px)";
+          e.currentTarget.style.boxShadow = "0 8px 22px rgba(6,78,59,0.1)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = "translateY(0)";
+          e.currentTarget.style.boxShadow = "0 3px 12px rgba(6,78,59,0.05)";
+        }}
+      >
+        <div style={{ position: "relative" }}>
+          <img
+            src={item.image_url}
+            alt={item.title || "Portfolio item"}
+            onClick={() => setPortfolioPreviewItem(item)}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src =
+                "https://via.placeholder.com/300x200?text=Image+unavailable";
+            }}
+            style={{
+              width: "100%",
+              height: "150px",
+              objectFit: "cover",
+              cursor: "pointer",
+              display: "block",
+            }}
+          />
+          {isOwner && (
+            <div
+              style={{
+                position: "absolute",
+                top: "8px",
+                right: "8px",
+                display: "flex",
+                gap: "6px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => handleStartEditPortfolioTitle(item)}
+                title="Edit title"
+                disabled={isDeleting}
+                style={{
+                  width: "28px",
+                  height: "28px",
+                  borderRadius: "50%",
+                  border: "none",
+                  background: "rgba(255,255,255,0.95)",
+                  color: "#064e3b",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+                }}
+              >
+                <HiOutlinePencil size={13} />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeletePortfolioItem(item)}
+                title="Delete"
+                disabled={isDeleting}
+                style={{
+                  width: "28px",
+                  height: "28px",
+                  borderRadius: "50%",
+                  border: "none",
+                  background: "rgba(255,255,255,0.95)",
+                  color: "#ef4444",
+                  cursor: isDeleting ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+                  opacity: isDeleting ? 0.6 : 1,
+                }}
+              >
+                {isDeleting ? "…" : <HiOutlineTrash size={13} />}
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div style={{ padding: "10px 12px" }}>
+          {isEditing ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              <input
+                type="text"
+                value={editPortfolioTitleValue}
+                onChange={(e) => setEditPortfolioTitleValue(e.target.value)}
+                autoFocus
+                style={{
+                  width: "100%",
+                  padding: "6px 8px",
+                  borderRadius: "4px",
+                  border: "1px solid #d1d5db",
+                  fontSize: "13px",
+                  boxSizing: "border-box",
+                }}
+              />
+              <div style={{ display: "flex", gap: "6px" }}>
+                <button
+                  type="button"
+                  onClick={() => handleSaveEditPortfolioTitle(item)}
+                  disabled={isSaving}
+                  style={{
+                    flex: 1,
+                    padding: "6px 8px",
+                    background: "#064e3b",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                  }}
+                >
+                  {isSaving ? "Saving..." : "Save"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelEditPortfolioTitle}
+                  disabled={isSaving}
+                  style={{
+                    flex: 1,
+                    padding: "6px 8px",
+                    background: "#f3f4f6",
+                    border: "none",
+                    borderRadius: "4px",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <h4
+                style={{
+                  margin: 0,
+                  fontSize: "13.5px",
+                  fontWeight: 700,
+                  color: "#0f1f1a",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                {item.title}
+              </h4>
+              <span
+                style={{
+                  display: "inline-block",
+                  marginTop: "6px",
+                  padding: "2px 8px",
+                  borderRadius: "999px",
+                  background: "#eefaf5",
+                  color: "#064e3b",
+                  fontSize: "10px",
+                  fontWeight: "700",
+                  letterSpacing: "0.3px",
+                  textTransform: "uppercase",
+                }}
+              >
+                {item.category || "Work Sample"}
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="profile-loading">
@@ -771,6 +1147,74 @@ export default function TutorProfile() {
               </div>
 
             )}
+
+            <div style={{ marginTop: "36px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "10px",
+                  marginBottom: "6px",
+                }}
+              >
+                <h3
+                  className="section-heading"
+                  style={{ margin: 0, display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  <HiOutlineSquares2X2 size={18} color="#064e3b" />
+                  Portfolio & Qualifications
+                </h3>
+                {isOwner && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPortfolioUploadModal(true)}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      background: "#064e3b",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "8px",
+                      padding: "9px 16px",
+                      fontSize: "12.5px",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <HiOutlinePlus size={14} /> Add Portfolio Item
+                  </button>
+                )}
+              </div>
+
+              <p style={{ fontSize: "13px", color: "#6b7280", margin: "0 0 16px 0" }}>
+                {isOwner
+                  ? "Showcase certificates, class work, and student achievements to attract more students."
+                  : `Certificates, class work, and student achievements shared by ${tutor.full_name}.`}
+              </p>
+
+              {loadingPortfolio ? (
+                <p className="empty-course-text">Loading portfolio...</p>
+              ) : portfolioItems.length === 0 ? (
+                <p className="empty-course-text">
+                  {isOwner
+                    ? "You haven't added any portfolio items yet."
+                    : "This tutor hasn't shared any portfolio items yet."}
+                </p>
+              ) : (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))",
+                    gap: "16px",
+                  }}
+                >
+                  {portfolioItems.map((item) => renderPortfolioCard(item))}
+                </div>
+              )}
+            </div>
 
             <div className="student-review-section">
 
@@ -1300,6 +1744,253 @@ export default function TutorProfile() {
 
         </div>
 
+      )}
+
+      {showPortfolioUploadModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10000,
+            padding: "16px",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              padding: "24px",
+              borderRadius: "8px",
+              width: "100%",
+              maxWidth: "400px",
+              boxSizing: "border-box",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "12px",
+              }}
+            >
+              <h3 style={{ margin: 0 }}>Add Portfolio Item</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPortfolioUploadModal(false);
+                  setNewPortfolioFile(null);
+                  setNewPortfolioItem({ title: "", category: "Work Sample", image_url: "" });
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "18px",
+                  color: "#6b7280",
+                }}
+              >
+                <HiOutlineXMark size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleUploadPortfolioItem}>
+              <div style={{ marginBottom: "12px" }}>
+                <label style={{ fontSize: "12px", fontWeight: "600", display: "block", marginBottom: "4px" }}>
+                  Title
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Certificate of Fine Arts, Student Mural Project"
+                  value={newPortfolioItem.title}
+                  onChange={(e) =>
+                    setNewPortfolioItem({ ...newPortfolioItem, title: e.target.value })
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    borderRadius: "4px",
+                    border: "1px solid #d1d5db",
+                    boxSizing: "border-box",
+                  }}
+                  required
+                />
+              </div>
+
+              <div style={{ marginBottom: "12px" }}>
+                <label style={{ fontSize: "12px", fontWeight: "600", display: "block", marginBottom: "4px" }}>
+                  Category
+                </label>
+                <select
+                  value={newPortfolioItem.category}
+                  onChange={(e) =>
+                    setNewPortfolioItem({ ...newPortfolioItem, category: e.target.value })
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    borderRadius: "4px",
+                    border: "1px solid #d1d5db",
+                    boxSizing: "border-box",
+                    background: "#fff",
+                  }}
+                >
+                  <option value="Work Sample">Work Sample</option>
+                  <option value="Qualification">Qualification / Certificate</option>
+                  <option value="Student Achievement">Student Achievement</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ fontSize: "12px", fontWeight: "600", display: "block", marginBottom: "4px" }}>
+                  Upload from Device
+                </label>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setNewPortfolioFile(e.target.files[0] || null)}
+                  style={{ width: "100%", fontSize: "12px" }}
+                />
+                {newPortfolioFile && (
+                  <p style={{ fontSize: "11px", color: "#059669", margin: "4px 0 0 0" }}>
+                    Selected: {newPortfolioFile.name}
+                  </p>
+                )}
+              </div>
+
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ fontSize: "12px", fontWeight: "600", display: "block", marginBottom: "4px" }}>
+                  Or Paste Image URL
+                </label>
+                <input
+                  type="text"
+                  placeholder="https://example.com/image.png"
+                  value={newPortfolioItem.image_url}
+                  onChange={(e) =>
+                    setNewPortfolioItem({ ...newPortfolioItem, image_url: e.target.value })
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    borderRadius: "4px",
+                    border: "1px solid #d1d5db",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPortfolioUploadModal(false);
+                    setNewPortfolioFile(null);
+                    setNewPortfolioItem({ title: "", category: "Work Sample", image_url: "" });
+                  }}
+                  style={{
+                    padding: "8px 14px",
+                    background: "#f3f4f6",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={uploadingPortfolioItem}
+                  style={{
+                    padding: "8px 14px",
+                    background: "#064e3b",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontWeight: "600",
+                  }}
+                >
+                  {uploadingPortfolioItem ? "Uploading..." : "Upload"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {portfolioPreviewItem && (
+        <div
+          onClick={() => setPortfolioPreviewItem(null)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10001,
+            padding: "16px",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: "90vw",
+              maxHeight: "90vh",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "12px",
+            }}
+          >
+            <img
+              src={portfolioPreviewItem.image_url}
+              alt={portfolioPreviewItem.title}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src =
+                  "https://via.placeholder.com/500x400?text=Image+unavailable";
+              }}
+              style={{
+                maxWidth: "100%",
+                maxHeight: "75vh",
+                borderRadius: "8px",
+                boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
+              }}
+            />
+            <div style={{ textAlign: "center", color: "#fff" }}>
+              <strong>{portfolioPreviewItem.title}</strong>
+              <div style={{ fontSize: "12px", opacity: 0.75, marginTop: "2px" }}>
+                {portfolioPreviewItem.category || "Work Sample"}
+              </div>
+            </div>
+            <button
+              onClick={() => setPortfolioPreviewItem(null)}
+              style={{
+                padding: "8px 16px",
+                background: "#f3f4f6",
+                border: "none",
+                borderRadius: "6px",
+                fontWeight: "600",
+                cursor: "pointer",
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
       )}
 
       <footer className="public-footer">

@@ -218,10 +218,33 @@ function TutorAnalytics() {
         return;
       }
 
-      const enrollments = enrollmentRecords || [];
+      const allEnrollments = enrollmentRecords || [];
 
-      console.log("TUTOR ENROLLMENTS:", enrollments);
-      console.log("Total enrollment records:", enrollments.length);
+      /*
+        A declined enrollment never actually became a student — it must
+        not count toward Student Growth. Everything below this point
+        uses `enrollments` (the filtered list), never `allEnrollments`
+        directly, for student counting.
+      */
+      const enrollments = allEnrollments.filter(
+        (e) => e.status !== "declined"
+      );
+
+      /*
+        Revenue is stricter than student counting: it should only reflect
+        money actually collected, so on top of excluding declined rows it
+        also requires fee_status === "Paid". A student who's enrolled but
+        still Pending/Overdue/Partial is a real student (counted above)
+        but hasn't generated revenue yet (excluded here).
+      */
+      const paidEnrollments = enrollments.filter(
+        (e) => e.fee_status === "Paid"
+      );
+
+      console.log("ALL ENROLLMENTS (raw):", allEnrollments);
+      console.log("ACTIVE ENROLLMENTS (declined excluded):", enrollments);
+      console.log("PAID ENROLLMENTS (revenue basis):", paidEnrollments);
+      console.log("Total active enrollment records:", enrollments.length);
 
       /* ---------------------------------------------------
          3. GET TUTOR'S COURSES (for revenue price lookup)
@@ -319,10 +342,10 @@ function TutorAnalytics() {
       });
 
       /* ---------------------------------------------------
-         6. REVENUE FROM EVERY ENROLLMENT RECORD
+         6. REVENUE FROM EVERY PAID ENROLLMENT RECORD
       --------------------------------------------------- */
 
-      enrollments.forEach((enrollment) => {
+      paidEnrollments.forEach((enrollment) => {
         const date = getDateFromRecord(enrollment);
 
         if (date.getFullYear() !== currentYear) {
