@@ -2,374 +2,394 @@
    SETTINGS PAGE
 ========================================== */
 
-.settings-page{
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+}
 
-    display:flex;
-    flex-direction:column;
-    gap:28px;
+.settings-form-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+}
 
+/* ==========================================
+   LOADING STATE
+========================================== */
+
+.settings-loading {
+  min-height: 300px;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-loading h2 {
+  color: #0f3d2e;
 }
 
 /* ==========================================
    HERO
 ========================================== */
 
-.settings-hero{
+.settings-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
 
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+  padding: 40px;
 
-    padding:40px;
+  color: #ffffff;
 
-    border-radius:28px;
+  background: linear-gradient(
+    135deg,
+    #0f3d2e,
+    #195442,
+    #2e735a
+  );
 
-    background:linear-gradient(
-        135deg,
-        #0F3D2E,
-        #195442,
-        #2E735A
-    );
-
-    color:white;
-
-    box-shadow:
-    0 25px 60px rgba(15,61,46,.18);
-
+  border-radius: 28px;
+  box-shadow: 0 25px 60px rgba(15, 61, 46, 0.18);
 }
 
-.settings-badge{
-
-    display:inline-block;
-
-    padding:8px 18px;
-
-    border-radius:50px;
-
-    background:rgba(255,255,255,.12);
-
-    color:#FFD66B;
-
-    font-size:14px;
-
-    font-weight:600;
-
-    margin-bottom:18px;
-
+.settings-hero-content {
+  min-width: 0;
+  flex: 1;
 }
 
-.settings-hero h1{
+.settings-badge {
+  display: inline-flex;
+  align-items: center;
 
-    margin:0;
+  margin-bottom: 18px;
+  padding: 8px 18px;
 
-    font-size:42px;
+  color: #ffd66b;
+  font-size: 14px;
+  font-weight: 600;
 
-    font-weight:700;
-
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 50px;
 }
 
-.settings-hero p{
+.settings-hero h1 {
+  margin: 0;
 
-    margin-top:12px;
+  color: #ffffff;
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1.15;
+}
 
-    color:rgba(255,255,255,.82);
+.settings-hero p {
+  max-width: 550px;
+  margin: 12px 0 0;
 
-    max-width:550px;
-
-    line-height:1.8;
-
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 16px;
+  line-height: 1.8;
 }
 
 /* ==========================================
-   SETTINGS ACTIONS CONTAINER
+   SETTINGS ACTIONS
 ========================================== */
 
 .settings-actions {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 /* ==========================================
-SAVE BUTTON
+   SAVE BUTTON
 ========================================== */
 
-.save-all-btn{
+.save-all-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-    border:none;
+  width: auto;
+  min-width: 126px;
+  height: 58px;
+  padding: 0 24px;
 
-    padding:16px 34px;
+  color: #0f3d2e;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
 
-    border-radius:50px;
+  background: linear-gradient(
+    135deg,
+    #d8c2a0,
+    #f6e6bf
+  );
 
-    background:linear-gradient(
-        135deg,
-        #D8C2A0,
-        #F6E6BF
-    );
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
 
-    color:#0F3D2E;
-
-    font-size:16px;
-
-    font-weight:700;
-
-    cursor:pointer;
-
-    transition:.35s;
-
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    opacity 0.35s ease;
 }
 
-.save-all-btn:hover{
+.save-all-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(216, 194, 160, 0.35);
+}
 
-    transform:translateY(-4px);
-
-    box-shadow:
-    0 20px 40px rgba(216,194,160,.35);
-
+.save-all-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 /* ==========================================
-LOGOUT BUTTON
+   SETTINGS LOGOUT BUTTON
 ========================================== */
 
-.logout-btn {
-    border: none;
-    padding: 16px 28px;
-    border-radius: 50px;
-    background: rgba(229, 57, 53, 0.15);
-    color: #ff6b6b;
-    border: 1px solid rgba(255, 107, 107, 0.3);
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: .35s;
+.settings-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  width: auto !important;
+  min-width: 126px;
+  height: 58px;
+  padding: 0 22px;
+
+  color: #ff7373;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+
+  background: rgba(229, 57, 53, 0.15);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 50px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.35s ease,
+    background 0.35s ease,
+    color 0.35s ease,
+    box-shadow 0.35s ease;
 }
 
-.logout-btn:hover {
-    background: hsl(87, 96%, 50%);
-    color: white;
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(81, 154, 8, 0.429);
+.settings-logout-btn svg {
+  flex-shrink: 0;
+  font-size: 15px;
+}
+
+.settings-logout-btn:hover {
+  color: #ffffff;
+  background: #e95753;
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(229, 87, 83, 0.3);
 }
 
 /* ==========================================
-CARD
+   ACCOUNT CARD
 ========================================== */
 
-.settings-card{
+.settings-card {
+  padding: 35px;
 
-    background:white;
-
-    border-radius:24px;
-
-    padding:35px;
-
-    border:1px solid rgba(0,0,0,.05);
-
-    box-shadow:
-    0 15px 40px rgba(15,23,42,.06);
-
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 24px;
+  box-shadow: 0 15px 40px rgba(15, 23, 42, 0.06);
 }
 
-.settings-card h2{
+.settings-card h2 {
+  margin: 0 0 28px;
 
-    margin-bottom:28px;
-
-    color:#0F3D2E;
-
-    font-size:26px;
-
+  color: #0f3d2e;
+  font-size: 26px;
 }
 
 /* ==========================================
    SETTINGS FORM
 ========================================== */
 
-.settings-form{
-
-    display:grid;
-
-    grid-template-columns:repeat(2,1fr);
-
-    gap:25px;
-
+.settings-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 25px;
 }
 
-.form-group{
-
-    display:flex;
-
-    flex-direction:column;
-
+.form-group {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
 }
 
-.form-group label{
+.form-group label {
+  margin-bottom: 10px;
 
-    margin-bottom:10px;
-
-    color:#0F3D2E;
-
-    font-size:15px;
-
-    font-weight:600;
-
+  color: #0f3d2e;
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.form-group input{
+.form-group input {
+  width: 100%;
+  height: 58px;
+  padding: 0 20px;
+  box-sizing: border-box;
 
-    width:100%;
+  color: #0f3d2e;
+  font-size: 15px;
 
-    height:58px;
+  background: #fafbfc;
+  border: 2px solid #e6e8ec;
+  border-radius: 16px;
 
-    padding:0 20px;
-
-    border:2px solid #E6E8EC;
-
-    border-radius:16px;
-
-    background:#FAFBFC;
-
-    color:#0F3D2E;
-
-    font-size:15px;
-
-    transition:.3s;
-
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
-.form-group input:hover{
-
-    border-color:#D8C2A0;
-
+.form-group input:hover {
+  border-color: #d8c2a0;
 }
 
-.form-group input:focus{
-
-    outline:none;
-
-    border-color:#0F3D2E;
-
-    background:white;
-
-    box-shadow:
-    0 0 0 5px rgba(15,61,46,.08);
-
+.form-group input:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: #0f3d2e;
+  box-shadow: 0 0 0 5px rgba(15, 61, 46, 0.08);
 }
 
-.form-group input::placeholder{
-
-    color:#A3A7AE;
-
+.form-group input::placeholder {
+  color: #a3a7ae;
 }
 
 /* ==========================================
-READ ONLY
+   READ-ONLY INPUTS
 ========================================== */
 
-.form-group input:disabled{
-
-    background:#F3F4F6;
-
-    color:#777;
-
-    cursor:not-allowed;
-
-    font-weight:600;
-
+.form-group input:disabled {
+  color: #777777;
+  font-weight: 600;
+  background: #f3f4f6;
+  cursor: not-allowed;
 }
 
 /* ==========================================
-FULL WIDTH
+   FULL-WIDTH FORM FIELD
 ========================================== */
 
-.form-group.full-width{
-
-    grid-column:1 / -1;
-
+.form-group.full-width {
+  grid-column: 1 / -1;
 }
 
 /* ==========================================
-RESPONSIVE
+   TABLET
 ========================================== */
 
-@media(max-width:992px){
+@media (max-width: 1200px) {
+  .settings-hero {
+    gap: 24px;
+    padding: 32px;
+  }
 
-.settings-hero{
+  .settings-hero h1 {
+    font-size: 36px;
+  }
 
-flex-direction:column;
-
-align-items:flex-start;
-
-gap:25px;
-
+  .save-all-btn,
+  .settings-logout-btn {
+    min-width: 112px;
+    padding: 0 18px;
+  }
 }
 
-.settings-actions {
-    width: 100%;
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width: 992px) {
+  .settings-hero {
     flex-direction: column;
-}
+    align-items: flex-start;
+    gap: 25px;
+  }
 
-.save-all-btn, .logout-btn {
+  .settings-actions {
     width: 100%;
-    justify-content: center;
+    justify-content: flex-start;
+  }
+
+  .save-all-btn,
+  .settings-logout-btn {
+    width: auto !important;
+  }
+
+  .settings-form {
+    grid-template-columns: 1fr;
+  }
 }
 
-.settings-form{
+/* ==========================================
+   PHONE
+========================================== */
 
-grid-template-columns:1fr;
+@media (max-width: 768px) {
+  .settings-page,
+  .settings-form-wrapper {
+    gap: 20px;
+  }
 
+  .settings-hero {
+    padding: 28px;
+    border-radius: 22px;
+  }
+
+  .settings-hero h1 {
+    font-size: 30px;
+  }
+
+  .settings-hero p {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .settings-card {
+    padding: 22px;
+  }
+
+  .settings-card h2 {
+    font-size: 22px;
+  }
+
+  .form-group input {
+    height: 54px;
+  }
 }
 
-}
+/* ==========================================
+   SMALL PHONE
+========================================== */
 
-@media(max-width:768px){
+@media (max-width: 520px) {
+  .settings-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-.settings-page{
-
-gap:20px;
-
-}
-
-.settings-card{
-
-padding:22px;
-
-}
-
-.settings-card h2{
-
-font-size:22px;
-
-}
-
-.settings-hero{
-
-padding:28px;
-
-border-radius:22px;
-
-}
-
-.settings-hero h1{
-
-font-size:30px;
-
-}
-
-.save-all-btn, .logout-btn{
-
-width:100%;
-
-}
-
-.form-group input{
-
-height:54px;
-
-}
-
+  .save-all-btn,
+  .settings-logout-btn {
+    width: 100% !important;
+  }
 }

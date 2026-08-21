@@ -1,8 +1,24 @@
+/* =========================================================
+   EDIT COURSE — PREMIUM RESPONSIVE
+   ========================================================= */
+
 .editCourse {
+  width: 100%;
+  min-height: 100vh;
   padding: 40px;
   background: #f5f7fb;
-  min-height: 100vh;
+  box-sizing: border-box;
 }
+
+.editCourse *,
+.editCourse *::before,
+.editCourse *::after {
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .wizardHeader {
   display: flex;
@@ -15,18 +31,25 @@
 
 .wizardHeader h1 {
   font-size: 38px;
+  line-height: 1.15;
   color: #103d2b;
   font-weight: 700;
   margin: 0;
 }
 
 .wizardHeader p {
-  margin-top: 8px;
+  margin: 8px 0 0;
   color: #777;
   max-width: 600px;
+  line-height: 1.6;
 }
 
+/* =========================================================
+   STEP INDICATOR
+   ========================================================= */
+
 .stepIndicator {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -37,6 +60,7 @@
 .stepIndicator > div {
   width: 44px;
   height: 44px;
+  min-width: 44px;
   border-radius: 50%;
   background: #ddd;
   color: #fff;
@@ -51,33 +75,48 @@
   background: #103d2b;
 }
 
+/* =========================================================
+   MAIN WIZARD CARD
+   ========================================================= */
+
 .wizardCard {
-  background: white;
+  width: 100%;
+  background: #fff;
   border-radius: 18px;
   padding: 35px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
 }
 
 .wizardCard h2 {
-  margin-bottom: 25px;
+  margin: 0 0 25px;
   color: #103d2b;
   font-size: 30px;
+  line-height: 1.2;
 }
+
+/* =========================================================
+   FORM ELEMENTS
+   ========================================================= */
 
 .wizardCard input,
 .wizardCard select,
 .wizardCard textarea {
   width: 100%;
+  max-width: 100%;
+  display: block;
   padding: 14px;
   border: 1px solid #ddd;
   border-radius: 12px;
   font-size: 15px;
   margin-bottom: 20px;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background: #fff;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .wizardCard textarea {
-  resize: none;
+  resize: vertical;
   min-height: 120px;
 }
 
@@ -89,7 +128,12 @@
   box-shadow: 0 0 0 4px rgba(16, 61, 43, 0.12);
 }
 
+/* =========================================================
+   CHAPTER
+   ========================================================= */
+
 .chapterCard {
+  width: 100%;
   background: #f9fafc;
   border-radius: 18px;
   padding: 24px;
@@ -108,24 +152,35 @@
 .chapterHeader h3 {
   margin: 0;
   font-size: 20px;
+  line-height: 1.3;
   color: #103d2b;
 }
 
 .chapterHeader button {
+  flex-shrink: 0;
   background: #103d2b;
   color: white;
   border: none;
   border-radius: 12px;
   padding: 10px 16px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  white-space: nowrap;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
 }
 
 .chapterHeader button:hover {
   background: #145339;
+  transform: translateY(-1px);
 }
 
+/* =========================================================
+   LESSON CARD
+   ========================================================= */
+
 .lessonCard {
+  width: 100%;
   background: white;
   border-radius: 18px;
   padding: 20px;
@@ -136,14 +191,25 @@
 .lessonCard input,
 .lessonCard textarea,
 .lessonCard select {
+  width: 100%;
+  max-width: 100%;
   margin-bottom: 16px;
 }
 
+/* =========================================================
+   LESSON UPLOAD GRID
+   ========================================================= */
+
 .lessonUploads {
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 16px;
+}
+
+.lessonUploads > div {
+  min-width: 0;
 }
 
 .lessonUploads label {
@@ -151,7 +217,20 @@
   margin-bottom: 8px;
   font-weight: 600;
   color: #333;
+  font-size: 14px;
 }
+
+.lessonUploads input[type="file"] {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  font-size: 13px;
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   LESSON BOTTOM
+   ========================================================= */
 
 .lessonBottom {
   display: flex;
@@ -162,13 +241,31 @@
   margin-bottom: 20px;
 }
 
+.lessonBottom > input {
+  flex: 1;
+  min-width: 180px;
+  margin-bottom: 0;
+}
+
 .previewLesson {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-weight: 600;
   color: #103d2b;
+  white-space: nowrap;
 }
+
+.previewLesson input {
+  width: 18px !important;
+  height: 18px;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
 
 .saveLesson,
 .addChapterBtn,
@@ -180,7 +277,10 @@
   cursor: pointer;
   font-size: 15px;
   font-weight: 700;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .saveLesson {
@@ -203,7 +303,12 @@
 .publishBtn:hover,
 .wizardButtons button:hover {
   background: #145339;
+  transform: translateY(-1px);
 }
+
+/* =========================================================
+   WIZARD NAVIGATION
+   ========================================================= */
 
 .wizardButtons {
   display: flex;
@@ -217,106 +322,372 @@
   color: white;
 }
 
-@media (max-width: 768px) {
-  .stepIndicator {
-    flex-wrap: wrap;
-  }
+/* =========================================================
+   PRICE CARD
+   ========================================================= */
 
-  .lessonUploads {
+.price-card {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.price-option {
+  border: 2px solid #ddd;
+  border-radius: 18px;
+  padding: 25px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.price-option:hover {
+  border-color: #103d2b;
+}
+
+.price-option.active {
+  border-color: #103d2b;
+  background: #f7fff9;
+}
+
+.price-option h3 {
+  color: #103d2b;
+  margin-bottom: 10px;
+}
+
+.price-option h1 {
+  margin: 15px 0;
+  font-size: 42px;
+}
+
+/* =========================================================
+   BOTTOM BUTTONS
+   ========================================================= */
+
+.bottom-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.prev-btn {
+  background: white;
+  color: #103d2b;
+  border: 2px solid #103d2b;
+  padding: 14px 35px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.next-btn {
+  background: #103d2b;
+  color: white;
+  border: none;
+  padding: 14px 35px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.prev-btn:hover,
+.next-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1100px) {
+  .price-card {
     grid-template-columns: 1fr;
   }
 }
 
+/* =========================================================
+   MOBILE
+   ========================================================= */
 
-.price-card{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:20px;
+@media (max-width: 768px) {
+
+  .editCourse {
+    padding: 16px;
+    min-height: 100vh;
+  }
+
+  .wizardHeader {
+    margin-bottom: 22px;
+    gap: 8px;
+  }
+
+  .wizardHeader h1 {
+    font-size: 28px;
+  }
+
+  .wizardHeader p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* -----------------------------------------
+     STEP INDICATOR
+     ----------------------------------------- */
+
+  .stepIndicator {
+    justify-content: flex-start;
+    gap: 8px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding: 2px 0 6px;
+    scrollbar-width: none;
+  }
+
+  .stepIndicator::-webkit-scrollbar {
+    display: none;
+  }
+
+  .stepIndicator > div {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    font-size: 14px;
+  }
+
+  /* -----------------------------------------
+     MAIN CARD
+     ----------------------------------------- */
+
+  .wizardCard {
+    width: 100%;
+    padding: 18px;
+    border-radius: 16px;
+  }
+
+  .wizardCard h2 {
+    font-size: 23px;
+    margin-bottom: 18px;
+  }
+
+  .wizardCard input,
+  .wizardCard select,
+  .wizardCard textarea {
+    padding: 12px;
+    font-size: 14px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+  }
+
+  /* -----------------------------------------
+     CHAPTER
+     ----------------------------------------- */
+
+  .chapterCard {
+    padding: 14px;
+    border-radius: 14px;
+    margin-bottom: 16px;
+  }
+
+  .chapterHeader {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .chapterHeader h3 {
+    font-size: 17px;
+    min-width: 0;
+  }
+
+  .chapterHeader button {
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+
+  /* -----------------------------------------
+     LESSON
+     ----------------------------------------- */
+
+  .lessonCard {
+    padding: 14px;
+    border-radius: 14px;
+    margin-bottom: 14px;
+  }
+
+  .lessonCard input,
+  .lessonCard textarea {
+    margin-bottom: 12px;
+  }
+
+  /* KEEP UPLOADS TWO COLUMNS
+     This prevents the page becoming
+     unnecessarily tall on mobile. */
+  .lessonUploads {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .lessonUploads label {
+    font-size: 12px;
+    margin-bottom: 5px;
+  }
+
+  .lessonUploads input[type="file"] {
+    padding: 8px;
+    font-size: 11px;
+    border-radius: 8px;
+  }
+
+  /* -----------------------------------------
+     LESSON BOTTOM
+     ----------------------------------------- */
+
+  .lessonBottom {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .lessonBottom > input {
+    min-width: 0;
+    width: 100%;
+    margin-bottom: 0;
+  }
+
+  .previewLesson {
+    font-size: 13px;
+    white-space: normal;
+  }
+
+  /* -----------------------------------------
+     SAVE LESSON
+     ----------------------------------------- */
+
+  .saveLesson {
+    width: 100%;
+    height: 46px;
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  /* -----------------------------------------
+     CHAPTER / PUBLISH BUTTONS
+     ----------------------------------------- */
+
+  .addChapterBtn,
+  .publishBtn {
+    width: 100%;
+    margin: 0 0 10px;
+    padding: 13px 16px;
+  }
+
+  /* -----------------------------------------
+     WIZARD BUTTONS
+     ----------------------------------------- */
+
+  .wizardButtons {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .wizardButtons button {
+    flex: 1;
+    padding: 13px 12px;
+  }
+
+  /* -----------------------------------------
+     PRICE
+     ----------------------------------------- */
+
+  .price-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .price-option {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .price-option h1 {
+    font-size: 34px;
+  }
+
+  /* -----------------------------------------
+     BOTTOM BUTTONS
+     ----------------------------------------- */
+
+  .bottom-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .prev-btn,
+  .next-btn {
+    width: 100%;
+    padding: 13px 20px;
+  }
 }
 
-.price-option{
-    border:2px solid #ddd;
-    border-radius:18px;
-    padding:25px;
-    cursor:pointer;
-    transition:.3s;
-}
+/* =========================================================
+   VERY SMALL PHONES — 360px / 375px
+   ========================================================= */
 
-.price-option:hover{
-    border-color:#103d2b;
-}
+@media (max-width: 420px) {
 
-.price-option.active{
-    border-color:#103d2b;
-    background:#f7fff9;
-}
+  .editCourse {
+    padding: 10px;
+  }
 
-.price-option h3{
-    color:#103d2b;
-    margin-bottom:10px;
-}
+  .wizardCard {
+    padding: 14px;
+    border-radius: 14px;
+  }
 
-.price-option h1{
-    margin:15px 0;
-    font-size:42px;
-}
+  .wizardCard h2 {
+    font-size: 21px;
+  }
 
-/* Bottom Buttons */
+  .chapterCard {
+    padding: 11px;
+  }
 
-.bottom-buttons{
-    display:flex;
-    justify-content:space-between;
-    margin-top:30px;
-}
+  .lessonCard {
+    padding: 11px;
+  }
 
-.prev-btn{
-    background:white;
-    color:#103d2b;
-    border:2px solid #103d2b;
-    padding:14px 35px;
-    border-radius:12px;
-    cursor:pointer;
-    font-weight:600;
-}
+  .chapterHeader {
+    align-items: center;
+  }
 
-.next-btn{
-    background:#103d2b;
-    color:white;
-    border:none;
-    padding:14px 35px;
-    border-radius:12px;
-    cursor:pointer;
-    font-weight:600;
-}
+  .chapterHeader h3 {
+    font-size: 16px;
+  }
 
-.prev-btn:hover,
-.next-btn:hover{
-    transform:translateY(-2px);
-}
+  .chapterHeader button {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
 
-/* Responsive */
+  .lessonUploads {
+    gap: 7px;
+  }
 
-@media(max-width:1100px){
+  .lessonUploads input[type="file"] {
+    font-size: 10px;
+    padding: 7px;
+  }
 
-.grid-2,
-.grid-3,
-.price-card{
-grid-template-columns:1fr;
-}
+  .stepIndicator {
+    gap: 6px;
+  }
 
-.steps{
-flex-direction:column;
-gap:30px;
-}
-
-.step::after{
-display:none;
-}
-
-.edit-header{
-flex-direction:column;
-align-items:flex-start;
-gap:20px;
-}
-
+  .stepIndicator > div {
+    width: 35px;
+    height: 35px;
+    min-width: 35px;
+  }
 }

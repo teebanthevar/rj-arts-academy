@@ -1,140 +1,139 @@
 /* ==========================================
+   GLOBAL PAGE SETUP
+========================================== */
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+}
+
+/* ==========================================
    DASHBOARD LAYOUT
 ========================================== */
 
-.dashboard-wrapper{
-
-    display:flex;
-
-    min-height:100vh;
-
-    background:#F4F7FB;
-
+.dashboard-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #f4f7fb;
 }
 
 /* ==========================================
    MAIN CONTENT
 ========================================== */
 
-.dashboard-content{
-
-    flex:1;
-
-    margin-left:290px;
-
-    padding:28px;
-
-    min-height:100vh;
-
-    transition:.35s;
-
+.dashboard-content {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 100vh;
+  min-height: 0;
+  margin-left: 0;
+  padding: 28px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  transition: 0.35s ease;
 }
 
 /* ==========================================
    PAGE SPACING
 ========================================== */
 
-.page-content{
-
-    margin-top:28px;
-
+.page-content {
+  margin-top: 28px;
 }
 
 /* ==========================================
    COMMON CARD
 ========================================== */
 
-.dashboard-card{
-
-    background:#fff;
-
-    border-radius:24px;
-
-    padding:28px;
-
-    border:1px solid rgba(0,0,0,.05);
-
-    box-shadow:
-    0 15px 40px rgba(16,24,40,.06);
-
+.dashboard-card {
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 24px;
+  box-shadow: 0 15px 40px rgba(16, 24, 40, 0.06);
 }
 
 /* ==========================================
-   GRID
+   MAIN GRID
 ========================================== */
 
-.dashboard-grid{
-
-    display:grid;
-
-    grid-template-columns:2fr 1fr;
-
-    gap:24px;
-
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
 }
 
-.dashboard-grid-small{
+/* ==========================================
+   SMALL CARDS GRID
+========================================== */
 
-    display:grid;
-
-    grid-template-columns:repeat(4,1fr);
-
-    gap:22px;
-
+.dashboard-grid-small {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
 }
 
 /* ==========================================
    TABLET
 ========================================== */
 
-@media(max-width:1200px){
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
 
-.dashboard-grid{
-
-grid-template-columns:1fr;
-
-}
-
-.dashboard-grid-small{
-
-grid-template-columns:repeat(2,1fr);
-
-}
-
+  .dashboard-grid-small {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* ==========================================
    MOBILE
 ========================================== */
 
-@media(max-width:992px){
+@media (max-width: 992px) {
+  .dashboard-wrapper {
+    height: 100vh;
+    overflow: hidden;
+  }
 
-.dashboard-content{
-
-margin-left:0;
-
-padding:20px;
-
-}
-
+  .dashboard-content {
+    width: 100%;
+    height: 100vh;
+    margin-left: 0;
+    padding: 20px;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
 }
 
 /* ==========================================
    PHONE
 ========================================== */
 
-@media(max-width:768px){
+@media (max-width: 768px) {
+  .dashboard-content {
+    padding: 15px;
+  }
 
-.dashboard-content{
+  .dashboard-grid-small {
+    grid-template-columns: 1fr;
+  }
 
-padding:15px;
-
-}
-
-.dashboard-grid-small{
-
-grid-template-columns:1fr;
-
-}
-
+  .dashboard-card {
+    padding: 20px;
+    border-radius: 20px;
+  }
 }
