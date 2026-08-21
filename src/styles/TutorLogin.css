@@ -1,3 +1,17 @@
+/* Root reset — prevents rem-based elements (h1, h2, etc.) from
+   rendering at different sizes across environments if the host
+   page's base font-size ever differs (e.g. dev index.html vs
+   the deployed build, or a global stylesheet difference). */
+:root {
+  font-size: 16px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 .tutor-login-page {
   min-height: 100vh;
   display: flex;
@@ -18,16 +32,25 @@
   gap: 5px;
   color: #ffffff;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.8rem;
+  line-height: 1;
   background: rgba(255, 255, 255, 0.1);
-  padding: 5px 10px;
+  padding: 6px 12px;
   border-radius: 6px;
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: background 0.2s;
   z-index: 10;
   width: auto;
+  white-space: nowrap;
+}
+
+.back-teachhub-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .back-teachhub-btn:hover {
@@ -285,12 +308,10 @@
     padding: 1.5rem 1rem !important;
   }
 
-  /* Optional: Make branding panel text compact on mobile if desired, or keep it visible */
   .login-brand-panel {
-    background-color: #0d231a !important; /* Matches your dark theme */
+    background-color: #0d231a !important;
   }
 
-  /* Form components sizing fit */
   .tutor-form-container {
     width: 100% !important;
   }
@@ -306,8 +327,7 @@
 }
 
 @media (max-width: 768px) {
-  /* Style the Create Tutor Account header cleanly */
-  .tutor-register-card h2, 
+  .tutor-register-card h2,
   .register-form-panel h2,
   .auth-card h2 {
     font-size: 1.35rem !important;
@@ -317,7 +337,7 @@
     text-align: left !important;
   }
 
-  .tutor-register-card p, 
+  .tutor-register-card p,
   .register-form-panel p {
     font-size: 0.8rem !important;
     color: #6b7280 !important;
@@ -325,7 +345,6 @@
     text-align: left !important;
   }
 
-  /* Force all input fields, wrappers, and text boxes to take 100% full width */
   input[type="text"],
   input[type="email"],
   input[type="password"],
@@ -338,8 +357,163 @@
     box-sizing: border-box !important;
   }
 
-  /* Make sure inputs inside wrappers fill completely */
   .input-with-icon input {
     width: 100% !important;
   }
+}
+
+@media (max-width: 768px) {
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  .tutor-login-page {
+    width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+
+  .tutor-login-wrapper {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 100dvh !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    margin: 0 !important;
+  }
+
+  /* Hide the marketing/brand panel on mobile, same as register page */
+  .login-brand-panel {
+    display: none !important;
+  }
+
+  .login-form-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    box-sizing: border-box !important;
+    padding: 1rem 1.1rem 1.4rem 1.1rem !important;
+    justify-content: flex-start !important;
+  }
+
+  .back-teachhub-btn {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #1b4d3e 0%, #11342a 100%) !important;
+    border: 1px solid #d4af37 !important;
+    padding: 7px 14px !important;
+    border-radius: 6px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+    display: inline-flex !important;
+    align-self: flex-start !important;
+    margin-bottom: 14px !important;
+  }
+
+  .back-teachhub-btn svg {
+    color: #d4af37 !important;
+  }
+
+  .login-form-header h2 {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    margin-bottom: 0.2rem !important;
+    text-align: left !important;
+  }
+
+  .login-form-header p {
+    font-size: 0.78rem !important;
+    color: #6b7280 !important;
+    text-align: left !important;
+  }
+
+  .form-group-field label {
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+    letter-spacing: 0.025em !important;
+    margin-bottom: 3px !important;
+  }
+
+  .input-with-icon input {
+    width: 100% !important;
+    padding: 0.55rem 0.75rem 0.55rem 2.4rem !important;
+    font-size: 0.85rem !important;
+    border-radius: 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Fix "Remember me" / "Create account" row wrapping onto 2 lines */
+  .login-options-row {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    font-size: 0.78rem !important;
+    white-space: nowrap !important;
+  }
+
+  .remember-me-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+  }
+
+  .submit-login-btn {
+    width: 100% !important;
+    padding: 0.7rem !important;
+    font-size: 0.88rem !important;
+    border-radius: 6px !important;
+    margin-top: 0.6rem !important;
+  }
+}
+
+.back-teachhub-btn {
+  position: static !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  align-self: flex-start !important;
+  margin-bottom: 24px !important;
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #2c6b56 0%, #1b4d3e 100%) !important;
+  border: 1px solid rgba(212, 175, 55, 0.5) !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  text-decoration: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.25s ease !important;
+  width: fit-content !important;
+}
+
+.back-teachhub-btn svg {
+  color: #d4af37 !important;
+}
+
+.back-teachhub-btn:hover {
+  border-color: #d4af37 !important;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25) !important;
+  transform: translateY(-1px) !important;
 }

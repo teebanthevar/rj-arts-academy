@@ -1,69 +1,118 @@
+/* =========================================
+   CONTACT SECTION - STANDARD / RESPONSIVE
+   ========================================= */
+
 .contact {
-  padding: 80px 10%;
+  padding: 60px 7%;
   background: #FAF9F6;
 }
 
 .contact h2 {
   text-align: center;
-  font-size: 42px;
+  font-size: 36px;
+  line-height: 1.2;
   color: #0F3D2E;
+  margin: 0;
 }
 
 .contact-subtitle {
   text-align: center;
   color: #666;
-  margin: 15px 0 50px;
+  margin: 12px 0 35px;
+  font-size: 16px;
+  line-height: 1.6;
 }
 
 .contact-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
 }
+
+/* =========================================
+   CONTACT INFO
+   ========================================= */
 
 .contact-info {
   background: #0F3D2E;
   color: white;
-  padding: 40px;
-  border-radius: 20px;
+  padding: 32px;
+  border-radius: 18px;
+  box-sizing: border-box;
 }
 
 .contact-info h3 {
   color: #D8C2A0;
-  margin-bottom: 25px;
+  margin: 0 0 20px;
+  font-size: 23px;
 }
 
 .contact-info p {
-  margin: 18px 0;
+  margin: 14px 0;
+  font-size: 15px;
+  line-height: 1.6;
 }
+
+/* =========================================
+   WHATSAPP BUTTON
+   ========================================= */
 
 .whatsapp-btn {
   display: inline-block;
-  margin-top: 30px;
+  margin-top: 22px;
   background: #25D366;
   color: white;
   text-decoration: none;
-  padding: 14px 30px;
+  padding: 12px 25px;
   border-radius: 40px;
+  font-size: 15px;
   font-weight: bold;
 }
 
-/* Updated Form Styles */
+/* =========================================
+   INSTAGRAM BUTTON
+   ========================================= */
+
+.instagram-btn {
+  display: inline-block;
+  margin-top: 12px;
+  background: #E1306C;
+  color: white;
+  text-decoration: none;
+  padding: 12px 25px;
+  border-radius: 40px;
+  font-size: 15px;
+  font-weight: bold;
+  transition: .3s;
+}
+
+.instagram-btn:hover {
+  opacity: .9;
+}
+
+/* =========================================
+   CONTACT FORM
+   ========================================= */
+
 .contact-form {
   width: 100%;
-  max-width: 520px;
+  max-width: none;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 16px;
 }
 
 .contact-form input,
 .contact-form textarea {
   width: 100%;
-  padding: 18px 22px;
+  padding: 15px 18px;
   border: 1px solid #d8d8d8;
-  border-radius: 16px;
-  font-size: 17px;
+  border-radius: 14px;
+  font-size: 15px;
   font-family: inherit;
   background: #fff;
   transition: all 0.3s ease;
@@ -71,11 +120,11 @@
 }
 
 .contact-form input {
-  height: 70px;
+  height: 58px;
 }
 
 .contact-form textarea {
-  min-height: 200px;
+  min-height: 150px;
   resize: vertical;
 }
 
@@ -83,18 +132,22 @@
 .contact-form textarea:focus {
   outline: none;
   border-color: #1b5e4b;
-  box-shadow: 0 0 0 4px rgba(27, 94, 75, 0.12);
+  box-shadow: 0 0 0 3px rgba(27, 94, 75, 0.10);
 }
+
+/* =========================================
+   SEND BUTTON
+   ========================================= */
 
 .contact-form button {
   background: #0F3D2E;
   color: white;
   border: none;
-  width: 240px;
-  height: 62px;
+  width: 210px;
+  height: 54px;
   border-radius: 50px;
   cursor: pointer;
-  font-size: 22px;
+  font-size: 17px;
   font-weight: 700;
   transition: .3s;
 }
@@ -104,24 +157,125 @@
   color: #0F3D2E;
 }
 
-@media(max-width:768px){
+/* =========================================
+   TABLET
+   ========================================= */
+
+@media (max-width: 900px) {
+
+  .contact {
+    padding: 50px 5%;
+  }
+
   .contact-container {
     grid-template-columns: 1fr;
+    max-width: 650px;
+    gap: 25px;
+  }
+
+  .contact-info {
+    padding: 28px;
+  }
+
+  .contact-form {
+    width: 100%;
   }
 }
 
-.instagram-btn {
-  display: inline-block;
-  margin-top: 15px;
-  background: #E1306C;
-  color: white;
-  text-decoration: none;
-  padding: 14px 30px;
-  border-radius: 40px;
-  font-weight: bold;
-  transition: .3s;
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 600px) {
+
+  .contact {
+    padding: 40px 20px;
+  }
+
+  .contact h2 {
+    font-size: 30px;
+  }
+
+  .contact-subtitle {
+    font-size: 14px;
+    margin: 10px 0 28px;
+  }
+
+  .contact-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .contact-info {
+    padding: 24px 20px;
+    border-radius: 16px;
+  }
+
+  .contact-info h3 {
+    font-size: 21px;
+    margin-bottom: 18px;
+  }
+
+  .contact-info p {
+    font-size: 14px;
+    margin: 12px 0;
+  }
+
+  .whatsapp-btn,
+  .instagram-btn {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    padding: 12px 18px;
+  }
+
+  .contact-form {
+    gap: 14px;
+  }
+
+  .contact-form input {
+    height: 54px;
+    padding: 14px 16px;
+    font-size: 15px;
+  }
+
+  .contact-form textarea {
+    min-height: 130px;
+    padding: 14px 16px;
+    font-size: 15px;
+  }
+
+  .contact-form button {
+    width: 100%;
+    height: 52px;
+    font-size: 16px;
+  }
 }
 
-.instagram-btn:hover {
-  opacity: .9;
+/* =========================================
+   SMALL PHONES
+   ========================================= */
+
+@media (max-width: 380px) {
+
+  .contact {
+    padding: 35px 15px;
+  }
+
+  .contact h2 {
+    font-size: 27px;
+  }
+
+  .contact-info {
+    padding: 20px 17px;
+  }
+
+  .contact-info h3 {
+    font-size: 19px;
+  }
+
+  .contact-info p {
+    font-size: 13px;
+  }
 }

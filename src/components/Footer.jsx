@@ -2,6 +2,18 @@ import "../styles/Footer.css";
 import logo from "../assets/images/logo.png";
 
 function Footer() {
+  const handleBackToTop = () => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
+  };
+
+  const handlePortal = () => {
+    window.location.href = "/student-login";
+  };
+
   return (
     <footer className="footer">
 
@@ -42,9 +54,13 @@ function Footer() {
 
           <a href="#contact">Contact</a>
 
-          <a href="#portal" className="portal-link">
+          <button
+            type="button"
+            className="portal-link"
+            onClick={handlePortal}
+          >
             🎓 Student Portal
-          </a>
+          </button>
 
         </div>
 
@@ -54,11 +70,18 @@ function Footer() {
 
           <h3>Contact</h3>
 
-          <p>📍 Lot 1205, Kampung Perhentian, 35800 Slim River, Perak</p>
+          <p>
+            📍 Lot 1205, Kampung Perhentian,
+            35800 Slim River, Perak
+          </p>
 
-          <p>📞 +60 12-245 1679</p>
+          <p>
+            📞 +60 12-245 1679
+          </p>
 
-          <p>📧 rjartsacademy@gmail.com</p>
+          <p>
+            📧 rjartsacademy@gmail.com
+          </p>
 
         </div>
 
@@ -95,13 +118,9 @@ function Footer() {
         </p>
 
         <button
+          type="button"
           className="top-btn"
-          onClick={() =>
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth",
-            })
-          }
+          onClick={handleBackToTop}
         >
           ↑ Back to Top
         </button>

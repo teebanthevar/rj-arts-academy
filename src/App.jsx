@@ -12,7 +12,10 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import TutorLayout from "./layouts/TutorLayout";
 
-// Public Pages
+// =====================================================
+// PUBLIC PAGES
+// =====================================================
+
 import Home from "./pages/Home";
 import PublicExplore from "./pages/PublicExplore";
 import TutorProfile from "./pages/TutorProfile";
@@ -20,14 +23,32 @@ import StudentPublicProfile from "./pages/StudentPublicProfile";
 import StudentRegister from "./pages/StudentRegister";
 import StudentPublicLogin from "./pages/StudentPublicLogin";
 import StudentLogin from "./pages/StudentLogin";
+
 import TutorRegister from "./pages/tutor/TutorRegister";
 import TutorLogin from "./pages/tutor/TutorLogin";
 
-// Blog Pages
+// =====================================================
+// PRESCHOOL PAGES
+// =====================================================
+
+import PreschoolRegister from "./pages/preschool/PreschoolRegister";
+import PreschoolLogin from "./pages/preschool/PreschoolLogin";
+import PreschoolDashboard from "./pages/preschool/PreschoolDashboard";
+
+// ⭐ NEW: Public Preschool Profile
+import PreschoolPublicProfile from "./pages/PreschoolPublicProfile";
+
+// =====================================================
+// BLOG PAGES
+// =====================================================
+
 import Blog from "./pages/Blog";
 import BlogArticle from "./pages/BlogArticle";
 
-// Tutor Pages
+// =====================================================
+// TUTOR PAGES
+// =====================================================
+
 import TutorDashboard from "./pages/tutor/TutorDashboard";
 import CreateCourse from "./pages/tutor/CreateCourse";
 import EditCourse from "./pages/tutor/EditCourse";
@@ -42,7 +63,10 @@ import TutorReviews from "./pages/tutor/TutorReviews";
 import TutorSubscription from "./pages/tutor/TutorSubscription";
 import TutorSettings from "./pages/tutor/TutorSettings";
 
-// Dashboard Pages
+// =====================================================
+// STUDENT DASHBOARD PAGES
+// =====================================================
+
 import DashboardHome from "./pages/DashboardHome";
 import MyPortfolio from "./pages/MyPortfolio";
 import MyCourses from "./pages/MyCourses";
@@ -54,7 +78,10 @@ import Payments from "./pages/Payments";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 
-// Admin Pages
+// =====================================================
+// ADMIN PAGES
+// =====================================================
+
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminStudents from "./pages/AdminStudents";
@@ -64,7 +91,7 @@ import AdminCourses from "./pages/AdminCourses";
 import AdminAttendance from "./pages/AdminAttendance";
 import AdminCertificates from "./pages/AdminCertificates";
 import AdminPayments from "./pages/AdminPayments";
-import AdminSubscriptions from "./pages/AdminSubscriptions"; // <-- Added import
+import AdminSubscriptions from "./pages/AdminSubscriptions";
 import AdminAnnouncement from "./pages/AdminAnnouncement";
 import AdminBlog from "./pages/AdminBlog";
 
@@ -88,43 +115,116 @@ export default function App() {
       <Routes>
 
         {/* =====================================================
-            STANDALONE PUBLIC PAGES (No Academy Header, No Sidebar)
+            STANDALONE PUBLIC PAGES
+            No Academy Header / No Dashboard Sidebar
         ===================================================== */}
 
-        <Route path="/teachhub" element={<PublicExplore />} />
-        <Route path="/tutor-profile/:id" element={<TutorProfile />} />
+        {/* TeachHub Explore */}
+        <Route
+          path="/teachhub"
+          element={<PublicExplore />}
+        />
 
-        <Route path="/student-login" element={<StudentLogin />} />
+        {/* Tutor Public Profile */}
+        <Route
+          path="/tutor-profile/:id"
+          element={<TutorProfile />}
+        />
 
-        <Route path="/student-register" element={<StudentRegister />} />
+        {/* Student Login */}
+        <Route
+          path="/student-login"
+          element={<StudentLogin />}
+        />
 
+        {/* Student Registration */}
+        <Route
+          path="/student-register"
+          element={<StudentRegister />}
+        />
+
+        {/* Student Public Login */}
         <Route
           path="/student-public-login"
           element={<StudentPublicLogin />}
         />
 
+        {/* Student Public Profile */}
         <Route
           path="/student-public-profile/:id"
           element={<StudentPublicProfile />}
         />
 
-        <Route path="/tutor-register" element={<TutorRegister />} />
+        {/* Tutor Registration */}
+        <Route
+          path="/tutor-register"
+          element={<TutorRegister />}
+        />
 
-        <Route path="/tutor-login" element={<TutorLogin />} />
+        {/* Tutor Login */}
+        <Route
+          path="/tutor-login"
+          element={<TutorLogin />}
+        />
 
-        {/* Blog Routes */}
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/:id" element={<BlogArticle />} />
+
+        {/* =====================================================
+            PRESCHOOL
+        ===================================================== */}
+
+        {/* Preschool Registration */}
+        <Route
+          path="/preschool-register"
+          element={<PreschoolRegister />}
+        />
+
+        {/* Preschool Login */}
+        <Route
+          path="/preschool-login"
+          element={<PreschoolLogin />}
+        />
+
+        {/* Preschool Dashboard */}
+        <Route
+          path="/preschool-dashboard"
+          element={<PreschoolDashboard />}
+        />
+
+        {/* ⭐ PUBLIC PRESCHOOL PROFILE
+            Example:
+            /preschool-profile/USER_ID
+        */}
+        <Route
+  path="/preschool-public-profile/:id"
+  element={<PreschoolPublicProfile />}
+/>
+
+
+        {/* =====================================================
+            BLOG
+        ===================================================== */}
+
+        <Route
+          path="/blog"
+          element={<Blog />}
+        />
+
+        <Route
+          path="/blog/:id"
+          element={<BlogArticle />}
+        />
 
 
         {/* =====================================================
             PUBLIC WEBSITE WITH MAIN LAYOUT
-            Includes Academy Header
         ===================================================== */}
 
         <Route element={<MainLayout />}>
 
-          <Route path="/" element={<Home />} />
+          <Route
+            path="/"
+            element={<Home />}
+          />
 
         </Route>
 

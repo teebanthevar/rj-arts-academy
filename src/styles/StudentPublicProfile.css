@@ -1520,3 +1520,1266 @@ aside.sidebar-open {
     justify-content: center;
   }
 }
+
+/* =========================================================
+   PREMIUM ACCESS — LOCKED FEATURES
+   Add this at the VERY BOTTOM of StudentPublicProfile.css
+   ========================================================= */
+
+/* Locked sidebar item */
+.premium-locked-item {
+  position: relative;
+  opacity: 0.72;
+  cursor: pointer !important;
+  transition: all 0.25s ease;
+}
+
+.premium-locked-item:hover {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+.premium-locked-item .premium-lock-icon {
+  margin-left: auto;
+  font-size: 15px;
+  opacity: 0.85;
+}
+
+.premium-locked-item .premium-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+
+/* Small Premium Access badge */
+.premium-access-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 8px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fff8e7, #fff2c7);
+  border: 1px solid rgba(198, 145, 35, 0.28);
+  color: #9a6b08;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   PREMIUM LOCK POPUP
+   ========================================================= */
+
+.premium-lock-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(7, 31, 24, 0.58);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: premiumOverlayIn 0.2s ease;
+}
+
+.premium-lock-modal {
+  position: relative;
+  width: min(460px, 100%);
+  padding: 38px 34px 32px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 61, 46, 0.10);
+  border-radius: 24px;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.22),
+    0 8px 30px rgba(15, 61, 46, 0.12);
+  text-align: center;
+  animation: premiumModalIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
+/* Close button */
+.premium-lock-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #f4f7f5;
+  color: #52615b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.premium-lock-close:hover {
+  background: #e8efeb;
+  color: #064e3b;
+  transform: rotate(90deg);
+}
+
+
+/* Gold premium icon */
+.premium-lock-icon-wrap {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 20px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    145deg,
+    #fff8e5,
+    #f9e7b2
+  );
+  border: 1px solid rgba(188, 142, 40, 0.25);
+  color: #a97812;
+  font-size: 30px;
+  box-shadow:
+    0 10px 25px rgba(172, 127, 26, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+
+/* Modal title */
+.premium-lock-modal h2 {
+  margin: 0 0 10px;
+  color: #10251e;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+
+/* Modal description */
+.premium-lock-modal p {
+  margin: 0 auto 24px;
+  max-width: 360px;
+  color: #718078;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+
+/* Premium badge inside popup */
+.premium-lock-modal .premium-modal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 22px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: #eefaf5;
+  border: 1px solid #d7eee4;
+  color: #075c46;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+
+/* Upgrade button */
+.premium-upgrade-btn {
+  width: 100%;
+  min-height: 50px;
+  border: none;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #075c46, #064e3b);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(6, 78, 59, 0.20);
+  transition: all 0.25s ease;
+}
+
+.premium-upgrade-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(6, 78, 59, 0.28);
+  background: linear-gradient(135deg, #087358, #075c46);
+}
+
+.premium-upgrade-btn:active {
+  transform: translateY(0);
+}
+
+
+/* Secondary button */
+.premium-cancel-btn {
+  width: 100%;
+  margin-top: 10px;
+  min-height: 46px;
+  border: 1px solid #dfe8e3;
+  border-radius: 13px;
+  background: #ffffff;
+  color: #53635c;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.premium-cancel-btn:hover {
+  background: #f6f9f7;
+  border-color: #cbdad3;
+  color: #064e3b;
+}
+
+
+/* =========================================================
+   LOCKED CONTENT CARD
+   ========================================================= */
+
+.premium-content-locked {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+.premium-content-locked::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  pointer-events: none;
+}
+
+.premium-content-lock-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+}
+
+.premium-content-lock-overlay strong {
+  color: #12352b;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.premium-content-lock-overlay span {
+  color: #7a8881;
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   PREMIUM SIDEBAR SEPARATOR
+   ========================================================= */
+
+.premium-sidebar-divider {
+  height: 1px;
+  margin: 10px 0;
+  background: rgba(255, 255, 255, 0.10);
+}
+
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes premiumOverlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes premiumModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+  .premium-lock-overlay {
+    padding: 16px;
+  }
+
+  .premium-lock-modal {
+    padding: 34px 22px 24px;
+    border-radius: 20px;
+  }
+
+  .premium-lock-modal h2 {
+    font-size: 22px;
+  }
+
+  .premium-lock-icon-wrap {
+    width: 68px;
+    height: 68px;
+    border-radius: 19px;
+    font-size: 27px;
+  }
+
+  .premium-access-badge {
+    font-size: 9px;
+    padding: 3px 7px;
+  }
+}
+
+/* Premium locked feature page */
+.premium-feature-page {
+  max-width: 520px;
+  margin: 60px auto;
+  padding: 45px 35px;
+  background: #fff;
+  border: 1px solid #e5ece8;
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 15px 45px rgba(6, 78, 59, 0.08);
+}
+
+.premium-feature-page-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #fff8e5, #f9e7b2);
+  font-size: 28px;
+  box-shadow: 0 10px 25px rgba(172, 127, 26, 0.12);
+}
+
+.premium-feature-page h2 {
+  margin: 0 0 10px;
+  color: #10251e;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.premium-feature-page p {
+  max-width: 400px;
+  margin: 0 auto 24px;
+  color: #718078;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.premium-feature-page .premium-upgrade-btn {
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+/* =========================================================
+   PREMIUM ACCESS — LOCKED FEATURES
+   PREMIUM ✦ ICON — NO PADLOCK
+   ========================================================= */
+
+
+/* =========================================================
+   LOCKED SIDEBAR ITEM
+   ========================================================= */
+
+.premium-locked-item {
+  position: relative;
+  opacity: 0.78;
+  cursor: pointer !important;
+
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    background 0.25s ease;
+}
+
+.premium-locked-item:hover {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+
+/* =========================================================
+   PREMIUM ICON
+   Replaces the padlock with a luxury star/sparkle
+   ========================================================= */
+
+.premium-locked-item .premium-lock-icon {
+  position: relative;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 22px;
+  height: 22px;
+
+  margin-left: auto;
+
+  flex-shrink: 0;
+
+  font-size: 0;
+
+  color: var(--gold-light);
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(245, 215, 110, 0.22),
+      rgba(212, 175, 55, 0.06) 60%,
+      transparent 70%
+    );
+
+  border-radius: 50%;
+
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
+}
+
+
+/* Hide the existing lock icon */
+.premium-locked-item .premium-lock-icon svg {
+  display: none !important;
+}
+
+
+/* Create the premium ✦ symbol */
+.premium-locked-item .premium-lock-icon::before {
+  content: "✦";
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+
+  color: #f5d76e;
+
+  font-size: 17px;
+
+  font-weight: 900;
+
+  line-height: 1;
+
+  text-shadow:
+    0 0 5px rgba(245, 215, 110, 0.45),
+    0 0 12px rgba(212, 175, 55, 0.20);
+
+  transition:
+    transform 0.25s ease,
+    color 0.25s ease;
+}
+
+
+/* Premium sparkle hover */
+.premium-locked-item:hover .premium-lock-icon {
+  transform: scale(1.12);
+}
+
+.premium-locked-item:hover .premium-lock-icon::before {
+  color: #ffe99a;
+
+  transform: rotate(15deg) scale(1.08);
+
+  text-shadow:
+    0 0 7px rgba(245, 215, 110, 0.65),
+    0 0 16px rgba(212, 175, 55, 0.35);
+}
+
+
+/* =========================================================
+   PREMIUM LABEL
+   ========================================================= */
+
+.premium-locked-item .premium-label {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 7px;
+}
+
+
+/* =========================================================
+   PREMIUM ACCESS BADGE
+   ========================================================= */
+
+.premium-access-badge {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  margin-left: 8px;
+
+  padding: 4px 10px;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fff8e7,
+      #fff2c7
+    );
+
+  border:
+    1px solid
+    rgba(198, 145, 35, 0.30);
+
+  color: #9a6b08;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.35px;
+
+  white-space: nowrap;
+
+  box-shadow:
+    0 2px 7px rgba(172, 127, 26, 0.08);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.premium-locked-item:hover .premium-access-badge {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 4px 10px rgba(172, 127, 26, 0.14);
+}
+
+
+/* =========================================================
+   PREMIUM LOCK POPUP
+   ========================================================= */
+
+.premium-lock-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 99999;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background:
+    rgba(7, 31, 24, 0.58);
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  animation:
+    premiumOverlayIn 0.2s ease;
+}
+
+
+/* =========================================================
+   PREMIUM MODAL
+   ========================================================= */
+
+.premium-lock-modal {
+  position: relative;
+
+  width: min(460px, 100%);
+
+  padding: 38px 34px 32px;
+
+  background: #ffffff;
+
+  border:
+    1px solid
+    rgba(15, 61, 46, 0.10);
+
+  border-radius: 24px;
+
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.22),
+    0 8px 30px rgba(15, 61, 46, 0.12);
+
+  text-align: center;
+
+  animation:
+    premiumModalIn
+    0.28s
+    cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
+/* =========================================================
+   CLOSE BUTTON
+   ========================================================= */
+
+.premium-lock-close {
+  position: absolute;
+
+  top: 15px;
+  right: 15px;
+
+  width: 36px;
+  height: 36px;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: #f4f7f5;
+
+  color: #52615b;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  font-size: 18px;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.premium-lock-close:hover {
+  background: #e8efeb;
+
+  color: #064e3b;
+
+  transform: rotate(90deg);
+}
+
+
+/* =========================================================
+   PREMIUM MODAL ICON
+   Replaces lock with premium sparkle
+   ========================================================= */
+
+.premium-lock-icon-wrap {
+  position: relative;
+
+  width: 76px;
+  height: 76px;
+
+  margin: 0 auto 20px;
+
+  border-radius: 22px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(
+      145deg,
+      #fff8e5,
+      #f9e7b2
+    );
+
+  border:
+    1px solid
+    rgba(188, 142, 40, 0.25);
+
+  color: #a97812;
+
+  font-size: 0;
+
+  box-shadow:
+    0 10px 25px
+    rgba(172, 127, 26, 0.14),
+
+    inset 0 1px 0
+    rgba(255, 255, 255, 0.8);
+}
+
+
+/* Hide existing lock SVG/icon inside modal */
+.premium-lock-icon-wrap svg {
+  display: none !important;
+}
+
+
+/* Main premium sparkle */
+.premium-lock-icon-wrap::before {
+  content: "✦";
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+
+  color: #a97812;
+
+  font-size: 36px;
+
+  font-weight: 900;
+
+  line-height: 1;
+
+  text-shadow:
+    0 2px 5px rgba(169, 120, 18, 0.20);
+
+  animation:
+    premiumSparkle 2.4s
+    ease-in-out
+    infinite;
+}
+
+
+/* Small sparkle detail */
+.premium-lock-icon-wrap::after {
+  content: "✦";
+
+  position: absolute;
+
+  top: 14px;
+  right: 14px;
+
+  color: #d4af37;
+
+  font-size: 10px;
+
+  opacity: 0.8;
+
+  animation:
+    smallPremiumSparkle 2s
+    ease-in-out
+    infinite;
+}
+
+
+/* =========================================================
+   PREMIUM MODAL TITLE
+   ========================================================= */
+
+.premium-lock-modal h2 {
+  margin: 0 0 10px;
+
+  color: #10251e;
+
+  font-size: 26px;
+
+  line-height: 1.2;
+
+  font-weight: 800;
+
+  letter-spacing: -0.5px;
+}
+
+
+/* =========================================================
+   PREMIUM MODAL DESCRIPTION
+   ========================================================= */
+
+.premium-lock-modal p {
+  margin: 0 auto 24px;
+
+  max-width: 360px;
+
+  color: #718078;
+
+  font-size: 14px;
+
+  line-height: 1.7;
+}
+
+
+/* =========================================================
+   PREMIUM BADGE INSIDE POPUP
+   ========================================================= */
+
+.premium-lock-modal .premium-modal-badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  margin-bottom: 22px;
+
+  padding: 7px 13px;
+
+  border-radius: 999px;
+
+  background: #eefaf5;
+
+  border:
+    1px solid
+    #d7eee4;
+
+  color: #075c46;
+
+  font-size: 11px;
+
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   UPGRADE BUTTON
+   ========================================================= */
+
+.premium-upgrade-btn {
+  width: 100%;
+
+  min-height: 50px;
+
+  border: none;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #075c46,
+      #064e3b
+    );
+
+  color: #ffffff;
+
+  font-size: 14px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 10px 22px
+    rgba(6, 78, 59, 0.20);
+
+  transition:
+    all 0.25s ease;
+}
+
+
+.premium-upgrade-btn:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 14px 28px
+    rgba(6, 78, 59, 0.28);
+
+  background:
+    linear-gradient(
+      135deg,
+      #087358,
+      #075c46
+    );
+}
+
+
+.premium-upgrade-btn:active {
+  transform: translateY(0);
+}
+
+
+/* =========================================================
+   SECONDARY BUTTON
+   ========================================================= */
+
+.premium-cancel-btn {
+  width: 100%;
+
+  margin-top: 10px;
+
+  min-height: 46px;
+
+  border:
+    1px solid
+    #dfe8e3;
+
+  border-radius: 13px;
+
+  background: #ffffff;
+
+  color: #53635c;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    all 0.2s ease;
+}
+
+
+.premium-cancel-btn:hover {
+  background: #f6f9f7;
+
+  border-color: #cbdad3;
+
+  color: #064e3b;
+}
+
+
+/* =========================================================
+   LOCKED CONTENT CARD
+   ========================================================= */
+
+.premium-content-locked {
+  position: relative;
+
+  overflow: hidden;
+
+  border-radius: 18px;
+}
+
+
+.premium-content-locked::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    rgba(255, 255, 255, 0.62);
+
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+
+  pointer-events: none;
+}
+
+
+.premium-content-lock-overlay {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 5;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-direction: column;
+
+  gap: 10px;
+
+  text-align: center;
+}
+
+
+.premium-content-lock-overlay strong {
+  color: #12352b;
+
+  font-size: 15px;
+
+  font-weight: 800;
+}
+
+
+.premium-content-lock-overlay span {
+  color: #7a8881;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   PREMIUM SIDEBAR DIVIDER
+   ========================================================= */
+
+.premium-sidebar-divider {
+  height: 1px;
+
+  margin: 10px 0;
+
+  background:
+    rgba(255, 255, 255, 0.10);
+}
+
+
+/* =========================================================
+   PREMIUM FEATURE PAGE
+   ========================================================= */
+
+.premium-feature-page {
+  max-width: 520px;
+
+  margin: 60px auto;
+
+  padding: 45px 35px;
+
+  background: #ffffff;
+
+  border:
+    1px solid
+    #e5ece8;
+
+  border-radius: 24px;
+
+  text-align: center;
+
+  box-shadow:
+    0 15px 45px
+    rgba(6, 78, 59, 0.08);
+}
+
+
+.premium-feature-page-icon {
+  position: relative;
+
+  width: 72px;
+  height: 72px;
+
+  margin: 0 auto 18px;
+
+  border-radius: 20px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(
+      145deg,
+      #fff8e5,
+      #f9e7b2
+    );
+
+  font-size: 0;
+
+  box-shadow:
+    0 10px 25px
+    rgba(172, 127, 26, 0.12);
+}
+
+
+/* Hide any existing lock */
+.premium-feature-page-icon svg {
+  display: none !important;
+}
+
+
+/* Premium feature icon */
+.premium-feature-page-icon::before {
+  content: "✦";
+
+  color: #a97812;
+
+  font-size: 34px;
+
+  font-weight: 900;
+
+  text-shadow:
+    0 2px 5px
+    rgba(169, 120, 18, 0.20);
+}
+
+
+/* =========================================================
+   PREMIUM FEATURE PAGE TITLE
+   ========================================================= */
+
+.premium-feature-page h2 {
+  margin: 0 0 10px;
+
+  color: #10251e;
+
+  font-size: 25px;
+
+  font-weight: 800;
+}
+
+
+.premium-feature-page p {
+  max-width: 400px;
+
+  margin: 0 auto 24px;
+
+  color: #718078;
+
+  font-size: 14px;
+
+  line-height: 1.7;
+}
+
+
+.premium-feature-page .premium-upgrade-btn {
+  max-width: 320px;
+
+  margin: 0 auto;
+}
+
+
+/* =========================================================
+   PREMIUM ANIMATIONS
+   ========================================================= */
+
+@keyframes premiumOverlayIn {
+
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+
+@keyframes premiumModalIn {
+
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(18px)
+      scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+
+@keyframes premiumSparkle {
+
+  0%,
+  100% {
+    transform:
+      scale(1)
+      rotate(0deg);
+
+    opacity: 0.92;
+  }
+
+  50% {
+    transform:
+      scale(1.12)
+      rotate(8deg);
+
+    opacity: 1;
+  }
+}
+
+
+@keyframes smallPremiumSparkle {
+
+  0%,
+  100% {
+    transform:
+      scale(0.8)
+      rotate(0deg);
+
+    opacity: 0.35;
+  }
+
+  50% {
+    transform:
+      scale(1.15)
+      rotate(25deg);
+
+    opacity: 1;
+  }
+}
+
+
+/* =========================================================
+   MOBILE PREMIUM
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+  .premium-lock-overlay {
+    padding: 16px;
+  }
+
+  .premium-lock-modal {
+    padding: 34px 22px 24px;
+
+    border-radius: 20px;
+  }
+
+  .premium-lock-modal h2 {
+    font-size: 22px;
+  }
+
+  .premium-lock-icon-wrap {
+    width: 68px;
+    height: 68px;
+
+    border-radius: 19px;
+  }
+
+  .premium-lock-icon-wrap::before {
+    font-size: 32px;
+  }
+
+  .premium-access-badge {
+    font-size: 9px;
+
+    padding: 3px 7px;
+  }
+
+  .premium-feature-page {
+    margin: 35px auto;
+
+    padding: 35px 22px;
+
+    border-radius: 20px;
+  }
+
+  .premium-feature-page-icon {
+    width: 66px;
+    height: 66px;
+  }
+
+  .premium-feature-page-icon::before {
+    font-size: 31px;
+  }
+}

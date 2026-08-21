@@ -1,0 +1,215 @@
+.preschool-auth {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #0F3D2E, #0a2a20);
+
+  /* Allow the page to scroll if the card is taller than the
+     viewport, instead of clipping the top of the card when
+     it's vertically centered. */
+  overflow-y: auto;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px 36px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
+
+  /* Keeps the card from being forced to the exact height of its
+     flex container; it can grow naturally and the page scrolls. */
+  margin: auto;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.auth-header h2 {
+  font-size: 26px;
+  color: #0F3D2E;
+  margin-bottom: 6px;
+}
+
+.auth-header p {
+  font-size: 14px;
+  color: #7a8079;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-form .input-group {
+  border: 1px solid #e3e0d6;
+  border-radius: 14px;
+  padding: 0 14px;
+}
+
+.auth-form .input-group input {
+  width: 100%;
+  height: 48px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #0F3D2E;
+  background: transparent;
+}
+
+.auth-form .input-group:focus-within {
+  border-color: #D8C2A0;
+  box-shadow: 0 0 0 3px rgba(216, 194, 160, 0.2);
+}
+
+.auth-btn {
+  margin-top: 6px;
+  height: 50px;
+  border: none;
+  border-radius: 40px;
+  background: linear-gradient(135deg, #EAD6B0, #D8C2A0);
+  color: #0F3D2E;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.auth-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.auth-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: #7a8079;
+}
+
+.auth-footer a {
+  color: #b48a3f;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-form .input-group input::placeholder {
+  color: #9aa19a !important;
+  opacity: 1 !important;
+}
+
+.back-to-teachhub {
+  display: inline-block;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  color: #059669;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.back-to-teachhub:hover {
+  text-decoration: underline;
+}
+
+/* =========================================================
+   MOBILE — compact spacing so the whole form fits on typical
+   phone screens (≈390–430px wide) with little to no scrolling
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .preschool-auth {
+    padding: 16px;
+    /* Let content sit from the top on very short viewports
+       instead of forcing perfect centering, which is what
+       clips the top of the card when it overflows. */
+    align-items: flex-start;
+  }
+
+  .auth-card {
+    padding: 28px 22px;
+    border-radius: 20px;
+  }
+
+  .back-to-teachhub {
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+  }
+
+  .auth-header {
+    margin-bottom: 20px;
+  }
+
+  .auth-header h2 {
+    font-size: 21px;
+  }
+
+  .auth-header p {
+    font-size: 13px;
+  }
+
+  .auth-form {
+    gap: 10px;
+  }
+
+  .auth-form .input-group input {
+    height: 44px;
+    font-size: 13.5px;
+  }
+
+  .auth-btn {
+    margin-top: 4px;
+    height: 46px;
+    font-size: 14px;
+  }
+
+  .auth-footer {
+    margin-top: 16px;
+    font-size: 12.5px;
+  }
+}
+
+/* =========================================================
+   VERY SHORT VIEWPORTS (e.g. landscape phones, small emulator
+   frames like the 408x516 in devtools) — shrink further
+   ========================================================= */
+
+@media (max-height: 600px) and (max-width: 480px) {
+  .auth-card {
+    padding: 20px 20px;
+  }
+
+  .auth-header {
+    margin-bottom: 14px;
+  }
+
+  .auth-header h2 {
+    font-size: 19px;
+    margin-bottom: 3px;
+  }
+
+  .auth-form {
+    gap: 8px;
+  }
+
+  .auth-form .input-group input {
+    height: 40px;
+  }
+
+  .auth-btn {
+    height: 42px;
+  }
+
+  .auth-footer {
+    margin-top: 12px;
+  }
+}

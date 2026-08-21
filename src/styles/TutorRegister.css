@@ -456,3 +456,281 @@
     padding-bottom: 3rem !important; /* Extra bottom space so the last button isn't cut off */
   }
 }
+
+@media (max-width: 768px) {
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  .tutor-register-page {
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding: 0 !important; /* edge-to-edge, no outer gutter */
+    display: flex !important;
+  }
+
+  .tutor-register-wrapper {
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 100dvh !important; /* fills full screen */
+    box-shadow: none !important;
+    border-radius: 0 !important; /* edge-to-edge, no rounded corners */
+    background: #ffffff !important;
+    margin: 0 !important;
+  }
+
+  .register-brand-panel {
+    display: none !important;
+  }
+
+  .register-form-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    padding: 1rem 1.1rem 1.4rem 1.1rem !important;
+    justify-content: flex-start !important;
+  }
+
+  /* Back button now sits inside the card, above the heading */
+  .back-teachhub-btn {
+    position: static !important;
+    display: inline-flex !important;
+    margin-bottom: 14px !important;
+    align-self: flex-start !important;
+    color: #1b4d3e !important;
+    background: rgba(27, 77, 62, 0.08) !important;
+    border: 1px solid rgba(27, 77, 62, 0.15) !important;
+  }
+
+  .register-form-header {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .register-form-header h2 {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    margin-bottom: 0.2rem !important;
+    text-align: left !important;
+  }
+
+  .register-form-header p {
+    font-size: 0.78rem !important;
+    color: #6b7280 !important;
+    text-align: left !important;
+  }
+
+  .tutor-form-container {
+    gap: 0.6rem !important;
+  }
+
+  .form-group-field {
+    text-align: left !important;
+  }
+
+  .form-group-field label {
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+    letter-spacing: 0.025em !important;
+    margin-bottom: 3px !important;
+  }
+
+  .input-with-icon input,
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 100% !important;
+    padding: 0.55rem 0.75rem 0.55rem 2.4rem !important;
+    font-size: 0.85rem !important;
+    border-radius: 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  .submit-login-btn {
+    width: 100% !important;
+    padding: 0.7rem !important;
+    font-size: 0.88rem !important;
+    border-radius: 6px !important;
+    margin-top: 0.3rem !important;
+  }
+
+  .login-help-text {
+    font-size: 0.72rem !important;
+    margin-top: 0.75rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  .tutor-register-page {
+    width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important; /* stop flex from leaving a gap */
+  }
+
+  .tutor-register-wrapper {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 100dvh !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    margin: 0 !important;
+  }
+
+  .register-brand-panel {
+    display: none !important;
+  }
+
+  .register-form-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    box-sizing: border-box !important;
+    padding: 1rem 1.1rem 1.4rem 1.1rem !important;
+    justify-content: flex-start !important;
+  }
+
+  .back-teachhub-btn {
+    position: static !important;
+    display: inline-flex !important;
+    margin-bottom: 14px !important;
+    align-self: flex-start !important;
+    color: #1b4d3e !important;
+    background: rgba(27, 77, 62, 0.08) !important;
+    border: 1px solid rgba(27, 77, 62, 0.15) !important;
+  }
+
+  .register-form-header {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .register-form-header h2 {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    margin-bottom: 0.2rem !important;
+    text-align: left !important;
+  }
+
+  .register-form-header p {
+    font-size: 0.78rem !important;
+    color: #6b7280 !important;
+    text-align: left !important;
+  }
+
+  .tutor-form-container {
+    gap: 0.6rem !important;
+  }
+
+  .form-group-field {
+    text-align: left !important;
+  }
+
+  .form-group-field label {
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+    letter-spacing: 0.025em !important;
+    margin-bottom: 3px !important;
+  }
+
+  .input-with-icon input,
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 100% !important;
+    padding: 0.55rem 0.75rem 0.55rem 2.4rem !important;
+    font-size: 0.85rem !important;
+    border-radius: 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  .submit-login-btn {
+    width: 100% !important;
+    padding: 0.7rem !important;
+    font-size: 0.88rem !important;
+    border-radius: 6px !important;
+    margin-top: 0.3rem !important;
+  }
+
+  .login-help-text {
+    font-size: 0.72rem !important;
+    margin-top: 0.75rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+}
+
+.back-teachhub-btn {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #2c6b56 0%, #1b4d3e 100%) !important;
+  border: 1px solid rgba(212, 175, 55, 0.5) !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  transition: all 0.25s ease !important;
+}
+
+.back-teachhub-btn svg {
+  color: #d4af37 !important; /* gold arrow icon */
+}
+
+.back-teachhub-btn:hover {
+  background: linear-gradient(135deg, #3a7d64 0%, #1f5a48 100%) !important;
+  border-color: #d4af37 !important;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Mobile version - sits inside the white card header area */
+@media (max-width: 768px) {
+  .back-teachhub-btn {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #1b4d3e 0%, #11342a 100%) !important;
+    border: 1px solid #d4af37 !important;
+    padding: 7px 14px !important;
+    border-radius: 6px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+    display: inline-flex !important;
+    align-self: flex-start !important;
+    margin-bottom: 14px !important;
+  }
+
+  .back-teachhub-btn svg {
+    color: #d4af37 !important;
+  }
+}

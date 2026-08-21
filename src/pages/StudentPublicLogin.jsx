@@ -61,7 +61,6 @@ export default function StudentPublicLogin() {
       {/* Left Branding Panel */}
       <div className="register-brand-panel">
         <div className="brand-content-top">
-          <span className="brand-badge">Student Portal</span>
           <h1>Welcome Back</h1>
           <p>Access your creative portfolios, connect with mentors, and continue your artistic journey.</p>
           

@@ -54,14 +54,14 @@ function TutorLogin() {
 
   return (
     <div className="tutor-login-page">
-      <Link to="/teachhub" className="back-teachhub-btn">
-        <FaArrowLeft /> Back to TeachHub
-      </Link>
-
       <div className="tutor-login-wrapper">
         {/* Left Artistic Branding Panel */}
         <div className="login-brand-panel">
           <div>
+            <Link to="/teachhub" className="back-teachhub-btn">
+              <FaArrowLeft /> Back to TeachHub
+            </Link>
+
             <div className="brand-logo-box">
               <img src="/logo.png" alt="RJ Arts" />
             </div>
@@ -122,8 +122,8 @@ function TutorLogin() {
               </div>
             </div>
 
-            <div 
-              className="form-options-row" 
+            <div
+              className="form-options-row"
               style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}
             >
               <label className="remember-checkbox">

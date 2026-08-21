@@ -1,185 +1,151 @@
 .footer{
     background:#0F3D2E;
     color:white;
-    padding:50px 8% 20px;
+    padding:36px 8% 18px;
 }
 
 .footer-container{
-
     max-width:1200px;
-
     margin:auto;
-
     display:grid;
-
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-
-    gap:35px;
-
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:24px;
+    padding-bottom:8px;
 }
 
 .footer-section h3{
-
     color:#D8C2A0;
-
-    margin-bottom:15px;
-
-    font-size:22px;
-
+    margin-bottom:10px;
+    font-size:17px;
+    font-weight:600;
+    letter-spacing:.3px;
 }
 
 .footer-section p{
-
-    color:#ddd;
-
-    line-height:1.7;
-
-    font-size:15px;
-
-    margin-bottom:10px;
-
+    color:#c9c9c9;
+    line-height:1.55;
+    font-size:13.5px;
+    margin-bottom:6px;
 }
 
 .footer-section a{
-
     display:block;
-
-    color:#ddd;
-
+    color:#c9c9c9;
     text-decoration:none;
-
-    margin-bottom:10px;
-
-    transition:.3s;
-
-    font-size:15px;
-
+    margin-bottom:7px;
+    font-size:13.5px;
+    transition:.25s;
 }
 
 .footer-section a:hover{
-
     color:#D8C2A0;
-
 }
 
 .footer-logo{
-
-    width:70px;
-
-    margin-bottom:15px;
-
+    width:48px;
+    margin-bottom:10px;
 }
 
 .portal-link{
-
     display:inline-block;
-
-    margin-top:15px;
-
-    padding:10px 18px;
-
+    margin-top:8px;
+    padding:7px 16px;
     background:#D8C2A0;
-
     color:#0F3D2E !important;
-
     border-radius:40px;
-
     font-weight:700;
-
+    font-size:13px;
+    border:none;
+    cursor:pointer;
+    transition:.25s;
 }
 
 .portal-link:hover{
-
     background:white;
-
+    transform:translateY(-2px);
 }
 
 .footer-bottom{
-
     max-width:1200px;
-
-    margin:35px auto 0;
-
-    padding-top:20px;
-
-    border-top:1px solid rgba(255,255,255,.15);
-
+    margin:20px auto 0;
+    padding-top:14px;
+    border-top:1px solid rgba(255,255,255,.12);
     display:flex;
-
     justify-content:space-between;
-
     align-items:center;
-
     flex-wrap:wrap;
-
-    gap:15px;
-
+    gap:12px;
 }
 
 .footer-bottom p{
-
-    color:#bbb;
-
-    font-size:14px;
-
+    color:#a8a8a8;
+    font-size:12.5px;
 }
 
 .top-btn{
-
     background:#D8C2A0;
-
     color:#0F3D2E;
-
     border:none;
-
-    padding:10px 22px;
-
+    padding:7px 18px;
     border-radius:40px;
-
     cursor:pointer;
-
-    font-weight:bold;
-
-    transition:.3s;
-
+    font-weight:700;
+    font-size:13px;
+    transition:.25s;
+    position:relative;
+    z-index:5;
 }
 
 .top-btn:hover{
-
     background:white;
-
-    transform:translateY(-3px);
-
+    transform:translateY(-2px);
 }
 
 @media(max-width:768px){
 
 .footer{
-
-text-align:center;
-
-padding:40px 6% 20px;
-
+    text-align:center;
+    padding:32px 6% 90px; /* extra bottom room so WhatsApp bubble doesn't sit on top of content */
 }
 
 .footer-container{
-
-grid-template-columns:1fr;
-
-gap:30px;
-
+    grid-template-columns:1fr;
+    gap:22px;
 }
 
 .footer-logo{
-
-margin:auto auto 15px;
-
+    margin:auto auto 10px;
 }
 
 .footer-bottom{
+    flex-direction:column;
+    gap:14px;
+}
 
-flex-direction:column;
+.top-btn{
+    position:relative;
+    z-index:10; /* sit above the fixed WhatsApp button */
+}
 
 }
 
+/* --- Force window/body to be the scroll container (fixes Back to Top on mobile) --- */
+html, body {
+  height: auto !important;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto !important;
+}
+
+#root {
+  min-height: 100%;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+@media (max-width: 768px) {
+  html, body, #root {
+    height: auto !important;
+    overflow-y: auto !important;
+  }
 }

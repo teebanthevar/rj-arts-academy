@@ -54,7 +54,6 @@ export default function StudentRegister() {
       {/* Left Branding Panel */}
       <div className="register-brand-panel">
         <div className="brand-content-top">
-          <span className="brand-badge">Student Portal</span>
           <h1>Join as a Student</h1>
           <p>Showcase your art portfolio, connect with professional mentors, and build your creative path.</p>
           

@@ -16,7 +16,7 @@ export default function AdminSubscriptions() {
       setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, subscription_tier, avatar_url");
+        .select("id, full_name, email, subscription_tier, avatar_url, role");
       if (error) throw error;
       setAllUsers(data || []);
     } catch (err) {
@@ -26,7 +26,7 @@ export default function AdminSubscriptions() {
     }
   };
 
-  const handleUpgradeUserTier = async (userId, newTier) => {
+  const handleUpgradeUserTier = async (userId, newTier, userRole) => {
     try {
       // 1. Update profiles table
       const { error: profileError } = await supabase
@@ -41,54 +41,115 @@ export default function AdminSubscriptions() {
       const planName = newTier === "Instructor Pass" ? "Pro Tutor" : newTier;
       const statusValue = isPaid ? "Active" : "Inactive";
 
-      // 3. Explicit check if a subscription row already exists for this user
-      const { data: existingSub, error: fetchError } = await supabase
-        .from("tutor_subscriptions")
-        .select("id")
-        .eq("tutor_id", userId)
-        .maybeSingle();
+      // Preschool accounts are teachers/institutions, not tutors or
+      // students — they don't have a row in the tutors table, so
+      // writing to "tutor_subscriptions" (which is FK-constrained to
+      // tutor accounts) fails for them. Only sync it for tutor/student
+      // roles; preschools go straight to the generic "subscriptions"
+      // table below, which is what PreschoolDashboard actually reads.
+      const isPreschool = userRole === "preschool";
 
-      if (fetchError) {
-        console.error("Error checking existing subscription:", fetchError);
-      }
-
-      let subError = null;
-
-      if (existingSub) {
-        // Update existing row
-        const { error: updateErr } = await supabase
+      if (!isPreschool) {
+        // 3. Explicit check if a subscription row already exists for this user
+        //    (tutor-specific dashboards read this one)
+        const { data: existingSub, error: fetchError } = await supabase
           .from("tutor_subscriptions")
-          .update({
-            plan_name: planName,
-            status: statusValue,
-            trial_days_remaining: isPaid ? 30 : 0,
-            updated_at: new Date(),
-          })
-          .eq("tutor_id", userId);
-        subError = updateErr;
-      } else {
-        // Insert new row if none existed
-        const { error: insertErr } = await supabase
-          .from("tutor_subscriptions")
-          .insert([
-            {
-              tutor_id: userId,
+          .select("id")
+          .eq("tutor_id", userId)
+          .maybeSingle();
+
+        if (fetchError) {
+          console.error("Error checking existing subscription:", fetchError);
+        }
+
+        let subError = null;
+
+        if (existingSub) {
+          // Update existing row
+          const { error: updateErr } = await supabase
+            .from("tutor_subscriptions")
+            .update({
               plan_name: planName,
               status: statusValue,
               trial_days_remaining: isPaid ? 30 : 0,
-              renewal_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              }),
-            },
-          ]);
-        subError = insertErr;
+              updated_at: new Date(),
+            })
+            .eq("tutor_id", userId);
+          subError = updateErr;
+        } else {
+          // Insert new row if none existed
+          const { error: insertErr } = await supabase
+            .from("tutor_subscriptions")
+            .insert([
+              {
+                tutor_id: userId,
+                plan_name: planName,
+                status: statusValue,
+                trial_days_remaining: isPaid ? 30 : 0,
+                renewal_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                }),
+              },
+            ]);
+          subError = insertErr;
+        }
+
+        if (subError) {
+          console.error("Error saving tutor_subscriptions:", subError);
+          alert("Tier updated in profile, but failed to sync subscription lock state. Check console.");
+          return;
+        }
       }
 
-      if (subError) {
-        console.error("Error saving tutor_subscriptions:", subError);
-        alert("Tier updated in profile, but failed to sync subscription lock state. Check console.");
+      // 4. Sync the generic "subscriptions" table too.
+      //    This is the table non-tutor dashboards (e.g. PreschoolDashboard)
+      //    actually read from. For preschool accounts this is the ONLY
+      //    lock-state table that matters.
+      const { data: existingGenericSub, error: genericFetchError } =
+        await supabase
+          .from("subscriptions")
+          .select("id")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+      if (genericFetchError) {
+        console.error(
+          "Error checking existing generic subscription:",
+          genericFetchError
+        );
+      }
+
+      let genericSubError = null;
+
+      if (existingGenericSub) {
+        const { error: updateGenericErr } = await supabase
+          .from("subscriptions")
+          .update({
+            tier: newTier,
+            status: isPaid ? "active" : "inactive",
+          })
+          .eq("user_id", userId);
+        genericSubError = updateGenericErr;
+      } else {
+        const { error: insertGenericErr } = await supabase
+          .from("subscriptions")
+          .insert([
+            {
+              user_id: userId,
+              tier: newTier,
+              status: isPaid ? "active" : "inactive",
+            },
+          ]);
+        genericSubError = insertGenericErr;
+      }
+
+      if (genericSubError) {
+        console.error("Error saving subscriptions:", genericSubError);
+        alert(
+          "Tier updated, but failed to sync the general subscription lock state (used by preschool accounts). Check console."
+        );
         return;
       }
 
@@ -135,19 +196,19 @@ export default function AdminSubscriptions() {
                 </div>
                 <div className="admin-user-actions">
                   <button 
-                    onClick={() => handleUpgradeUserTier(u.id, "Student Pro")}
+                    onClick={() => handleUpgradeUserTier(u.id, "Student Pro", u.role)}
                     className="btn-pro"
                   >
                     Set Pro ($15)
                   </button>
                   <button 
-                    onClick={() => handleUpgradeUserTier(u.id, "Instructor Pass")}
+                    onClick={() => handleUpgradeUserTier(u.id, "Instructor Pass", u.role)}
                     className="btn-instructor"
                   >
                     Set Instructor ($49)
                   </button>
                   <button 
-                    onClick={() => handleUpgradeUserTier(u.id, "Free Starter")}
+                    onClick={() => handleUpgradeUserTier(u.id, "Free Starter", u.role)}
                     className="btn-reset"
                   >
                     Reset Free

@@ -1,88 +1,89 @@
 .whychoose {
-  padding: 100px 8%;
+  padding: 70px 8%;
   background: #f8f5ef;
 }
 
 .why-header {
-  max-width: 800px;
+  max-width: 750px;
   margin: auto;
   text-align: center;
-  margin-bottom: 70px;
+  margin-bottom: 45px;
 }
 
 .section-tag {
   display: inline-block;
-  padding: 10px 24px;
+  padding: 10px 22px;
   background: #e8d7b8;
   color: #0F3D2E;
   border-radius: 50px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 2px;
-  margin-bottom: 25px;
+  margin-bottom: 18px;
 }
 
 .why-header h2 {
-  font-size: 48px;
+  font-size: 34px;
   color: #0F3D2E;
-  line-height: 1.2;
-  margin-bottom: 20px;
+  line-height: 1.25;
+  margin-bottom: 14px;
   font-weight: 700;
 }
 
 .why-header p {
-  font-size: 19px;
+  font-size: 16px;
   color: #555;
-  line-height: 1.8;
+  line-height: 1.7;
 }
 
 .whychoose-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 30px;
-  margin-bottom: 70px;
+  gap: 22px;
+  margin-bottom: 45px;
 }
 
 .whychoose-card {
   background: white;
-  padding: 45px 30px;
-  border-radius: 24px;
+  padding: 30px 22px;
+  border-radius: 18px;
   text-align: center;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.07);
   transition: 0.35s;
 }
 
 .whychoose-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 50px rgba(15, 61, 46, 0.15);
+  transform: translateY(-8px);
+  box-shadow: 0 16px 38px rgba(15, 61, 46, 0.13);
 }
 
 .whychoose-card h3 {
-  font-size: 56px;
+  font-size: 38px;
   color: #D8C2A0;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   font-weight: 700;
 }
 
 .whychoose-card h4 {
-  font-size: 22px;
+  font-size: 18px;
   color: #0F3D2E;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .whychoose-card p {
   color: #666;
-  line-height: 1.7;
+  font-size: 14.5px;
+  line-height: 1.6;
 }
 
 .trust-box {
   background: #0F3D2E;
   color: white;
-  border-radius: 30px;
-  padding: 60px;
+  border-radius: 22px;
+  padding: 40px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 60px;
+  gap: 40px;
   align-items: center;
 }
 
@@ -91,28 +92,28 @@
 }
 
 .rating h3 {
-  font-size: 58px;
+  font-size: 40px;
   color: #D8C2A0;
-  letter-spacing: 5px;
-  margin-bottom: 20px;
+  letter-spacing: 4px;
+  margin-bottom: 12px;
 }
 
 .rating p {
-  font-size: 20px;
+  font-size: 16px;
   color: #F5E8D5;
 }
 
 .feature-list {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  gap: 14px;
 }
 
 .feature-item {
   background: rgba(255, 255, 255, 0.08);
-  padding: 18px 22px;
-  border-radius: 14px;
-  font-size: 17px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 15px;
   font-weight: 500;
   transition: 0.3s;
 }
@@ -136,28 +137,28 @@
 
 @media (max-width: 768px) {
   .whychoose {
-    padding: 70px 20px;
+    padding: 50px 20px;
   }
 
   .why-header h2 {
-    font-size: 36px;
+    font-size: 28px;
   }
 
   .why-header p {
-    font-size: 17px;
+    font-size: 15px;
   }
 
   .whychoose-stats-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .whychoose-card {
     position: relative;
-    padding: 35px 20px;
+    padding: 26px 20px;
     text-align: center;
-    border-radius: 24px;
-    
-    /* Force internal elements to stack vertically */
+    border-radius: 18px;
+
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -167,26 +168,26 @@
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
     border: 1px solid rgba(255, 255, 255, 0.45);
-    box-shadow: 0 10px 35px rgba(15, 61, 46, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 24px rgba(15, 61, 46, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.6);
     overflow: hidden;
     transition: 0.35s ease;
   }
 
   .whychoose-card h3 {
-    font-size: 44px; /* Slightly scaled down for mobile balance */
-    margin-bottom: 10px;
+    font-size: 32px;
+    margin-bottom: 8px;
   }
 
   .whychoose-card h4 {
-    font-size: 20px;
-    margin-bottom: 10px;
+    font-size: 17px;
+    margin-bottom: 8px;
   }
 
   .whychoose-card::before {
     content: "";
     position: absolute;
     inset: 0;
-    border-radius: 24px;
+    border-radius: 18px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.05));
     pointer-events: none;
   }
@@ -197,17 +198,17 @@
   }
 
   .whychoose-card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-8px);
     border-color: rgba(216, 194, 160, 0.65);
-    box-shadow: 0 20px 45px rgba(15, 61, 46, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    box-shadow: 0 16px 36px rgba(15, 61, 46, 0.16), inset 0 1px 1px rgba(255, 255, 255, 0.8);
   }
 
   .trust-box {
-    padding: 35px 25px;
+    padding: 28px 20px;
   }
 
   .rating h3 {
-    font-size: 42px;
+    font-size: 32px;
     letter-spacing: 2px;
   }
 

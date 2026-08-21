@@ -7,7 +7,7 @@ import "../../styles/TutorRegister.css";
 function TutorRegister() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const refCode = searchParams.get("ref"); // e.g. /tutor-register?ref=AB12CD34
+  const refCode = searchParams.get("ref");
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -18,11 +18,6 @@ function TutorRegister() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Links this new tutor to whoever referred them, if a valid ?ref=
-  // code was present in the URL. Runs AFTER the "tutors" row already
-  // exists, since referrals.referred_id has to point at a real row.
-  // Never blocks or fails the signup flow - referral linking is
-  // best-effort only.
   const linkReferralIfPresent = async (newTutorId) => {
     if (!refCode || !newTutorId) return;
 
@@ -50,8 +45,6 @@ function TutorRegister() {
         status: "pending",
       });
 
-      // 23505 = unique_violation (this account was already referred
-      // by someone else) - safe to ignore, not a real error.
       if (insertErr && insertErr.code !== "23505") {
         console.error("Error linking referral:", insertErr.message);
       }
@@ -88,7 +81,6 @@ function TutorRegister() {
     }
 
     if (authData?.user) {
-      // Upsert into the 'tutors' table matching your database columns
       const { error: tutorError } = await supabase.from("tutors").upsert(
         [
           {
@@ -106,7 +98,6 @@ function TutorRegister() {
         return;
       }
 
-      // Tutor row now exists - safe to link the referral, if any.
       await linkReferralIfPresent(authData.user.id);
 
       setLoading(false);
@@ -116,14 +107,14 @@ function TutorRegister() {
 
   return (
     <div className="tutor-register-page">
-      <Link to="/teachhub" className="back-teachhub-btn">
-        <FaArrowLeft /> Back to TeachHub
-      </Link>
-
       <div className="tutor-register-wrapper">
         {/* Left Artistic Features Panel */}
         <div className="register-brand-panel">
           <div>
+            <Link to="/teachhub" className="back-teachhub-btn">
+              <FaArrowLeft /> Back to TeachHub
+            </Link>
+
             <div className="brand-logo-box">
               <img src="/logo.png" alt="RJ Arts" />
             </div>

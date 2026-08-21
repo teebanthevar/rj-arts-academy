@@ -24,6 +24,7 @@ import {
   HiOutlineChartBar,
   HiOutlineCheckCircle,
   HiOutlineBanknotes,
+  HiOutlineBuildingLibrary,
 } from "react-icons/hi2";
 import "../styles/StudentPublicProfile.css";
 
@@ -76,6 +77,8 @@ export default function StudentPublicProfile() {
 
   const [activeView, setActiveView] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showPremiumLock, setShowPremiumLock] = useState(false);
+  const [premiumFeatureName, setPremiumFeatureName] = useState("Premium Feature");
 
   const [editForm, setEditForm] = useState({ full_name: "", avatar_url: "" });
   const [updatingProfile, setUpdatingProfile] = useState(false);
@@ -108,7 +111,7 @@ export default function StudentPublicProfile() {
   const [deletingCategoryId, setDeletingCategoryId] = useState(null);
 
   // ---- ASSIGNMENTS / TUTOR-LINKING STATE ----
-  const [projectsSubTab, setProjectsSubTab] = useState("portfolio"); // "portfolio" | "assignments"
+  const [projectsSubTab, setProjectsSubTab] = useState("portfolio"); // "portfolio" | "assignments" | "homework"
   const [tutorMap, setTutorMap] = useState({}); // tutor_id -> { name, avatar_url }
   const [assignments, setAssignments] = useState([]);
   const [selectedEnrollmentId, setSelectedEnrollmentId] = useState("");
@@ -116,8 +119,22 @@ export default function StudentPublicProfile() {
   const [uploadingAssignment, setUploadingAssignment] = useState(false);
   const [assignmentError, setAssignmentError] = useState("");
 
+  // ---- PRESCHOOL HOMEWORK (parent submits, preschool teacher reviews) STATE ----
+  // Separate from the TeachHub course "assignments" above: this is scoped to
+  // approved preschool_enrollments rows (preschool_id) instead of tutor_id,
+  // and lives in its own table/bucket so the two flows never collide.
+  const [preschoolHomeworkItems, setPreschoolHomeworkItems] = useState([]);
+  const [selectedPreschoolEnrollmentId, setSelectedPreschoolEnrollmentId] = useState("");
+  const [preschoolHomeworkFile, setPreschoolHomeworkFile] = useState(null);
+  const [uploadingPreschoolHomework, setUploadingPreschoolHomework] = useState(false);
+  const [preschoolHomeworkError, setPreschoolHomeworkError] = useState("");
+
   // ---- ANNOUNCEMENTS (tutor -> student notices) STATE ----
   const [notices, setNotices] = useState([]);
+
+  // ---- PRESCHOOL ENROLLMENT REQUESTS STATE ----
+  const [preschoolRequests, setPreschoolRequests] = useState([]);
+  const [preschoolMap, setPreschoolMap] = useState({});
 
   const [messages, setMessages] = useState([]);
   const [conversations, setConversations] = useState([
@@ -259,11 +276,76 @@ export default function StudentPublicProfile() {
       )
       .subscribe();
 
+    // Live updates when a preschool approves/rejects this student's
+    // enrollment request (preschool_enrollments is keyed by parent_id).
+    const preschoolEnrollmentSubscription = supabase
+      .channel("public:preschool-enrollments-student")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "preschool_enrollments", filter: `parent_id=eq.${id}` },
+        (payload) => {
+          setPreschoolRequests((prev) => {
+            if (prev.some((r) => r.id === payload.new.id)) return prev;
+            return [payload.new, ...prev];
+          });
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "preschool_enrollments", filter: `parent_id=eq.${id}` },
+        (payload) => {
+          setPreschoolRequests((prev) =>
+            prev.map((r) => (r.id === payload.new.id ? { ...r, ...payload.new } : r))
+          );
+        }
+      )
+      .subscribe();
+
+    // Live updates when a preschool teacher leaves feedback / marks a
+    // homework submission reviewed (preschool_assignments is keyed by
+    // parent_id, mirroring the course-side "assignments" subscriptionless
+    // pattern above — this table is small enough to just refetch on change).
+    const preschoolHomeworkSubscription = supabase
+      .channel("public:preschool-assignments-student")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "preschool_assignments", filter: `parent_id=eq.${id}` },
+        (payload) => {
+          setPreschoolHomeworkItems((prev) =>
+            prev.map((h) => (h.id === payload.new.id ? { ...h, ...payload.new } : h))
+          );
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(messageSubscription);
       supabase.removeChannel(noticeSubscription);
       supabase.removeChannel(enrollmentSubscription);
+      supabase.removeChannel(preschoolEnrollmentSubscription);
+      supabase.removeChannel(preschoolHomeworkSubscription);
+      if (peerConnectionRef.current) {
+        peerConnectionRef.current.close();
+        peerConnectionRef.current = null;
+      }
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((t) => t.stop());
+        localStreamRef.current = null;
+      }
+      if (screenStreamRef.current) {
+        screenStreamRef.current.getTracks().forEach((t) => t.stop());
+        screenStreamRef.current = null;
+      }
+      if (peerSignalChannelRef.current) {
+        supabase.removeChannel(peerSignalChannelRef.current.channel);
+        peerSignalChannelRef.current = null;
+      }
+      if (callTimerRef.current) {
+        clearInterval(callTimerRef.current);
+        callTimerRef.current = null;
+      }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -303,26 +385,6 @@ export default function StudentPublicProfile() {
 
     return () => {
       supabase.removeChannel(channel);
-      if (peerConnectionRef.current) {
-        peerConnectionRef.current.close();
-        peerConnectionRef.current = null;
-      }
-      if (localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach((t) => t.stop());
-        localStreamRef.current = null;
-      }
-      if (screenStreamRef.current) {
-        screenStreamRef.current.getTracks().forEach((t) => t.stop());
-        screenStreamRef.current = null;
-      }
-      if (peerSignalChannelRef.current) {
-        supabase.removeChannel(peerSignalChannelRef.current.channel);
-        peerSignalChannelRef.current = null;
-      }
-      if (callTimerRef.current) {
-        clearInterval(callTimerRef.current);
-        callTimerRef.current = null;
-      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
@@ -766,6 +828,48 @@ export default function StudentPublicProfile() {
 
       setTutorMap(tutorNameMap);
 
+      // ---- Preschool enrollment requests (separate table, keyed by parent_id) ----
+      // This is a different flow from course enrollments above: submitted from
+      // PreschoolPublicProfile.jsx's enrollment form, and approved/rejected from
+      // PreschoolDashboard.jsx's Student Approval tab.
+      const { data: preschoolEnrollData, error: preschoolEnrollError } = await supabase
+        .from("preschool_enrollments")
+        .select("*")
+        .eq("parent_id", id)
+        .order("created_at", { ascending: false });
+
+      if (preschoolEnrollError) {
+        console.error("Error fetching preschool enrollment requests:", preschoolEnrollError);
+      }
+
+      if (preschoolEnrollData && preschoolEnrollData.length > 0) {
+        const preschoolIds = [...new Set(preschoolEnrollData.map((r) => r.preschool_id))];
+
+        const { data: preschoolProfiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", preschoolIds);
+
+        const { data: preschoolDetails } = await supabase
+          .from("preschool_details")
+          .select("id, business_name")
+          .in("id", preschoolIds);
+
+        const preschoolNameMap = {};
+        (preschoolProfiles || []).forEach((p) => {
+          preschoolNameMap[p.id] = p.full_name;
+        });
+        (preschoolDetails || []).forEach((d) => {
+          if (d.business_name) preschoolNameMap[d.id] = d.business_name;
+        });
+
+        setPreschoolMap(preschoolNameMap);
+      } else {
+        setPreschoolMap({});
+      }
+
+      setPreschoolRequests(preschoolEnrollData || []);
+
       // Default the assignment submission form to the student's first approved,
       // tutor-linked enrollment so there's always a valid tutor_id to submit against.
       const approvedForAssignments = (coursesData || []).filter(
@@ -773,6 +877,15 @@ export default function StudentPublicProfile() {
       );
       if (approvedForAssignments.length > 0) {
         setSelectedEnrollmentId((prev) => prev || approvedForAssignments[0].id);
+      }
+
+      // Default the preschool homework submission form to the first approved
+      // preschool enrollment, same idea as above but scoped to preschools.
+      const approvedPreschoolEnrollments = (preschoolEnrollData || []).filter(
+        (r) => r.status === "approved"
+      );
+      if (approvedPreschoolEnrollments.length > 0) {
+        setSelectedPreschoolEnrollmentId((prev) => prev || approvedPreschoolEnrollments[0].id);
       }
 
       setConversations([
@@ -795,6 +908,17 @@ export default function StudentPublicProfile() {
         console.error("Error fetching assignments:", assignmentError2);
       }
       setAssignments(assignmentData || []);
+
+      // ---- Preschool homework submissions (this parent's own uploads) ----
+      const { data: preschoolHomeworkData, error: preschoolHomeworkError2 } = await supabase
+        .from("preschool_assignments")
+        .select("*")
+        .eq("parent_id", id)
+        .order("submitted_at", { ascending: false });
+      if (preschoolHomeworkError2) {
+        console.error("Error fetching preschool homework:", preschoolHomeworkError2);
+      }
+      setPreschoolHomeworkItems(preschoolHomeworkData || []);
     } catch (err) {
       console.error("Error loading dashboard details:", err);
     } finally {
@@ -1117,9 +1241,70 @@ export default function StudentPublicProfile() {
     }
   };
 
+  // ---- PRESCHOOL HOMEWORK UPLOAD ----
+  // Mirrors handleUploadAssignment above but writes to the separate
+  // "preschool_assignments" table/bucket and derives preschool_id from the
+  // selected APPROVED preschool_enrollments row rather than a tutor_id.
+  const handleUploadPreschoolHomework = async () => {
+    setPreschoolHomeworkError("");
+    if (!preschoolHomeworkFile) {
+      setPreschoolHomeworkError("Choose a file first.");
+      return;
+    }
+
+    const enrollment = preschoolRequests.find(
+      (r) => r.id === selectedPreschoolEnrollmentId
+    );
+
+    if (!enrollment || enrollment.status !== "approved") {
+      setPreschoolHomeworkError("Select which child/preschool this is for.");
+      return;
+    }
+
+    setUploadingPreschoolHomework(true);
+    try {
+      const path = `${id}/${Date.now()}-${preschoolHomeworkFile.name}`;
+      const { error: uploadErr } = await supabase.storage
+        .from("preschool_assignments")
+        .upload(path, preschoolHomeworkFile);
+      if (uploadErr) throw uploadErr;
+
+      const { data: publicUrlData } = supabase.storage
+        .from("preschool_assignments")
+        .getPublicUrl(path);
+
+      const { data, error: insertErr } = await supabase
+        .from("preschool_assignments")
+        .insert({
+          preschool_id: enrollment.preschool_id,
+          enrollment_id: enrollment.id,
+          parent_id: id,
+          child_name: enrollment.child_name || enrollment.full_name,
+          file_name: preschoolHomeworkFile.name,
+          file_url: publicUrlData.publicUrl,
+        })
+        .select()
+        .single();
+      if (insertErr) throw insertErr;
+
+      setPreschoolHomeworkItems((prev) => [data, ...prev]);
+      setPreschoolHomeworkFile(null);
+    } catch (err) {
+      console.error("Error uploading preschool homework:", err);
+      setPreschoolHomeworkError("Upload failed. Try again.");
+    } finally {
+      setUploadingPreschoolHomework(false);
+    }
+  };
+
   const getTutorName = (tutorId) => {
     if (!tutorId) return "Unassigned";
     return tutorMap[tutorId]?.name || "Course Instructor";
+  };
+
+  const getPreschoolName = (preschoolId) => {
+    if (!preschoolId) return "Preschool";
+    return preschoolMap[preschoolId] || "Preschool";
   };
 
   const formatAssignmentDateTime = (d) =>
@@ -1192,6 +1377,33 @@ export default function StudentPublicProfile() {
     } finally {
       setSavingArtId(null);
     }
+  };
+
+  // ---- PREMIUM ACCESS ----
+  // Free Starter users can see these features, but Projects & Assignments
+  // and Messages are available only to students on a paid plan.
+  const normalizedSubscriptionTier = String(student?.subscription_tier || "Free Starter")
+    .trim()
+    .toLowerCase();
+
+  const hasPremiumAccess = !["", "free", "free starter", "starter", "free plan"].includes(
+    normalizedSubscriptionTier
+  );
+
+  const openPremiumLock = (featureName) => {
+    setPremiumFeatureName(featureName);
+    setShowPremiumLock(true);
+    setIsSidebarOpen(false);
+  };
+
+  const handlePremiumNavigation = (view) => {
+    if (!hasPremiumAccess) {
+      openPremiumLock(view === "projects" ? "Projects & Assignments" : "Messages");
+      return;
+    }
+
+    setActiveView(view);
+    setIsSidebarOpen(false);
   };
 
   const handleWhatsAppRedirect = (tierName) => {
@@ -1381,6 +1593,12 @@ export default function StudentPublicProfile() {
   // student can submit an assignment against (unaffected by the course search box).
   const tutorLinkedEnrollments = enrolledCourses.filter(
     (c) => (!c.status || c.status === "approved") && c.tutor_id
+  );
+
+  // Approved preschool enrollments - these are the only ones a parent can
+  // submit homework against.
+  const approvedPreschoolEnrollments = preschoolRequests.filter(
+    (r) => r.status === "approved"
   );
 
   const filteredConversations = conversations.filter(c =>
@@ -1749,6 +1967,76 @@ export default function StudentPublicProfile() {
             </>
           )}
         </div>
+      </div>
+    );
+  };
+
+  const renderPreschoolRequestCard = (req) => {
+    const status = req.status || "pending";
+    const isApproved = status === "approved";
+    const isRejected = status === "rejected";
+    const accent = isApproved ? "#0d6b52" : isRejected ? "#dc2626" : "#d97706";
+    const bg = isApproved ? "#eefaf5" : isRejected ? "#fef2f2" : "#fffbeb";
+    const border = isApproved ? "#bfe3d4" : isRejected ? "#fecaca" : "#fde68a";
+    const badgeBg = isApproved ? "#dcf5ea" : isRejected ? "#fee2e2" : "#fef3c7";
+
+    return (
+      <div
+        key={req.id}
+        style={{
+          position: "relative",
+          background: bg,
+          borderRadius: "14px",
+          padding: "18px 18px 16px",
+          border: `1px solid ${border}`,
+          overflow: "hidden"
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            bottom: 0,
+            width: "4px",
+            background: accent
+          }}
+        />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
+          <h4 style={{ margin: 0, fontSize: "14.5px", fontWeight: 700, color: "#0f1f1a" }}>
+            {req.child_name || "Child"}
+          </h4>
+          <span
+            style={{
+              flexShrink: 0,
+              fontSize: "10px",
+              fontWeight: 700,
+              padding: "3px 9px",
+              borderRadius: "999px",
+              letterSpacing: "0.03em",
+              textTransform: "uppercase",
+              background: badgeBg,
+              color: accent
+            }}
+          >
+            {status}
+          </span>
+        </div>
+        <p style={{ fontSize: "12px", color: "#0d6b52", fontWeight: 600, margin: "8px 0 2px 0" }}>
+          {getPreschoolName(req.preschool_id)}
+        </p>
+        {req.child_age && (
+          <p style={{ fontSize: "12px", color: "#8a968e", margin: "0 0 2px 0", fontWeight: 500 }}>
+            Age: {req.child_age}
+          </p>
+        )}
+        <p style={{ fontSize: "12px", color: "#8a968e", margin: 0, fontWeight: 500 }}>
+          Requested {new Date(req.created_at).toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+          })}
+        </p>
       </div>
     );
   };
@@ -2197,6 +2485,64 @@ export default function StudentPublicProfile() {
     );
   };
 
+  const renderPremiumLockModal = () => {
+    if (!showPremiumLock) return null;
+
+    return createPortal(
+      <div
+        className="premium-lock-overlay"
+        onClick={() => setShowPremiumLock(false)}
+        role="presentation"
+      >
+        <div
+          className="premium-lock-modal"
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="premium-lock-title"
+        >
+          <button
+            type="button"
+            className="premium-lock-close"
+            onClick={() => setShowPremiumLock(false)}
+            aria-label="Close premium access message"
+          >
+            <HiOutlineXMark size={18} />
+          </button>
+
+          <div className="premium-lock-icon-wrap">🔒</div>
+          <span className="premium-modal-badge">✦ Premium Access Required</span>
+
+          <h2 id="premium-lock-title">{premiumFeatureName} is Premium</h2>
+          <p>
+            Your current plan is <strong>{student?.subscription_tier || "Free Starter"}</strong>.
+            Upgrade to <strong>Pro Scholar</strong> to unlock {premiumFeatureName.toLowerCase()} and all premium learning features.
+          </p>
+
+          <button
+            type="button"
+            className="premium-upgrade-btn"
+            onClick={() => {
+              setShowPremiumLock(false);
+              setActiveView("pricing");
+            }}
+          >
+            Upgrade to Pro Scholar
+          </button>
+
+          <button
+            type="button"
+            className="premium-cancel-btn"
+            onClick={() => setShowPremiumLock(false)}
+          >
+            Maybe Later
+          </button>
+        </div>
+      </div>,
+      document.body
+    );
+  };
+
   const renderIncomingCallBanner = () => {
     if (callState !== "incoming" || !incomingCall) return null;
 
@@ -2259,11 +2605,33 @@ export default function StudentPublicProfile() {
           <button onClick={() => { setActiveView("courses"); setIsSidebarOpen(false); }} style={{ width: "100%", background: "none", border: "none", textAlign: "left", cursor: "pointer", padding: 0 }}>
             <span className={`sidebar-link ${activeView === "courses" ? "active" : ""}`}>Enrolled Courses</span>
           </button>
-          <button onClick={() => { setActiveView("projects"); setIsSidebarOpen(false); }} style={{ width: "100%", background: "none", border: "none", textAlign: "left", cursor: "pointer", padding: 0 }}>
-            <span className={`sidebar-link ${activeView === "projects" ? "active" : ""}`}>Projects & Assignments</span>
+          <button
+            onClick={() => handlePremiumNavigation("projects")}
+            className={!hasPremiumAccess ? "premium-locked-item" : ""}
+            style={{ width: "100%", background: "none", border: "none", textAlign: "left", cursor: "pointer", padding: 0 }}
+            type="button"
+          >
+            <span className={`sidebar-link ${activeView === "projects" ? "active" : ""}`}>
+              <span className="premium-label">
+                Projects & Assignments
+                {!hasPremiumAccess && <span className="premium-access-badge">✦ Premium</span>}
+              </span>
+              {!hasPremiumAccess && <span className="premium-lock-icon">🔒</span>}
+            </span>
           </button>
-          <button onClick={() => { setActiveView("messages"); setIsSidebarOpen(false); }} style={{ width: "100%", background: "none", border: "none", textAlign: "left", cursor: "pointer", padding: 0 }}>
-            <span className={`sidebar-link ${activeView === "messages" ? "active" : ""}`}>Messages</span>
+          <button
+            onClick={() => handlePremiumNavigation("messages")}
+            className={!hasPremiumAccess ? "premium-locked-item" : ""}
+            style={{ width: "100%", background: "none", border: "none", textAlign: "left", cursor: "pointer", padding: 0 }}
+            type="button"
+          >
+            <span className={`sidebar-link ${activeView === "messages" ? "active" : ""}`}>
+              <span className="premium-label">
+                Messages
+                {!hasPremiumAccess && <span className="premium-access-badge">✦ Premium</span>}
+              </span>
+              {!hasPremiumAccess && <span className="premium-lock-icon">🔒</span>}
+            </span>
           </button>
           <button onClick={() => { setActiveView("pricing"); setIsSidebarOpen(false); }} style={{ width: "100%", background: "none", border: "none", textAlign: "left", cursor: "pointer", padding: 0 }}>
             <span className={`sidebar-link ${activeView === "pricing" ? "active" : ""}`}>Pricing & Plans</span>
@@ -2422,7 +2790,7 @@ export default function StudentPublicProfile() {
                       {m.label}
                     </div>
 
-                    {m.isTier && (
+                    {m.isTier && hasPremiumAccess && (
                       <span
                         style={{
                           display: "inline-block",
@@ -2529,6 +2897,22 @@ export default function StudentPublicProfile() {
                 </div>
               )}
 
+              {preschoolRequests.length > 0 && (
+                <div className="content-section-box" style={{ marginBottom: "25px", borderLeft: "4px solid #0d6b52" }}>
+                  <h3>Preschool Enrollment Requests</h3>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                      gap: "16px",
+                      marginTop: "12px"
+                    }}
+                  >
+                    {preschoolRequests.map((req) => renderPreschoolRequestCard(req))}
+                  </div>
+                </div>
+              )}
+
               {notices.length > 0 && (
                 <div className="content-section-box" style={{ marginBottom: "25px" }}>
                   <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -2613,7 +2997,8 @@ export default function StudentPublicProfile() {
           )}
 
           {activeView === "projects" && (
-            <div className="content-section-box">
+            hasPremiumAccess ? (
+              <div className="content-section-box">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
                 <h3 style={{ margin: 0 }}>Projects & Assignments</h3>
                 {projectsSubTab === "portfolio" && (
@@ -2640,6 +3025,13 @@ export default function StudentPublicProfile() {
                   className={`category-tab ${projectsSubTab === "assignments" ? "active" : ""}`}
                 >
                   Assignments ({assignments.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProjectsSubTab("homework")}
+                  className={`category-tab ${projectsSubTab === "homework" ? "active" : ""}`}
+                >
+                  Preschool Homework ({preschoolHomeworkItems.length})
                 </button>
               </div>
 
@@ -2806,11 +3198,148 @@ export default function StudentPublicProfile() {
                   </div>
                 </div>
               )}
+
+              {projectsSubTab === "homework" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px" }}>
+                    <h4 style={{ margin: "0 0 12px 0", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px", color: "#064e3b" }}>
+                      <HiOutlineBuildingLibrary size={17} /> Submit preschool homework
+                    </h4>
+
+                    {approvedPreschoolEnrollments.length === 0 ? (
+                      <p className="no-data-text">You need an approved preschool enrollment before you can submit homework.</p>
+                    ) : (
+                      <>
+                        <label style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.05em", textTransform: "uppercase", color: "#8a968e", display: "block", marginBottom: "6px" }}>
+                          Child / preschool
+                        </label>
+                        <select
+                          value={selectedPreschoolEnrollmentId}
+                          onChange={(e) => setSelectedPreschoolEnrollmentId(e.target.value)}
+                          style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #d1d5db", fontSize: "13.5px", marginBottom: "14px", background: "#fff" }}
+                        >
+                          {approvedPreschoolEnrollments.map((r) => (
+                            <option key={r.id} value={r.id}>
+                              {(r.child_name || r.full_name || "Child")} — {getPreschoolName(r.preschool_id)}
+                            </option>
+                          ))}
+                        </select>
+
+                        <label
+                          htmlFor="preschool-homework-file-input"
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            border: "1.5px dashed #d1d5db",
+                            borderRadius: "10px",
+                            padding: "18px",
+                            cursor: "pointer",
+                            color: "#55625b",
+                            fontSize: "13.5px",
+                            marginBottom: "12px"
+                          }}
+                        >
+                          <input
+                            id="preschool-homework-file-input"
+                            type="file"
+                            onChange={(e) => setPreschoolHomeworkFile(e.target.files?.[0] || null)}
+                            hidden
+                          />
+                          <HiOutlineDocumentText size={19} color="#064e3b" />
+                          <span>{preschoolHomeworkFile ? preschoolHomeworkFile.name : "Click to choose a file"}</span>
+                        </label>
+
+                        {preschoolHomeworkError && (
+                          <p style={{ color: "#b91c1c", fontSize: "12.5px", margin: "0 0 12px 0" }}>{preschoolHomeworkError}</p>
+                        )}
+
+                        <button
+                          type="button"
+                          disabled={uploadingPreschoolHomework}
+                          onClick={handleUploadPreschoolHomework}
+                          style={{
+                            background: "#064e3b",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "8px",
+                            padding: "11px 20px",
+                            fontSize: "13.5px",
+                            fontWeight: "600",
+                            cursor: uploadingPreschoolHomework ? "not-allowed" : "pointer",
+                            opacity: uploadingPreschoolHomework ? 0.6 : 1
+                          }}
+                        >
+                          {uploadingPreschoolHomework ? "Uploading..." : "Submit homework"}
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  <div>
+                    <h4 style={{ margin: "0 0 12px 0", fontSize: "14px", color: "#064e3b" }}>Your submissions</h4>
+                    {preschoolHomeworkItems.length === 0 ? (
+                      <p className="no-data-text">Nothing submitted yet.</p>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                        {preschoolHomeworkItems.map((h) => (
+                          <div key={h.id} style={{ border: "1px solid #e5e7eb", borderRadius: "10px", padding: "14px 16px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", flexWrap: "wrap" }}>
+                              <div>
+                                <p style={{ margin: "0 0 3px 0", fontSize: "14px", fontWeight: "600", color: "#111827" }}>{h.file_name}</p>
+                                <p style={{ margin: 0, fontSize: "12px", color: "#8a968e", display: "flex", alignItems: "center", gap: "5px", flexWrap: "wrap" }}>
+                                  {h.child_name ? `${h.child_name} • ` : ""}
+                                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                                    <HiOutlineBuildingLibrary size={13} /> {getPreschoolName(h.preschool_id)}
+                                  </span>
+                                  {" • Submitted "}{formatAssignmentDateTime(h.submitted_at)}
+                                </p>
+                              </div>
+                              <span
+                                style={{
+                                  display: "inline-block",
+                                  padding: "3px 11px",
+                                  borderRadius: "999px",
+                                  fontSize: "11.5px",
+                                  fontWeight: "600",
+                                  textTransform: "capitalize",
+                                  flexShrink: 0,
+                                  background: h.status === "reviewed" ? "#eefaf5" : "#fef3c7",
+                                  color: h.status === "reviewed" ? "#064e3b" : "#b45309"
+                                }}
+                              >
+                                {h.status || "pending"}
+                              </span>
+                            </div>
+                            {h.teacher_remarks && (
+                              <div style={{ marginTop: "10px", paddingTop: "10px", borderTop: "1px dashed #e5e7eb", fontSize: "13px", color: "#55625b" }}>
+                                <strong style={{ color: "#064e3b" }}>Teacher feedback:</strong> {h.teacher_remarks}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
+            ) : (
+              <div className="premium-feature-page">
+                <div className="premium-feature-page-icon">🔒</div>
+                <span className="premium-modal-badge">✦ Premium Access</span>
+                <h2>Projects & Assignments</h2>
+                <p>Projects, assignments, submissions and homework tools are available with a premium TeachHub plan.</p>
+                <button type="button" className="premium-upgrade-btn" onClick={() => setActiveView("pricing")}>
+                  View Premium Plans
+                </button>
+              </div>
+            )
           )}
 
           {activeView === "messages" && (
-            <div style={isMobileViewport ? { margin: "0 -16px" } : undefined}>
+            hasPremiumAccess ? (
+              <div style={isMobileViewport ? { margin: "0 -16px" } : undefined}>
               {!isMobileViewport && (
                 <div style={{ maxWidth: "1050px", margin: "0 auto 16px auto" }}>
                   <h1 style={{ fontSize: "20px", fontWeight: "700", color: "#111", margin: 0 }}>Messages & Support</h1>
@@ -2818,7 +3347,18 @@ export default function StudentPublicProfile() {
                 </div>
               )}
               {renderModernMessagingLayout("560px")}
-            </div>
+              </div>
+            ) : (
+              <div className="premium-feature-page">
+                <div className="premium-feature-page-icon">🔒</div>
+                <span className="premium-modal-badge">✦ Premium Access</span>
+                <h2>Messages & Support</h2>
+                <p>Direct tutor messaging, calls and AI support are available after upgrading to a premium TeachHub plan.</p>
+                <button type="button" className="premium-upgrade-btn" onClick={() => setActiveView("pricing")}>
+                  View Premium Plans
+                </button>
+              </div>
+            )
           )}
 
           {activeView === "profile" && (
@@ -2910,7 +3450,7 @@ export default function StudentPublicProfile() {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px", textAlign: "left" }}>
                 <div style={{ border: "1px solid #e5e7eb", borderRadius: "8px", padding: "20px", background: "#fff" }}>
                   <h4>Free Starter</h4>
-                  <p style={{ fontSize: "24px", fontWeight: "bold", margin: "10px 0" }}>$0 <span style={{ fontSize: "14px", fontWeight: "normal", color: "#6b7280" }}>/mo</span></p>
+                  <p style={{ fontSize: "24px", fontWeight: "bold", margin: "10px 0" }}>RM0 <span style={{ fontSize: "14px", fontWeight: "normal", color: "#6b7280" }}>/mo</span></p>
                   <ul style={{ paddingLeft: "20px", fontSize: "13px", color: "#4b5563", lineHeight: "1.6" }}>
                     <li>Access to free enrolled courses</li>
                     <li>Basic portfolio uploading</li>
@@ -2922,7 +3462,7 @@ export default function StudentPublicProfile() {
                 <div style={{ border: "2px solid #064e3b", borderRadius: "8px", padding: "20px", background: "#fff", position: "relative" }}>
                   <span style={{ position: "absolute", top: "-12px", right: "20px", background: "#064e3b", color: "#fff", fontSize: "10px", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>POPULAR</span>
                   <h4>Pro Scholar</h4>
-                  <p style={{ fontSize: "24px", fontWeight: "bold", margin: "10px 0" }}>$19 <span style={{ fontSize: "14px", fontWeight: "normal", color: "#6b7280" }}>/mo</span></p>
+                  <p style={{ fontSize: "24px", fontWeight: "bold", margin: "10px 0" }}>RM19 <span style={{ fontSize: "14px", fontWeight: "normal", color: "#6b7280" }}>/mo</span></p>
                   <ul style={{ paddingLeft: "20px", fontSize: "13px", color: "#4b5563", lineHeight: "1.6" }}>
                     <li>All Free features</li>
                     <li>Unlimited course enrollments</li>
@@ -3139,6 +3679,7 @@ export default function StudentPublicProfile() {
         </div>
       )}
 
+      {renderPremiumLockModal()}
       {renderCallModal()}
       {renderIncomingCallBanner()}
     </div>

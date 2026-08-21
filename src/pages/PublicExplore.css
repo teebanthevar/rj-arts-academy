@@ -830,3 +830,22 @@
   color: #d4af37;
   margin-left: -11px;
 }
+
+.business-dropdown-menu {
+  min-width: 220px;
+}
+
+.dropdown-group-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  padding: 8px 16px 4px;
+}
+
+.dropdown-group-divider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 6px 0;
+}
