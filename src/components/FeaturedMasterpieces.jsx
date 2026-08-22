@@ -63,7 +63,7 @@ function FeaturedMasterpieces() {
       <div className="masterpiece-grid">
         {masterpieces.map((item, index) => (
           <div className="masterpiece-card" key={index}>
-            <img src={item.image} alt={item.title} />
+            <img loading="lazy" decoding="async" src={item.image} alt={item.title} />
 
             <div className="masterpiece-overlay">
               <h3>{item.title}</h3>
