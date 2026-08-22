@@ -69,7 +69,7 @@ Thank you.`;
 
           return (
             <div className="course-card" key={index}>
-              <img
+              <img loading="lazy" decoding="async"
                 src={course.image}
                 alt={course.title}
                 className="course-image"
