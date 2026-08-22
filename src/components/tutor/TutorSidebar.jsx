@@ -131,18 +131,14 @@ function TutorSidebar({ sidebarOpen, setSidebarOpen }) {
               <FaCog />
               <span>Settings</span>
             </NavLink>
+
+            <button className="logout-nav-link" onClick={handleLogout}>
+              <FaSignOutAlt />
+              <span>Logout</span>
+            </button>
           </div>
 
         </nav>
-
-        {/* Bottom Section */}
-        <div className="sidebar-footer">
-          <button className="logout-btn" onClick={handleLogout}>
-            <FaSignOutAlt />
-            <span>Logout</span>
-          </button>
-
-        </div>
 
       </aside>
     </>

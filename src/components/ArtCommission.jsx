@@ -3,9 +3,9 @@ import "../styles/ArtCommission.css";
 import commission1 from "../assets/images/commission/commission1.jpg";
 import commission2 from "../assets/images/commission/commission2.jpg";
 import commission3 from "../assets/images/commission/commission3.jpg";
-import commission4 from "../assets/images/commission/commission4.webp";
+import commission4 from "../assets/images/commission/commission4.jpg";
 import commission5 from "../assets/images/commission/commission5.jpg";
-import commission6 from "../assets/images/commission/commission6.webp";
+import commission6 from "../assets/images/commission/commission6.jpg";
 
 const services = [
   {
