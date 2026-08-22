@@ -966,7 +966,7 @@ export default function PublicExplore() {
                       className="public-tutor-card"
                     >
 
-                      <img loading="lazy" decoding="async"
+                      <img
                         src={
                           tutor.avatar_url ||
                           `https://ui-avatars.com/api/?name=${encodeURIComponent(
@@ -1127,7 +1127,7 @@ export default function PublicExplore() {
 
                       {/* PRESCHOOL AVATAR */}
 
-                      <img loading="lazy" decoding="async"
+                      <img
                         src={getPreschoolAvatar(
                           preschool
                         )}
