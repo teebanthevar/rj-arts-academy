@@ -3,13 +3,7 @@ import heroBg from "../assets/images/hero-bg.jpg";
 
 function Hero() {
   return (
-    <section
-      id="home"
-      className="hero"
-      style={{
-        backgroundImage: "linear-gradient(rgba(15,61,46,.55), rgba(15,61,46,.65))",
-      }}
-    >
+    <section id="home" className="hero">
       <img className="hero-image" src={heroBg} alt="Students creating artwork at RJ Arts Academy" fetchPriority="high" decoding="async" width="1920" height="1080" />
       <div className="hero-content">
 
