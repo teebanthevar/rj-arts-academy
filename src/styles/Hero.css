@@ -37,22 +37,7 @@
 }
 
 .hero::before{
-
-    content:"";
-
-    position:absolute;
-
-    inset:0;
-
-    background:linear-gradient(
-        90deg,
-        rgba(15,61,46,.28) 0%,
-        rgba(15,61,46,.18) 48%,
-        rgba(15,61,46,.25) 100%
-    );
-
-    z-index:1;
-
+    display:none;
 }
 
 .hero-content{
