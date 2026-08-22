@@ -1,15 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import VitePluginSitemap from "vite-plugin-sitemap";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   plugins: [
     react(),
-
-    VitePluginSitemap({
-      hostname: "https://rjartsacademy.com",
-    }),
 
     VitePWA({
       registerType: "autoUpdate",
