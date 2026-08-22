@@ -238,7 +238,14 @@
 }
 
 .hero-image{
-    object-position:49% center;
+    top:-10%;
+    left:-10%;
+    right:auto;
+    bottom:auto;
+    width:120%;
+    height:120%;
+    object-position:50% center;
+    transform:none;
 }
 
 .hero-line{
