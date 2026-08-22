@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import "./App.css";
 
 import Loader from "./components/Loader";
-import SupabaseTest from "./components/SupabaseTest";
 import PremiumRoute from "./components/PremiumRoute";
 
 import MainLayout from "./layouts/MainLayout";
@@ -16,102 +15,88 @@ import TutorLayout from "./layouts/TutorLayout";
 // PUBLIC PAGES
 // =====================================================
 
-import Home from "./pages/Home";
-import PublicExplore from "./pages/PublicExplore";
-import TutorProfile from "./pages/TutorProfile";
-import StudentPublicProfile from "./pages/StudentPublicProfile";
-import StudentRegister from "./pages/StudentRegister";
-import StudentPublicLogin from "./pages/StudentPublicLogin";
-import StudentLogin from "./pages/StudentLogin";
+const Home = lazy(() => import("./pages/Home"));
+const PublicExplore = lazy(() => import("./pages/PublicExplore"));
+const TutorProfile = lazy(() => import("./pages/TutorProfile"));
+const StudentPublicProfile = lazy(() => import("./pages/StudentPublicProfile"));
+const StudentRegister = lazy(() => import("./pages/StudentRegister"));
+const StudentPublicLogin = lazy(() => import("./pages/StudentPublicLogin"));
+const StudentLogin = lazy(() => import("./pages/StudentLogin"));
 
-import TutorRegister from "./pages/tutor/TutorRegister";
-import TutorLogin from "./pages/tutor/TutorLogin";
+const TutorRegister = lazy(() => import("./pages/tutor/TutorRegister"));
+const TutorLogin = lazy(() => import("./pages/tutor/TutorLogin"));
 
 // =====================================================
 // PRESCHOOL PAGES
 // =====================================================
 
-import PreschoolRegister from "./pages/preschool/PreschoolRegister";
-import PreschoolLogin from "./pages/preschool/PreschoolLogin";
-import PreschoolDashboard from "./pages/preschool/PreschoolDashboard";
+const PreschoolRegister = lazy(() => import("./pages/preschool/PreschoolRegister"));
+const PreschoolLogin = lazy(() => import("./pages/preschool/PreschoolLogin"));
+const PreschoolDashboard = lazy(() => import("./pages/preschool/PreschoolDashboard"));
 
 // ⭐ NEW: Public Preschool Profile
-import PreschoolPublicProfile from "./pages/PreschoolPublicProfile";
+const PreschoolPublicProfile = lazy(() => import("./pages/PreschoolPublicProfile"));
 
 // =====================================================
 // BLOG PAGES
 // =====================================================
 
-import Blog from "./pages/Blog";
-import BlogArticle from "./pages/BlogArticle";
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogArticle = lazy(() => import("./pages/BlogArticle"));
 
 // =====================================================
 // TUTOR PAGES
 // =====================================================
 
-import TutorDashboard from "./pages/tutor/TutorDashboard";
-import CreateCourse from "./pages/tutor/CreateCourse";
-import EditCourse from "./pages/tutor/EditCourse";
-import TutorAnalytics from "./pages/tutor/TutorAnalytics";
-import TutorMyCourses from "./pages/tutor/MyCourses";
-import TutorStudents from "./pages/tutor/TutorStudents";
-import StudentProfile from "./pages/tutor/StudentProfile";
-import TutorMessages from "./components/tutor/TutorMessages";
-import TutorEarnings from "./pages/tutor/TutorEarnings";
-import TutorAdvertisements from "./pages/tutor/TutorAdvertisements";
-import TutorReviews from "./pages/tutor/TutorReviews";
-import TutorSubscription from "./pages/tutor/TutorSubscription";
-import TutorSettings from "./pages/tutor/TutorSettings";
+const TutorDashboard = lazy(() => import("./pages/tutor/TutorDashboard"));
+const CreateCourse = lazy(() => import("./pages/tutor/CreateCourse"));
+const EditCourse = lazy(() => import("./pages/tutor/EditCourse"));
+const TutorAnalytics = lazy(() => import("./pages/tutor/TutorAnalytics"));
+const TutorMyCourses = lazy(() => import("./pages/tutor/MyCourses"));
+const TutorStudents = lazy(() => import("./pages/tutor/TutorStudents"));
+const StudentProfile = lazy(() => import("./pages/tutor/StudentProfile"));
+const TutorMessages = lazy(() => import("./components/tutor/TutorMessages"));
+const TutorEarnings = lazy(() => import("./pages/tutor/TutorEarnings"));
+const TutorAdvertisements = lazy(() => import("./pages/tutor/TutorAdvertisements"));
+const TutorReviews = lazy(() => import("./pages/tutor/TutorReviews"));
+const TutorSubscription = lazy(() => import("./pages/tutor/TutorSubscription"));
+const TutorSettings = lazy(() => import("./pages/tutor/TutorSettings"));
 
 // =====================================================
 // STUDENT DASHBOARD PAGES
 // =====================================================
 
-import DashboardHome from "./pages/DashboardHome";
-import MyPortfolio from "./pages/MyPortfolio";
-import MyCourses from "./pages/MyCourses";
-import CoursePlayer from "./pages/CoursePlayer";
-import QuizPlayer from "./pages/QuizPlayer";
-import Attendance from "./pages/Attendance";
-import Certificates from "./pages/Certificates";
-import Payments from "./pages/Payments";
-import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
+const DashboardHome = lazy(() => import("./pages/DashboardHome"));
+const MyPortfolio = lazy(() => import("./pages/MyPortfolio"));
+const MyCourses = lazy(() => import("./pages/MyCourses"));
+const CoursePlayer = lazy(() => import("./pages/CoursePlayer"));
+const QuizPlayer = lazy(() => import("./pages/QuizPlayer"));
+const Attendance = lazy(() => import("./pages/Attendance"));
+const Certificates = lazy(() => import("./pages/Certificates"));
+const Payments = lazy(() => import("./pages/Payments"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Settings = lazy(() => import("./pages/Settings"));
 
 // =====================================================
 // ADMIN PAGES
 // =====================================================
 
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminStudents from "./pages/AdminStudents";
-import StudentDetails from "./pages/StudentDetails";
-import AdminArtworks from "./pages/AdminArtworks";
-import AdminCourses from "./pages/AdminCourses";
-import AdminAttendance from "./pages/AdminAttendance";
-import AdminCertificates from "./pages/AdminCertificates";
-import AdminPayments from "./pages/AdminPayments";
-import AdminSubscriptions from "./pages/AdminSubscriptions";
-import AdminAnnouncement from "./pages/AdminAnnouncement";
-import AdminBlog from "./pages/AdminBlog";
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminStudents = lazy(() => import("./pages/AdminStudents"));
+const StudentDetails = lazy(() => import("./pages/StudentDetails"));
+const AdminArtworks = lazy(() => import("./pages/AdminArtworks"));
+const AdminCourses = lazy(() => import("./pages/AdminCourses"));
+const AdminAttendance = lazy(() => import("./pages/AdminAttendance"));
+const AdminCertificates = lazy(() => import("./pages/AdminCertificates"));
+const AdminPayments = lazy(() => import("./pages/AdminPayments"));
+const AdminSubscriptions = lazy(() => import("./pages/AdminSubscriptions"));
+const AdminAnnouncement = lazy(() => import("./pages/AdminAnnouncement"));
+const AdminBlog = lazy(() => import("./pages/AdminBlog"));
 
 export default function App() {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
-    return <Loader />;
-  }
-
   return (
-    <>
+    <Suspense fallback={<Loader />}>
       <Routes>
 
         {/* =====================================================
@@ -448,6 +433,6 @@ export default function App() {
         </Route>
 
       </Routes>
-    </>
+    </Suspense>
   );
 }

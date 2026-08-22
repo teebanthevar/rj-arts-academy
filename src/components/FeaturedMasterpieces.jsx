@@ -1,11 +1,11 @@
 import "../styles/FeaturedMasterpieces.css";
 
 import masterpiece1 from "../assets/images/masterpieces/masterpiece1.jpg";
-import masterpiece2 from "../assets/images/masterpieces/masterpiece2.jpg";
+import masterpiece2 from "../assets/images/masterpieces/masterpiece2.webp";
 import masterpiece3 from "../assets/images/masterpieces/masterpiece3.jpg";
 import masterpiece4 from "../assets/images/masterpieces/masterpiece4.jpg";
 import masterpiece5 from "../assets/images/masterpieces/masterpiece5.jpg";
-import masterpiece6 from "../assets/images/masterpieces/masterpiece6.jpg";
+import masterpiece6 from "../assets/images/masterpieces/masterpiece6.webp";
 
 const masterpieces = [
   {
@@ -63,7 +63,7 @@ function FeaturedMasterpieces() {
       <div className="masterpiece-grid">
         {masterpieces.map((item, index) => (
           <div className="masterpiece-card" key={index}>
-            <img src={item.image} alt={item.title} />
+            <img src={item.image} alt={item.title} loading="lazy" decoding="async" />
 
             <div className="masterpiece-overlay">
               <h3>{item.title}</h3>

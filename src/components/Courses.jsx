@@ -73,6 +73,8 @@ Thank you.`;
                 src={course.image}
                 alt={course.title}
                 className="course-image"
+                loading="lazy"
+                decoding="async"
               />
 
               <div className="course-content">
