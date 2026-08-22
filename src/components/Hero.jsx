@@ -1,5 +1,5 @@
 import "../styles/Hero.css";
-import heroBg from "../assets/images/hero-bg.webp";
+import heroBg from "../assets/images/hero-bg.jpg";
 
 function Hero() {
   return (
