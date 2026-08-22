@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { lazy, Suspense } from "react";
+=======
+import React, { lazy, Suspense } from "react";
+>>>>>>> origin/main
 import { Routes, Route } from "react-router-dom";
 
 import "./App.css";
@@ -95,9 +99,16 @@ const AdminAnnouncement = lazy(() => import("./pages/AdminAnnouncement"));
 const AdminBlog = lazy(() => import("./pages/AdminBlog"));
 
 export default function App() {
+<<<<<<< HEAD
   return (
     <Suspense fallback={<Loader />}>
       <Routes>
+=======
+
+  return (
+    <>
+      <Suspense fallback={<Loader />}><Routes>
+>>>>>>> origin/main
 
         {/* =====================================================
             STANDALONE PUBLIC PAGES
@@ -432,7 +443,12 @@ export default function App() {
 
         </Route>
 
+<<<<<<< HEAD
       </Routes>
     </Suspense>
+=======
+      </Routes></Suspense>
+    </>
+>>>>>>> origin/main
   );
 }

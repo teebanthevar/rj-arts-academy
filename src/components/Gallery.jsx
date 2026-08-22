@@ -37,6 +37,8 @@ function Gallery() {
           >
             <img
               src={image}
+              loading="lazy"
+              decoding="async"
               alt={`Gallery ${index + 1}`}
               loading="lazy"
               decoding="async"
