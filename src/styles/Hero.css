@@ -237,6 +237,10 @@
 
 }
 
+.hero-image{
+    object-position:58% center;
+}
+
 .hero-line{
 
     width:70px;
