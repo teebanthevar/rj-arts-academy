@@ -487,7 +487,7 @@ html, body {
 
 /* --- Terms & Conditions popup modal --- */
 .terms-modal-overlay {
-  z-index: 999;
+  z-index: 1100;
 }
 
 .terms-modal {
@@ -516,4 +516,60 @@ html, body {
   font-size: 14px;
   color: #555;
   line-height: 1.6;
+}
+
+.terms-modal .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 26px;
+  border-bottom: 1px solid rgba(216, 194, 160, 0.4);
+}
+
+.terms-modal .modal-header h2 {
+  color: #0F3D2E;
+  font-size: 24px;
+  margin: 0;
+}
+
+.terms-modal .modal-header button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+  line-height: 1;
+  padding: 6px;
+}
+
+.terms-modal .modal-header button:hover {
+  color: #CC0001;
+}
+
+.terms-modal .modal-footer {
+  display: flex;
+  justify-content: center;
+  padding: 18px 26px 24px;
+  border-top: 1px solid rgba(216, 194, 160, 0.4);
+}
+
+.terms-modal .save-btn {
+  background: linear-gradient(135deg, #CC0001, #A50000);
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  padding: 11px 32px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(204, 0, 1, 0.25);
+  transition: 0.25s;
+}
+
+.terms-modal .save-btn:hover {
+  background: linear-gradient(135deg, #FFCC00, #E8B800);
+  color: #0F3D2E;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(232, 184, 0, 0.35);
 }
