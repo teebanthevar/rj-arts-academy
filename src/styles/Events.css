@@ -284,6 +284,134 @@ html, body {
   }
 }
 
+/* --- Register via WhatsApp popup modal --- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 61, 46, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.edit-profile-modal {
+  background: #fff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  text-align: left;
+}
+
+.edit-profile-modal .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 26px;
+  border-bottom: 1px solid rgba(216, 194, 160, 0.4);
+}
+
+.edit-profile-modal .modal-header h2 {
+  color: #0F3D2E;
+  font-size: 22px;
+  margin: 0;
+}
+
+.edit-profile-modal .modal-header button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+  line-height: 1;
+  padding: 6px;
+}
+
+.edit-profile-modal .modal-body {
+  padding: 22px 26px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.edit-profile-modal .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.edit-profile-modal .form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 480px) {
+  .edit-profile-modal .modal-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.edit-profile-modal .form-group label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0F3D2E;
+}
+
+.edit-profile-modal .form-group input {
+  border: 1px solid #e3e0d6;
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.edit-profile-modal .form-group input:focus {
+  border-color: #CC0001;
+}
+
+.edit-profile-modal .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 18px 26px 24px;
+  border-top: 1px solid rgba(216, 194, 160, 0.4);
+}
+
+.edit-profile-modal .cancel-btn {
+  background: #fff;
+  color: #0F3D2E;
+  border: 1px solid #0F3D2E;
+  border-radius: 30px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.edit-profile-modal .save-btn {
+  background: #CC0001;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .edit-profile-modal {
+    max-height: 95vh;
+  }
+}
+
 /* --- Terms & Conditions link --- */
 .terms-link {
   background: none;
