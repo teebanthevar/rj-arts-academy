@@ -18,6 +18,8 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
+  filter: blur(3px);
+  transform: scale(1.03);
   z-index: 0;
 }
 
