@@ -7,9 +7,10 @@ function Hero() {
       id="home"
       className="hero"
       style={{
-        backgroundImage: `linear-gradient(rgba(15,61,46,.55), rgba(15,61,46,.65)), url(${heroBg})`,
+        backgroundImage: "linear-gradient(rgba(15,61,46,.55), rgba(15,61,46,.65))",
       }}
     >
+      <img className="hero-image" src={heroBg} alt="Students creating artwork at RJ Arts Academy" fetchPriority="high" decoding="async" width="1920" height="1080" />
       <div className="hero-content">
 
         <h1>
