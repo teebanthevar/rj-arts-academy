@@ -21,7 +21,7 @@ const TutorProfile = lazy(() => import("./pages/TutorProfile"));
 const StudentPublicProfile = lazy(() => import("./pages/StudentPublicProfile"));
 const StudentRegister = lazy(() => import("./pages/StudentRegister"));
 const StudentPublicLogin = lazy(() => import("./pages/StudentPublicLogin"));
-const StudentLogin = lazy(() => import("./pages/StudentLogin"));
+const StudentLogin = lazy(() => import("./components/StudentLogin"));
 
 const TutorRegister = lazy(() => import("./pages/tutor/TutorRegister"));
 const TutorLogin = lazy(() => import("./pages/tutor/TutorLogin"));
