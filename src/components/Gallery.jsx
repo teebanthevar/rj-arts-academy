@@ -40,6 +40,8 @@ function Gallery() {
               loading="lazy"
               decoding="async"
               alt={`Gallery ${index + 1}`}
+              loading="lazy"
+              decoding="async"
             />
           </div>
         ))}
