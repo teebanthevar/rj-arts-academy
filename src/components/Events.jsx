@@ -80,7 +80,7 @@ function Events() {
       return;
     }
 
-    const phoneNumber = "60123456789";
+    const phoneNumber = "60122451679";
 
     let message = `Hello RJ Arts Academy! I would like to register for the upcoming event:\n\n*Event:* ${selectedEvent.title}\n*Date:* ${selectedEvent.date}\n\n*My Details:*\n*Name:* ${formData.name}\n*Email:* ${formData.email}\n*Phone:* ${formData.phone}`;
 
