@@ -32,12 +32,14 @@ body {
 ========================================== */
 
 .dashboard-content {
+  /* The sidebar is fixed so the main column must reserve its width.
+     Without this offset, the hero and header render underneath it. */
   flex: 1 1 auto;
-  width: 100%;
+  width: auto;
   min-width: 0;
   height: 100vh;
   min-height: 0;
-  margin-left: 0;
+  margin-left: 290px;
   padding: 28px;
   box-sizing: border-box;
   overflow-x: hidden;
