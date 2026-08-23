@@ -11,13 +11,6 @@ export default defineConfig({
 
       // Route-specific manifests are selected in index.html.
       manifest: false,
-          {
-            src: "/logo.png",
-            sizes: "512x512",
-            type: "image/png",
-          },
-        ],
-      },
     }),
   ],
 
