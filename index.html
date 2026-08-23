@@ -35,6 +35,21 @@
       content="width=device-width, initial-scale=1.0"
     />
 
+    <!-- Route-specific install identity for Academy and Teach Hub. -->
+    <script>
+      (() => {
+        const isTeachHub = location.pathname === "/teachhub" || location.pathname.startsWith("/teachhub/");
+        const manifest = document.createElement("link");
+        manifest.rel = "manifest";
+        manifest.href = isTeachHub ? "/teachhub-manifest.webmanifest" : "/academy-manifest.webmanifest";
+        document.head.appendChild(manifest);
+
+        const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+        if (appleTitle) appleTitle.content = isTeachHub ? "Teach Hub" : "RJ Arts Academy";
+        document.title = isTeachHub ? "RJ Arts Teach Hub" : "RJ Arts Academy | Drawing, Painting & Art Classes in Slim River";
+      })();
+    </script>
+
     <!-- Load decorative fonts without blocking the first paint. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
