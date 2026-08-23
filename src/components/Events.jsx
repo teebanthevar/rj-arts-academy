@@ -99,7 +99,7 @@ function Events() {
 
   async function handleShare(event, e) {
     e.stopPropagation();
-    const shareUrl = `${window.location.origin}/#events?event=${event.id}`;
+    const shareUrl = `${window.location.origin}/#${event.id}`;
     const shareData = {
       title: event.title,
       text: `Join the ${event.title} at RJ Arts Academy — ${event.theme || ""} Register now!`,
@@ -131,6 +131,7 @@ function Events() {
           <div
             className={`event-card ${event.premium ? "event-card-premium" : "event-card-classic"}`}
             key={index}
+            id={event.id}
           >
             {event.premium && (
               <div className="merdeka-ribbon">

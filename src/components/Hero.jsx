@@ -22,8 +22,8 @@ function Hero() {
             Enroll Now
           </a>
 
-          <a href="#gallery" className="secondary-btn">
-            Explore Gallery
+          <a href="#merdeka-colouring-competition" className="secondary-btn">
+            Join Competition
           </a>
 
         </div>
