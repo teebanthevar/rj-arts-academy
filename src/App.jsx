@@ -38,6 +38,12 @@ const PreschoolDashboard = lazy(() => import("./pages/preschool/PreschoolDashboa
 const PreschoolPublicProfile = lazy(() => import("./pages/PreschoolPublicProfile"));
 
 // =====================================================
+// MERDEKA COLOURING COMPETITION
+// =====================================================
+
+const MerdekaPublicGallery = lazy(() => import("./pages/MerdekaPublicGallery"));
+
+// =====================================================
 // BLOG PAGES
 // =====================================================
 
@@ -93,6 +99,7 @@ const AdminPayments = lazy(() => import("./pages/AdminPayments"));
 const AdminSubscriptions = lazy(() => import("./pages/AdminSubscriptions"));
 const AdminAnnouncement = lazy(() => import("./pages/AdminAnnouncement"));
 const AdminBlog = lazy(() => import("./pages/AdminBlog"));
+const AdminMerdekaGallery = lazy(() => import("./pages/AdminMerdekaGallery"));
 
 export default function App() {
   return (
@@ -150,6 +157,12 @@ export default function App() {
         <Route
           path="/tutor-login"
           element={<TutorLogin />}
+        />
+
+        {/* Merdeka Colouring Competition Public Gallery */}
+        <Route
+          path="/merdeka-gallery"
+          element={<MerdekaPublicGallery />}
         />
 
 
@@ -423,6 +436,11 @@ export default function App() {
           <Route
             path="/admin/announcements"
             element={<AdminAnnouncement />}
+          />
+
+          <Route
+            path="/admin/merdeka-gallery"
+            element={<AdminMerdekaGallery />}
           />
 
           <Route

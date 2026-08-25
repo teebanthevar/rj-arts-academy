@@ -2853,3 +2853,103 @@
   color: #e0b83f;
   filter: drop-shadow(0 0 4px rgba(224, 184, 63, 0.18));
 }
+
+/* =========================================================
+   HERO SHARE BUTTON
+   ========================================================= */
+
+.hero-share-button {
+  position: absolute;
+  z-index: 3;
+
+  top: 22px;
+  right: 22px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 16px;
+
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.08);
+
+  cursor: pointer;
+
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.1px;
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.hero-share-button:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(212, 175, 55, 0.45);
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.hero-share-button:active {
+  transform: translateY(0);
+}
+
+.hero-share-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  color: #e6c75b;
+  filter: drop-shadow(0 0 4px rgba(224, 184, 63, 0.2));
+}
+
+@media (max-width: 800px) {
+  .hero-share-button {
+    top: 16px;
+    right: 16px;
+
+    padding: 8px 13px;
+
+    font-size: 11px;
+  }
+
+  .hero-share-icon {
+    width: 13px;
+    height: 13px;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-share-button {
+    top: 12px;
+    right: 12px;
+
+    padding: 7px;
+
+    border-radius: 50%;
+  }
+
+  .hero-share-button span {
+    display: none;
+  }
+
+  .hero-share-icon {
+    width: 14px;
+    height: 14px;
+  }
+}

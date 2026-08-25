@@ -11,6 +11,7 @@ import {
   FaBell,
   FaBlog,
   FaCog,
+  FaImages,
 } from "react-icons/fa";
 
 import "../../styles/AdminSidebar.css";
@@ -98,6 +99,14 @@ function AdminSidebar() {
           <FaBell />
 
           Announcements
+
+        </NavLink>
+
+        <NavLink to="/admin/merdeka-gallery">
+
+          <FaImages />
+
+          Merdeka Gallery
 
         </NavLink>
 

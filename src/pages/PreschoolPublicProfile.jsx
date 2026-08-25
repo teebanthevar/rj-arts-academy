@@ -15,6 +15,12 @@ export default function PreschoolPublicProfile() {
   const isOwner = !!(currentUser && currentUser.id === id);
 
   // =========================================================
+  // SHARE STATE
+  // =========================================================
+
+  const [shareCopied, setShareCopied] = useState(false);
+
+  // =========================================================
   // SUBSCRIPTION / PREMIUM STATE
   // =========================================================
 
@@ -660,6 +666,32 @@ export default function PreschoolPublicProfile() {
   }
 
   // =========================================================
+  // SHARE
+  // =========================================================
+
+  async function handleShare() {
+    const shareData = {
+      title: getBusinessName(),
+      text: `Check out ${getBusinessName()} on TeachHub`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        setShareCopied(true);
+        setTimeout(() => setShareCopied(false), 2000);
+      }
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        console.error("Share failed:", err);
+      }
+    }
+  }
+
+  // =========================================================
   // CONTACT
   // =========================================================
 
@@ -824,6 +856,58 @@ export default function PreschoolPublicProfile() {
 
           <div className="profile-hero-glow glow-one" />
           <div className="profile-hero-glow glow-two" />
+
+          {/* =================================================
+              PREMIUM SHARE BUTTON
+          ================================================= */}
+
+          <button
+            type="button"
+            className="hero-share-button"
+            onClick={handleShare}
+            aria-label="Share this preschool profile"
+          >
+            <svg
+              className="hero-share-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <circle
+                cx="18"
+                cy="5"
+                r="2.6"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              />
+
+              <circle
+                cx="6"
+                cy="12"
+                r="2.6"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              />
+
+              <circle
+                cx="18"
+                cy="19"
+                r="2.6"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              />
+
+              <path
+                d="M8.3 10.6 15.7 6.4M8.3 13.4l7.4 4.2"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+
+            <span>{shareCopied ? "Link copied!" : "Share"}</span>
+          </button>
 
           <div className="profile-hero-content">
 

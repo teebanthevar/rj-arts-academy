@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaBars, FaTimes, FaUserGraduate } from "react-icons/fa";
+import { FaBars, FaTimes, FaUserGraduate, FaChevronDown } from "react-icons/fa";
 import logo from "../assets/images/logo.png";
 import "../styles/Navbar.css";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [eventsDropdownOpen, setEventsDropdownOpen] = useState(false);
 
-  const closeMenu = () => setMenuOpen(false);
+  const closeMenu = () => {
+    setMenuOpen(false);
+    setEventsDropdownOpen(false);
+  };
 
   return (
     <header className="navbar">
@@ -34,9 +38,33 @@ export default function Navbar() {
           <a href="#gallery" onClick={closeMenu}>
             Gallery
           </a>
-          <a href="#events" onClick={closeMenu}>
-            Events
-          </a>
+
+          <div className="nav-dropdown">
+            <button
+              type="button"
+              className="nav-dropdown-trigger"
+              onClick={() => setEventsDropdownOpen((prev) => !prev)}
+            >
+              Events
+              <FaChevronDown className="nav-dropdown-arrow" />
+            </button>
+
+            <div
+              className={
+                eventsDropdownOpen
+                  ? "nav-dropdown-menu open"
+                  : "nav-dropdown-menu"
+              }
+            >
+              <a href="#events" onClick={closeMenu}>
+                Upcoming Events
+              </a>
+              <Link to="/merdeka-gallery" onClick={closeMenu}>
+                Merdeka Gallery
+              </Link>
+            </div>
+          </div>
+
           <a href="#faq" onClick={closeMenu}>
             FAQ
           </a>
