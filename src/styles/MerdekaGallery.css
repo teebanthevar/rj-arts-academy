@@ -1,0 +1,134 @@
+.merdeka-gallery-page {
+  background: #fff;
+  min-height: 100vh;
+}
+
+.merdeka-gallery-back {
+  display: inline-block;
+  margin: 24px 32px 0;
+  color: #0F3D2E;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.merdeka-gallery-back:hover {
+  text-decoration: underline;
+}
+
+.merdeka-gallery {
+  padding: 40px 10% 80px;
+  background: linear-gradient(160deg, #FAF9F6 0%, #FFF9EE 100%);
+  text-align: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.merdeka-gallery h2 {
+  font-size: 42px;
+  color: #0F3D2E;
+}
+
+.merdeka-gallery-subtitle {
+  margin: 15px 0 45px;
+  color: #666;
+  font-size: 18px;
+}
+
+.merdeka-gallery-empty {
+  color: #888;
+  font-size: 16px;
+}
+
+.merdeka-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 260px));
+  justify-content: center;
+  gap: 26px;
+}
+
+.merdeka-gallery-card {
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(15, 61, 46, 0.10);
+  border: 1px solid rgba(216, 194, 160, 0.4);
+  cursor: pointer;
+  transition: 0.35s ease;
+}
+
+.merdeka-gallery-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(15, 61, 46, 0.18);
+  border-color: rgba(216, 194, 160, 0.7);
+}
+
+.merdeka-gallery-card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .merdeka-gallery {
+    padding: 30px 20px 60px;
+  }
+
+  .merdeka-gallery h2 {
+    font-size: 32px;
+  }
+
+  .merdeka-gallery-back {
+    margin: 20px 20px 0;
+  }
+
+  .merdeka-gallery-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 220px));
+  }
+
+  .merdeka-gallery-card img {
+    height: 180px;
+  }
+}
+
+/* Preview modal */
+.merdeka-preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 61, 46, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1200;
+}
+
+.merdeka-preview-content {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 100%;
+  overflow: hidden;
+  text-align: center;
+}
+
+.merdeka-preview-content img {
+  width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
+  background: #111;
+  display: block;
+}
+
+.merdeka-preview-close {
+  margin: 16px;
+  background: #0F3D2E;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 600;
+}
