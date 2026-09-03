@@ -336,3 +336,30 @@
     height: 36px;
   }
 }
+
+.trial-box {
+  justify-content: center; /* add this line to your existing .trial-box rule */
+}
+
+.trial-box svg {
+  display: block;
+  margin: 0 auto;
+}
+
+/* Make sure the mobile-collapsed version is explicitly centered too */
+@media (max-width: 992px) {
+  .trial-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 650px) {
+  .trial-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+}
