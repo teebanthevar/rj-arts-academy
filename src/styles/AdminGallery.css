@@ -1,0 +1,67 @@
+.admin-gallery {
+  padding: 24px;
+}
+
+.admin-gallery h2 {
+  margin-bottom: 16px;
+}
+
+.upload-btn {
+  display: inline-block;
+  background: #4f46e5;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 24px;
+  transition: background 0.2s ease;
+}
+
+.upload-btn:hover {
+  background: #4338ca;
+}
+
+.admin-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.admin-gallery-card {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  background: #f3f4f6;
+}
+
+.admin-gallery-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.admin-gallery-card .delete-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(220, 38, 38, 0.9);
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.admin-gallery-card:hover .delete-btn {
+  opacity: 1;
+}
+
+.admin-gallery-card .delete-btn:hover {
+  background: #dc2626;
+}

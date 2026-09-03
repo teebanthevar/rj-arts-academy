@@ -260,164 +260,209 @@
 }
 
 /* ===================================
-   COURSE MODAL (RESIZED & OPTIMIZED)
+   COURSE MODAL (COMPACT, ALWAYS FITS)
 =================================== */
 
 .courseModalOverlay{
     position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.6);
-    backdrop-filter:blur(6px);
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    width:100%;
+    height:100%;
+    background:rgba(10,20,16,.55);
+    backdrop-filter:blur(8px);
     display:flex;
     justify-content:center;
     align-items:center;
-    padding:20px;
-    z-index:999;
+    padding:16px;
+    z-index:9999;
     animation:fadeIn .25s ease;
 }
 
 .courseModal{
-    width:100%;
-    max-width:580px; /* Reduced from 850px for a proportional fit */
-    max-height: 90vh;
-    overflow-y: auto;
-    background:white;
+    position:relative;
+    width:400px;
+    max-width:100%;
+    max-height:calc(100vh - 32px);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    background:#FEFDFB;
     border-radius:20px;
-    box-shadow:0 20px 50px rgba(0,0,0,.2);
-    animation:popup .3s ease;
+    box-shadow:0 30px 70px rgba(0,0,0,.35), 0 0 0 1px rgba(15,61,46,.06);
+    animation:popup .3s cubic-bezier(.2,.8,.2,1);
 }
 
-.courseModal img{
+.courseModalBody{
+    overflow-y:auto;
+    flex:1;
+}
+
+.courseModalClose{
+    position:absolute;
+    top:12px;
+    right:12px;
+    width:32px;
+    height:32px;
+    border:none;
+    border-radius:50%;
+    background:rgba(0,0,0,.45);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-size:15px;
+    backdrop-filter:blur(4px);
+    transition:.25s;
+    z-index:2;
+}
+
+.courseModalClose:hover{
+    background:#0F3D2E;
+    transform:rotate(90deg);
+}
+
+.courseModalBody img{
     width:100%;
-    height:180px; /* Reduced banner height */
+    height:110px;
     object-fit:cover;
+    display:block;
+    border-radius:20px 20px 0 0;
 }
 
-.courseModal h2{
-    font-size:24px;
+.courseModalBody h2{
+    font-family:Georgia,'Times New Roman',serif;
+    font-size:22px;
+    letter-spacing:.2px;
     color:#0F3D2E;
-    padding:20px 24px 4px;
+    padding:16px 22px 2px;
+    margin:0;
 }
 
-.courseModal>p{
-    padding:0 24px;
-    color:#777;
-    font-size:14px;
+.courseModalBody > p{
+    padding:0 22px;
+    color:#9A9A93;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    margin:0;
 }
 
 .modalStats{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:12px;
-    padding:20px 24px;
+    display:flex;
+    align-items:stretch;
+    margin:14px 22px 0;
+    border-top:1px solid rgba(15,61,46,.1);
+    border-bottom:1px solid rgba(15,61,46,.1);
+    padding:12px 0;
 }
 
 .modalStats div{
-    background:#F7F8FA;
-    border-radius:12px;
-    padding:14px 10px;
+    flex:1;
     text-align:center;
+    position:relative;
+}
+
+.modalStats div:not(:last-child)::after{
+    content:"";
+    position:absolute;
+    right:0;
+    top:4px;
+    bottom:4px;
+    width:1px;
+    background:rgba(15,61,46,.12);
 }
 
 .modalStats h4{
-    margin-bottom:6px;
-    color:#666;
-    font-size:13px;
+    margin-bottom:4px;
+    color:#9A9A93;
+    font-size:10px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.8px;
 }
 
 .modalStats span{
-    font-size:18px;
+    font-size:17px;
     color:#0F3D2E;
     font-weight:700;
 }
 
 .modalDescription{
-    padding:0 24px 20px;
-    line-height:1.6;
-    color:#555;
-    font-size:14px;
+    padding:12px 22px 16px;
+    line-height:1.5;
+    color:#5B5B54;
+    font-size:13px;
+    font-style:italic;
+    margin:0;
 }
 
 .modalButtons{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    padding:0 24px 24px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    padding:0 22px 20px;
 }
 
 .modalButtons button{
-    flex: 1;
-    min-width: 100px;
-    height:42px;
+    height:40px;
     border:none;
     border-radius:10px;
     cursor:pointer;
-    font-size: 14px;
+    font-size:13px;
     font-weight:600;
-    transition:.3s;
-    background:#0F3D2E;
-    color:white;
+    transition:.25s;
+    background:#F2F3F0;
+    color:#0F3D2E;
 }
 
-.modalButtons button:hover{
+.modalButtons button:first-child{
+    grid-column:1 / -1;
+    background:#0F3D2E;
+    color:#fff;
+}
+
+.modalButtons button:first-child:hover{
+    background:#165540;
     transform:translateY(-2px);
-    box-shadow:0 8px 18px rgba(15,61,46,.2);
+    box-shadow:0 10px 22px rgba(15,61,46,.28);
+}
+
+.modalButtons button:not(:first-child):not(.deleteBtn):hover{
+    background:#E4E7E2;
 }
 
 .modalButtons .deleteBtn{
-    background:#dc3545;
+    background:#FBE9E9;
+    color:#C0392B;
 }
 
 .modalButtons .deleteBtn:hover{
-    background:#bb2d3b;
+    background:#dc3545;
+    color:#fff;
 }
 
 @keyframes popup{
-  from{
-    opacity:0;
-    transform:scale(.95);
-  }
-  to{
-    opacity:1;
-    transform:scale(1);
-  }
+  from{ opacity:0; transform:scale(.92) translateY(10px); }
+  to{ opacity:1; transform:scale(1) translateY(0); }
 }
 
 @keyframes fadeIn{
-  from{
-    opacity:0;
-  }
-  to{
-    opacity:1;
-  }
+  from{ opacity:0; }
+  to{ opacity:1; }
 }
 
 @media(max-width:768px){
-  .courseModal img{
-    height:150px;
-  }
-
-  .courseModal h2{
-    font-size:20px;
-    padding:18px 18px 4px;
-  }
-
-  .courseModal>p{
-    padding:0 18px;
-  }
-
-  .modalStats{
-    grid-template-columns:1fr;
-    padding:16px 18px;
-  }
-
-  .modalDescription{
-    padding:0 18px 18px;
-  }
-
-  .modalButtons{
-    padding:0 18px 20px;
-  }
+  .courseModal{ width:100%; max-height:calc(100vh - 24px); }
+  .courseModalBody img{ height:90px; }
+  .courseModalBody h2{ font-size:19px; padding:14px 18px 2px; }
+  .courseModalBody > p{ padding:0 18px; }
+  .modalStats{ margin:12px 18px 0; }
+  .modalDescription{ padding:10px 18px 14px; }
+  .modalButtons{ padding:0 18px 16px; }
 }
 
 /* ===================================
@@ -528,4 +573,82 @@ width:100%;
 
 }
 
+}
+
+/* ===================================
+   MOBILE PREMIUM OVERRIDES
+=================================== */
+
+@media(max-width:768px){
+
+  .statsGrid{
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  .statCard{
+    padding:16px;
+    border-radius:14px;
+    border:1px solid rgba(15,61,46,.05);
+  }
+
+  .statCard svg{
+    font-size:14px;
+    background:#EAF3EE;
+    padding:8px;
+    border-radius:9px;
+    width:14px;
+    height:14px;
+    margin-bottom:10px;
+  }
+
+  .statCard h2{
+    font-size:22px;
+  }
+
+  .statCard span{
+    font-size:12.5px;
+  }
+
+  .filterBar{
+    flex-direction:column;
+    align-items:stretch;
+    gap:10px;
+  }
+
+  .searchCourses{
+    width:100%;
+    height:44px;
+    border-radius:12px;
+    border:1px solid rgba(15,61,46,.08);
+    box-shadow:0 4px 14px rgba(15,61,46,.04);
+  }
+
+  .searchCourses input{
+    font-size:14px;
+  }
+
+  .filterBar select{
+    width:100%;
+    height:44px;
+    border-radius:12px;
+    border:1px solid rgba(15,61,46,.08);
+    box-shadow:0 4px 14px rgba(15,61,46,.04);
+    background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%230F3D2E' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center;
+    appearance:none;
+    -webkit-appearance:none;
+    padding:0 34px 0 14px;
+    font-size:13.5px;
+  }
+
+  .createCourseBtn{
+    width:100%;
+    justify-content:center;
+    height:46px;
+    border-radius:12px;
+  }
+}
+
+.statCard svg{
+    box-sizing: content-box;
 }

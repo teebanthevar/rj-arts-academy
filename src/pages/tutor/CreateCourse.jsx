@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
+import { getCurrencySymbol } from "../../lib/currencies";
 import "../../styles/CreateCourse.css";
 
 function CreateCourse() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [tutorCurrency, setTutorCurrency] = useState("MYR");
 
   const [course, setCourse] = useState({
     title: "",
@@ -19,6 +21,28 @@ function CreateCourse() {
     language: "",
     description: "",
   });
+
+  // Pull the tutor's currency preference from their profile (set in
+  // Settings) so every course they create uses it automatically —
+  // no per-course currency picker needed.
+  useEffect(() => {
+    const fetchTutorCurrency = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("currency")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (data?.currency) setTutorCurrency(data.currency);
+    };
+
+    fetchTutorCurrency();
+  }, []);
+
+  const currencySymbol = getCurrencySymbol(tutorCurrency);
 
   const handleChange = (e) => {
     setCourse({
@@ -45,6 +69,7 @@ function CreateCourse() {
         level: course.level,
         mode: course.mode,
         price: course.price ? parseFloat(course.price) : 0,
+        currency: tutorCurrency,
         duration: course.duration,
         students: 0,
         rating: 5.0,
@@ -133,7 +158,7 @@ function CreateCourse() {
               name="price"
               type="number"
               value={course.price}
-              placeholder="Course Fee (RM)"
+              placeholder={`Course Fee (${currencySymbol})`}
               onChange={handleChange}
             />
 
@@ -167,6 +192,11 @@ function CreateCourse() {
               onChange={handleChange}
             />
           </div>
+
+          <p style={{ fontSize: "12.5px", color: "#8a968e", marginTop: "-8px", marginBottom: "16px" }}>
+            Pricing is in {currencySymbol} ({tutorCurrency}) — change your currency in{" "}
+            <span style={{ fontWeight: 600 }}>Settings → Profile Info</span>.
+          </p>
 
           <button type="submit" disabled={loading}>
             {loading ? "Publishing Course..." : "Publish Course"}

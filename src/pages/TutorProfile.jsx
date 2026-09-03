@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { getCurrencySymbol } from "../lib/currencies";
 import {
   FaStar,
   FaRegStar,
@@ -741,6 +742,11 @@ export default function TutorProfile() {
         ).toFixed(1)
       : "0.0";
 
+  // Currency symbol for this tutor's profile — falls back to MYR if the
+  // tutor hasn't set one. Individual courses use their own stored
+  // currency where available, falling back to the tutor's.
+  const tutorCurrencySymbol = getCurrencySymbol(tutor?.currency);
+
   const renderPortfolioCard = (item) => {
     const isEditing = editingPortfolioId === item.id;
     const isSaving = savingPortfolioId === item.id;
@@ -1062,7 +1068,8 @@ export default function TutorProfile() {
                 <strong>
                   Hourly Rate:
                 </strong>{" "}
-                ${tutor.hourly_rate ||
+                {tutorCurrencySymbol}
+                {tutor.hourly_rate ||
                   30}
                 /hr
               </li>
@@ -1702,7 +1709,9 @@ export default function TutorProfile() {
                   💵 Price / Fee:
                 </strong>{" "}
                 {selectedCourseModal.price
-                  ? `$${selectedCourseModal.price}`
+                  ? `${getCurrencySymbol(
+                      selectedCourseModal.currency || tutor.currency
+                    )}${selectedCourseModal.price}`
                   : "Standard Tutor Rate"}
               </p>
 

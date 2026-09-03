@@ -100,3 +100,73 @@
     grid-template-columns: 1fr;
   }
 }
+
+.price-currency-group {
+  display: flex;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.price-currency-group .currency-select {
+  border: none;
+  border-right: 1px solid #d1d5db;
+  border-radius: 0;
+  background: #f9fafb;
+  padding: 0 10px;
+  font-size: 13.5px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.price-currency-group .price-input {
+  border: none;
+  border-radius: 0;
+  flex: 1;
+}
+
+.price-currency-group .currency-select:focus,
+.price-currency-group .price-input:focus {
+  outline: none;
+}
+
+@media (max-width: 768px) {
+  .create-course-page {
+    padding: 16px;
+  }
+
+  .course-card {
+    padding: 22px;
+    border-radius: 16px;
+  }
+
+  .course-card h1 {
+    font-size: 22px;
+  }
+
+  .course-card p {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .course-grid {
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .course-card input,
+  .course-card select,
+  .course-card textarea {
+    padding: 11px 14px;
+    font-size: 15px; /* prevents iOS auto-zoom on focus */
+  }
+
+  .course-card textarea {
+    grid-column: span 1;
+  }
+
+  .course-card button[type="submit"] {
+    padding: 13px;
+    font-size: 15px;
+  }
+}

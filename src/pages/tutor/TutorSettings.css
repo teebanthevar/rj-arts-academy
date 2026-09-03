@@ -338,3 +338,35 @@
     padding: 20px 16px;
   }
 }
+
+.settings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.replay-tour-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #b8860b;
+  color: #0f3d2e;
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.replay-tour-btn:hover {
+  background: #fdf6e8;
+}
+
+.replay-tour-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -4,6 +4,7 @@ import { FaChartLine, FaUsers, FaEnvelope } from "react-icons/fa";
 
 import TutorSidebar from "../components/tutor/TutorSidebar";
 import TutorHeader from "../components/tutor/TutorHeader";
+import TutorOnboarding from "../components/tutor/TutorOnboarding";
 
 import "../styles/TutorLayout.css";
 
@@ -26,6 +27,11 @@ function TutorLayout() {
           <Outlet />
         </div>
       </main>
+
+      <TutorOnboarding
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
     </div>
   );
 }

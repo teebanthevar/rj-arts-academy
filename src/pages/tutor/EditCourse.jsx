@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./EditCourse.css";
 
 export default function EditCourse() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
 
   // State for managing chapters and lessons
@@ -184,8 +186,13 @@ export default function EditCourse() {
         )}
 
         <div className="wizardButtons">
-          {step > 1 && <button onClick={prevStep}>Previous</button>}
-          {step < 6 && <button onClick={nextStep}>Next</button>}
+          <button
+            className="backBtn"
+            onClick={() => (step === 1 ? navigate("/tutor/my-courses") : prevStep())}
+          >
+            {step === 1 ? "Back" : "Previous"}
+          </button>
+          {step < 6 && <button className="nextBtn" onClick={nextStep}>Next</button>}
         </div>
       </div>
     </div>
