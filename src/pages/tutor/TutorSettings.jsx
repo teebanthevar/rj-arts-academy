@@ -5,9 +5,12 @@ import {
   HiOutlineBanknotes,
   HiOutlineLockClosed,
   HiOutlineCheck,
+  HiOutlineAcademicCap,
 } from "react-icons/hi2";
 import { FaCamera } from "react-icons/fa";
 import { supabase } from "../../lib/supabase";
+import { replayOnboardingTour } from "../../components/tutor/TutorOnboarding";
+import { CURRENCIES } from "../../lib/currencies";
 import "./TutorSettings.css";
 
 export default function TutorSettings() {
@@ -16,6 +19,7 @@ export default function TutorSettings() {
   const [uploading, setUploading] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [replayingTour, setReplayingTour] = useState(false);
 
   // Comprehensive profile state including all onboarding fields
   const [profile, setProfile] = useState({
@@ -30,6 +34,7 @@ export default function TutorSettings() {
     state: "",
     city: "",
     hourly_rate: "",
+    currency: "MYR",
     teaching_mode: "Online",
     bio: "",
     avatar_url: "",
@@ -85,6 +90,7 @@ export default function TutorSettings() {
           state: data.state || "",
           city: data.city || "",
           hourly_rate: data.hourly_rate || "",
+          currency: data.currency || "MYR",
           teaching_mode: data.teaching_mode || "Online",
           bio: data.bio || "",
           avatar_url: data.avatar_url || "",
@@ -166,6 +172,7 @@ export default function TutorSettings() {
         state: profile.state,
         city: profile.city,
         hourly_rate: profile.hourly_rate ? parseFloat(profile.hourly_rate) : null,
+        currency: profile.currency,
         teaching_mode: profile.teaching_mode,
         bio: profile.bio,
         avatar_url: profile.avatar_url,
@@ -214,6 +221,15 @@ export default function TutorSettings() {
     setTimeout(() => setSavedSuccess(false), 3000);
   };
 
+  const handleReplayTour = async () => {
+    setReplayingTour(true);
+    try {
+      await replayOnboardingTour();
+    } finally {
+      setReplayingTour(false);
+    }
+  };
+
   const getInitials = (name) => {
     if (!name) return "TU";
     return name.split(" ").map((n) => n[0]).join("").toUpperCase().substring(0, 2);
@@ -222,8 +238,21 @@ export default function TutorSettings() {
   return (
     <div className="settings-container">
       <div className="settings-header">
-        <h1>Account Settings</h1>
-        <p>Manage your professional profile, preferences, and security details.</p>
+        <div>
+          <h1>Account Settings</h1>
+          <p>Manage your professional profile, preferences, and security details.</p>
+        </div>
+
+        <button
+          type="button"
+          className="replay-tour-btn"
+          onClick={handleReplayTour}
+          disabled={replayingTour}
+          title="Replay the dashboard walkthrough"
+        >
+          <HiOutlineAcademicCap />
+          {replayingTour ? "Starting tour..." : "Replay dashboard tour"}
+        </button>
       </div>
 
       {savedSuccess && (
@@ -370,7 +399,21 @@ export default function TutorSettings() {
                 </div>
 
                 <div className="form-group">
-                  <label>Hourly Rate ($)</label>
+                  <label>Currency</label>
+                  <select
+                    value={profile.currency}
+                    onChange={(e) => setProfile({ ...profile, currency: e.target.value })}
+                  >
+                    {CURRENCIES.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Hourly Rate</label>
                   <input
                     type="number"
                     value={profile.hourly_rate}

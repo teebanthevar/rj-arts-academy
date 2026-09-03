@@ -70,17 +70,17 @@ function TutorSidebar({ sidebarOpen, setSidebarOpen }) {
               MAIN
             </span>
 
-            <NavLink to="/tutor-dashboard" onClick={closeSidebar}>
+            <NavLink to="/tutor-dashboard" data-tour="dashboard" onClick={closeSidebar}>
               <FaHome />
               <span>Dashboard</span>
             </NavLink>
 
-            <NavLink to="/tutor/my-courses" onClick={closeSidebar}>
+            <NavLink to="/tutor/my-courses" data-tour="my-courses" onClick={closeSidebar}>
               <FaBookOpen />
               <span>My Courses</span>
             </NavLink>
 
-            <NavLink to="/tutor/students" onClick={closeSidebar}>
+            <NavLink to="/tutor/students" data-tour="students" onClick={closeSidebar}>
               <FaUsers />
               <span>Students</span>
             </NavLink>
@@ -101,7 +101,7 @@ function TutorSidebar({ sidebarOpen, setSidebarOpen }) {
               <span>Earnings</span>
             </NavLink>
 
-            <NavLink to="/tutor/messages" onClick={closeSidebar}>
+            <NavLink to="/tutor/messages" data-tour="messages" onClick={closeSidebar}>
               <FaEnvelope />
               <span>Messages</span>
             </NavLink>
@@ -127,7 +127,7 @@ function TutorSidebar({ sidebarOpen, setSidebarOpen }) {
               <span>Subscription</span>
             </NavLink>
 
-            <NavLink to="/tutor/settings" onClick={closeSidebar}>
+            <NavLink to="/tutor/settings" data-tour="settings" onClick={closeSidebar}>
               <FaCog />
               <span>Settings</span>
             </NavLink>

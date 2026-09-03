@@ -101,6 +101,9 @@ const AdminAnnouncement = lazy(() => import("./pages/AdminAnnouncement"));
 const AdminBlog = lazy(() => import("./pages/AdminBlog"));
 const AdminMerdekaGallery = lazy(() => import("./pages/AdminMerdekaGallery"));
 
+// ⭐ NEW: Admin Gallery (manages images shown on the public Gallery section)
+const AdminGallery = lazy(() => import("./pages/AdminGallery"));
+
 export default function App() {
   return (
     <Suspense fallback={<Loader />}>
@@ -446,6 +449,12 @@ export default function App() {
           <Route
             path="/admin/blog"
             element={<AdminBlog />}
+          />
+
+          {/* ⭐ NEW: Admin Gallery — upload/manage images shown in public Gallery */}
+          <Route
+            path="/admin/gallery"
+            element={<AdminGallery />}
           />
 
         </Route>

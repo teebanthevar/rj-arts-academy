@@ -691,3 +691,59 @@
     min-width: 35px;
   }
 }
+
+/* ===================================
+   WIZARD BUTTONS (BACK / NEXT)
+=================================== */
+
+.wizardButtons{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-top:26px;
+}
+
+.wizardButtons button{
+    flex:1;
+    height:48px;
+    border-radius:12px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.25s;
+    border:none;
+}
+
+.wizardButtons .backBtn{
+    background:#F2F3F0;
+    color:#0F3D2E;
+    border:1px solid rgba(15,61,46,.1);
+}
+
+.wizardButtons .backBtn:hover{
+    background:#E4E7E2;
+    transform:translateY(-2px);
+}
+
+.wizardButtons .nextBtn{
+    background:#0F3D2E;
+    color:#fff;
+    box-shadow:0 8px 20px rgba(15,61,46,.18);
+}
+
+.wizardButtons .nextBtn:hover{
+    background:#165540;
+    transform:translateY(-2px);
+    box-shadow:0 14px 30px rgba(15,61,46,.28);
+}
+
+@media(max-width:480px){
+  .wizardButtons{
+    flex-direction:column-reverse;
+  }
+
+  .wizardButtons button{
+    width:100%;
+  }
+}

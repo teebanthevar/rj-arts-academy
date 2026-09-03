@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
+import { getCurrencySymbol } from "../../lib/currencies";
 import "./MyCourses.css";
 import {
   FaPlus,
@@ -35,7 +37,6 @@ export default function MyCourses() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // 1. Fetch this tutor's courses
       const { data: courseData, error: courseError } = await supabase
         .from("courses")
         .select("*")
@@ -46,11 +47,6 @@ export default function MyCourses() {
       const courseList = courseData || [];
       const courseIds = courseList.map((c) => c.id);
 
-      // 2. Fetch real enrollments for those courses, so student counts
-      //    always reflect actual enrollment rows instead of a stale
-      //    "students" column on the course itself. Also pull status and
-      //    fee_status so declined enrollments and unpaid enrollments can
-      //    be excluded from the counts that matter (students / revenue).
       let enrollmentsList = [];
       if (courseIds.length > 0) {
         const { data: enrData, error: enrError } = await supabase
@@ -62,17 +58,11 @@ export default function MyCourses() {
         enrollmentsList = enrData || [];
       }
 
-      // 3. Merge real enrollment counts onto each course
       const enhancedCourses = courseList.map((course) => {
-        // A declined enrollment never actually became a student - exclude
-        // it from every count below.
         const activeEnrollments = enrollmentsList.filter(
           (e) => e.course_id === course.id && e.status !== "declined"
         );
 
-        // Of the active enrollments, only the ones actually marked Paid
-        // count toward revenue - Pending/Overdue/Partial haven't been
-        // collected yet.
         const paidEnrollments = activeEnrollments.filter(
           (e) => e.fee_status === "Paid"
         );
@@ -92,7 +82,6 @@ export default function MyCourses() {
     }
   };
 
-  // Check subscription and course count before letting them create a new course
   const handleCreateCourseClick = async () => {
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -101,7 +90,6 @@ export default function MyCourses() {
         return;
       }
 
-      // Check tutor subscription status
       const { data: subData } = await supabase
         .from("tutor_subscriptions")
         .select("*")
@@ -110,7 +98,6 @@ export default function MyCourses() {
 
       const isSubscribed = subData && subData.status === "Active" && subData.plan_name !== "Starter Tutor";
 
-      // If NOT subscribed, check how many courses they currently have
       if (!isSubscribed) {
         const { count, error: countError } = await supabase
           .from("courses")
@@ -126,7 +113,6 @@ export default function MyCourses() {
         }
       }
 
-      // If under limit or subscribed, proceed to creation page
       navigate("/tutor/create-course");
     } catch (err) {
       console.error("Error checking course limit:", err.message);
@@ -159,9 +145,6 @@ export default function MyCourses() {
   const totalCourses = courses.length;
   const totalStudents = courses.reduce((acc, curr) => acc + (curr.realStudents || 0), 0);
 
-  // Revenue reflects money actually collected: price x only the students
-  // whose fee_status is "Paid" on that course (declined enrollments are
-  // already excluded upstream in fetchCourses).
   const totalRevenue = courses.reduce((acc, curr) => {
     let priceVal = 0;
     if (typeof curr.price === "number") {
@@ -171,6 +154,8 @@ export default function MyCourses() {
     }
     return acc + priceVal * (curr.paidStudents || 0);
   }, 0);
+
+  const revenueCurrencySymbol = getCurrencySymbol(courses[0]?.currency);
 
   const avgRating = totalCourses > 0
     ? (courses.reduce((acc, curr) => acc + (parseFloat(curr.rating) || 0), 0) / totalCourses).toFixed(1)
@@ -220,7 +205,7 @@ export default function MyCourses() {
 
         <div className="statCard">
           <FaDollarSign />
-          <h2>RM{totalRevenue.toLocaleString()}</h2>
+          <h2>{revenueCurrencySymbol}{totalRevenue.toLocaleString()}</h2>
           <span>Estimated Revenue</span>
         </div>
 
@@ -286,7 +271,11 @@ export default function MyCourses() {
                   <span>👨 {course.realStudents || 0}</span>
                 </div>
 
-                <h4>{course.price ? `RM${course.price} / month` : "Free"}</h4>
+                <h4>
+                  {course.price
+                    ? `${getCurrencySymbol(course.currency)}${course.price} / month`
+                    : "Free"}
+                </h4>
 
                 <div className={`status ${(course.status || "Draft").toLowerCase()}`}>
                   {course.status || "Draft"}
@@ -327,7 +316,7 @@ export default function MyCourses() {
         </div>
       )}
 
-      {selectedCourse && (
+      {selectedCourse && createPortal(
         <div
           className="courseModalOverlay"
           onClick={() => setSelectedCourse(null)}
@@ -336,54 +325,69 @@ export default function MyCourses() {
             className="courseModal"
             onClick={(e) => e.stopPropagation()}
           >
-            <img
-              src={selectedCourse.image_url || selectedCourse.image || "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=900"}
-              alt={selectedCourse.title}
-            />
+            <button
+              className="courseModalClose"
+              onClick={() => setSelectedCourse(null)}
+              title="Close"
+            >
+              ✕
+            </button>
 
-            <h2>{selectedCourse.title}</h2>
-            <p>{selectedCourse.category}</p>
+            <div className="courseModalBody">
+              <img
+                src={selectedCourse.image_url || selectedCourse.image || "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=900"}
+                alt={selectedCourse.title}
+              />
 
-            <div className="modalStats">
-              <div>
-                <h4>Students</h4>
-                <span>{selectedCourse.realStudents || 0}</span>
+              <h2>{selectedCourse.title}</h2>
+              <p>{selectedCourse.category}</p>
+
+              <div className="modalStats">
+                <div>
+                  <h4>Students</h4>
+                  <span>{selectedCourse.realStudents || 0}</span>
+                </div>
+
+                <div>
+                  <h4>Rating</h4>
+                  <span>⭐ {selectedCourse.rating || "5.0"}</span>
+                </div>
+
+                <div>
+                  <h4>Price</h4>
+                  <span>
+                    {selectedCourse.price
+                      ? `${getCurrencySymbol(selectedCourse.currency)}${selectedCourse.price}/mo`
+                      : "Free"}
+                  </span>
+                </div>
               </div>
 
-              <div>
-                <h4>Rating</h4>
-                <span>⭐ {selectedCourse.rating || "5.0"}</span>
+              <p className="modalDescription">
+                {selectedCourse.description || "This course is designed to help students master the subject through structured lessons, practical exercises, quizzes and continuous guidance."}
+              </p>
+
+              <div className="modalButtons">
+                <button onClick={() => {
+                  setSelectedCourse(null);
+                  navigate(`/tutor/edit-course/${selectedCourse.id}`);
+                }}>
+                  Edit Course
+                </button>
+                <button onClick={() => navigate("/tutor/analytics")}>
+                  Analytics
+                </button>
+                <button onClick={() => navigate("/tutor/students")}>
+                  Students
+                </button>
+                <button className="deleteBtn" onClick={() => handleDeleteCourse(selectedCourse.id)}>
+                  Delete
+                </button>
               </div>
-
-              <div>
-                <h4>Price</h4>
-                <span>{selectedCourse.price ? `RM${selectedCourse.price} / month` : "Free"}</span>
-              </div>
-            </div>
-
-            <p className="modalDescription">
-              {selectedCourse.description || "This course is designed to help students master the subject through structured lessons, practical exercises, quizzes and continuous guidance."}
-            </p>
-
-            <div className="modalButtons">
-              <button onClick={() => {
-                setSelectedCourse(null);
-                navigate(`/tutor/edit-course/${selectedCourse.id}`);
-              }}>
-                Edit Course
-              </button>
-              <button onClick={() => navigate("/tutor/analytics")}>
-                Analytics
-              </button>
-              <button onClick={() => navigate("/tutor/students")}>
-                Students
-              </button>
-              <button className="deleteBtn" onClick={() => handleDeleteCourse(selectedCourse.id)}>
-                Delete
-              </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

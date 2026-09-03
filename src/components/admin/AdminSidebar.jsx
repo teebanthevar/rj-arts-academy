@@ -110,6 +110,15 @@ function AdminSidebar() {
 
         </NavLink>
 
+        {/* ⭐ NEW: Academy Gallery — upload/manage images for the public Gallery section */}
+        <NavLink to="/admin/gallery">
+
+          <FaImages />
+
+          Academy Gallery
+
+        </NavLink>
+
         <NavLink to="/admin/blog">
 
           <FaBlog />
