@@ -3,13 +3,23 @@ import { supabase } from "../lib/supabase";
 import { FaTrash, FaUpload } from "react-icons/fa";
 import "../styles/AdminMerdekaGallery.css";
 
+const AGE_CATEGORIES = [
+  { key: "4-6", label: "4 – 6 Years" },
+  { key: "7-12", label: "7 – 12 Years" },
+  { key: "13-17", label: "13 – 17 Years" },
+  { key: "18+", label: "18+ Years" },
+];
+
+const MAX_PER_CATEGORY = 3;
+const PLACEMENT_LABELS = ["1st Place", "2nd Place", "3rd Place"];
+
 function AdminMerdekaGallery() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [uploadFile, setUploadFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
+  const [uploadFiles, setUploadFiles] = useState({});
+  const [uploading, setUploading] = useState({});
   const [deletingId, setDeletingId] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessages, setErrorMessages] = useState({});
 
   useEffect(() => {
     fetchSubmissions();
@@ -34,24 +44,43 @@ function AdminMerdekaGallery() {
     }
   }
 
-  async function handleUpload(e) {
-    e.preventDefault();
-    setErrorMessage("");
+  function getCategoryItems(catKey) {
+    return submissions
+      .filter((s) => s.age_category === catKey)
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  }
 
-    if (!uploadFile) {
-      setErrorMessage("Please choose an image to upload.");
+  async function handleUpload(e, catKey) {
+    e.preventDefault();
+    setErrorMessages((prev) => ({ ...prev, [catKey]: "" }));
+
+    const file = uploadFiles[catKey];
+
+    if (!file) {
+      setErrorMessages((prev) => ({
+        ...prev,
+        [catKey]: "Please choose an image to upload.",
+      }));
+      return;
+    }
+
+    if (getCategoryItems(catKey).length >= MAX_PER_CATEGORY) {
+      setErrorMessages((prev) => ({
+        ...prev,
+        [catKey]: `Maximum ${MAX_PER_CATEGORY} winners already uploaded for this category.`,
+      }));
       return;
     }
 
     try {
-      setUploading(true);
+      setUploading((prev) => ({ ...prev, [catKey]: true }));
 
-      const fileExt = uploadFile.name.split(".").pop();
-      const filePath = `merdeka/entry-${Date.now()}.${fileExt}`;
+      const fileExt = file.name.split(".").pop();
+      const filePath = `merdeka/entry-${catKey}-${Date.now()}.${fileExt}`;
 
       const { error: uploadErr } = await supabase.storage
         .from("avatars")
-        .upload(filePath, uploadFile);
+        .upload(filePath, file);
 
       if (uploadErr) throw uploadErr;
 
@@ -61,7 +90,7 @@ function AdminMerdekaGallery() {
 
       const { data, error } = await supabase
         .from("merdeka_submissions")
-        .insert([{ image_url: urlData.publicUrl }])
+        .insert([{ image_url: urlData.publicUrl, age_category: catKey }])
         .select();
 
       if (error) throw error;
@@ -70,13 +99,17 @@ function AdminMerdekaGallery() {
         setSubmissions((prev) => [data[0], ...prev]);
       }
 
-      setUploadFile(null);
-      document.getElementById("merdeka-file-input").value = "";
+      setUploadFiles((prev) => ({ ...prev, [catKey]: null }));
+      const input = document.getElementById(`merdeka-file-input-${catKey}`);
+      if (input) input.value = "";
     } catch (err) {
       console.error("Error uploading submission:", err);
-      setErrorMessage("Failed to upload. Please try again.");
+      setErrorMessages((prev) => ({
+        ...prev,
+        [catKey]: "Failed to upload. Please try again.",
+      }));
     } finally {
-      setUploading(false);
+      setUploading((prev) => ({ ...prev, [catKey]: false }));
     }
   }
 
@@ -108,88 +141,117 @@ function AdminMerdekaGallery() {
 
   return (
     <div className="admin-merdeka-page">
-
       <div className="admin-merdeka-header">
         <div>
           <h1>Merdeka Colouring Competition</h1>
-          <p>Upload participant artwork to display on the public gallery.</p>
+          <p>Upload the winning artwork for each age category (max 3 per category).</p>
         </div>
-      </div>
-
-      <div className="admin-merdeka-upload-card">
-        <form onSubmit={handleUpload}>
-
-          <div className="admin-merdeka-upload-field">
-            <label htmlFor="merdeka-file-input">Artwork Image</label>
-
-            <input
-              id="merdeka-file-input"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setUploadFile(e.target.files[0] || null)}
-            />
-
-            {uploadFile && (
-              <p className="admin-merdeka-file-selected">
-                Selected: {uploadFile.name}
-              </p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            className="admin-merdeka-upload-btn"
-            disabled={uploading}
-          >
-            <FaUpload />
-            {uploading ? "Uploading..." : "Upload Artwork"}
-          </button>
-
-          {errorMessage && (
-            <p className="admin-merdeka-error">{errorMessage}</p>
-          )}
-        </form>
-      </div>
-
-      <div className="admin-merdeka-grid-header">
-        <h2>Submitted Entries ({submissions.length})</h2>
       </div>
 
       {loading ? (
         <p className="admin-merdeka-empty">Loading submissions...</p>
-      ) : submissions.length === 0 ? (
-        <p className="admin-merdeka-empty">
-          No submissions uploaded yet.
-        </p>
       ) : (
-        <div className="admin-merdeka-grid">
-          {submissions.map((item) => (
-            <div className="admin-merdeka-card" key={item.id}>
+        AGE_CATEGORIES.map((cat) => {
+          const items = getCategoryItems(cat.key);
+          const isFull = items.length >= MAX_PER_CATEGORY;
 
-              <img
-                src={item.image_url}
-                alt="Competition entry"
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src =
-                    "https://via.placeholder.com/300x220?text=Image+unavailable";
-                }}
-              />
+          return (
+            <div className="admin-merdeka-category" key={cat.key}>
+              <div className="admin-merdeka-category-header">
+                <h2>{cat.label}</h2>
+                <span
+                  className={`admin-merdeka-count ${isFull ? "is-full" : ""}`}
+                >
+                  {items.length}/{MAX_PER_CATEGORY}
+                </span>
+              </div>
 
-              <button
-                type="button"
-                className="admin-merdeka-delete-btn"
-                onClick={() => handleDelete(item)}
-                disabled={deletingId === item.id}
-              >
-                {deletingId === item.id ? "…" : <FaTrash />}
-              </button>
+              <div className="admin-merdeka-upload-card">
+                <form onSubmit={(e) => handleUpload(e, cat.key)}>
+                  <div className="admin-merdeka-upload-field">
+                    <label htmlFor={`merdeka-file-input-${cat.key}`}>
+                      Artwork Image
+                    </label>
 
+                    <input
+                      id={`merdeka-file-input-${cat.key}`}
+                      type="file"
+                      accept="image/*"
+                      disabled={isFull}
+                      onChange={(e) =>
+                        setUploadFiles((prev) => ({
+                          ...prev,
+                          [cat.key]: e.target.files[0] || null,
+                        }))
+                      }
+                    />
+
+                    {uploadFiles[cat.key] && (
+                      <p className="admin-merdeka-file-selected">
+                        Selected: {uploadFiles[cat.key].name}
+                      </p>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="admin-merdeka-upload-btn"
+                    disabled={uploading[cat.key] || isFull}
+                  >
+                    <FaUpload />
+                    {isFull
+                      ? "Category Full"
+                      : uploading[cat.key]
+                      ? "Uploading..."
+                      : "Upload Winner"}
+                  </button>
+
+                  {errorMessages[cat.key] && (
+                    <p className="admin-merdeka-error">
+                      {errorMessages[cat.key]}
+                    </p>
+                  )}
+                </form>
+              </div>
+
+              {items.length === 0 ? (
+                <p className="admin-merdeka-empty">
+                  No winners uploaded yet for this category.
+                </p>
+              ) : (
+                <div className="admin-merdeka-grid">
+                  {items.map((item, index) => (
+                    <div className="admin-merdeka-card" key={item.id}>
+                      <span className={`admin-merdeka-badge badge-${index}`}>
+                        {PLACEMENT_LABELS[index]}
+                      </span>
+
+                      <img
+                        src={item.image_url}
+                        alt="Competition entry"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src =
+                            "https://via.placeholder.com/300x220?text=Image+unavailable";
+                        }}
+                      />
+
+                      <button
+                        type="button"
+                        className="admin-merdeka-delete-btn"
+                        onClick={() => handleDelete(item)}
+                        disabled={deletingId === item.id}
+                      >
+                        {deletingId === item.id ? "…" : <FaTrash />}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          ))}
-        </div>
+          );
+        })
       )}
-
     </div>
   );
 }

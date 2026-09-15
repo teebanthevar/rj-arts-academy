@@ -3,7 +3,7 @@
   "short_name": "Teach Hub",
   "description": "Find expert tutors and private preschools with RJ Arts Teach Hub.",
   "start_url": "/teachhub",
-  "scope": "/teachhub",
+  "scope": "/",
   "id": "/teachhub",
   "display": "standalone",
   "theme_color": "#0f3d2e",

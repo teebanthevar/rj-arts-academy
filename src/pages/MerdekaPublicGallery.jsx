@@ -3,6 +3,15 @@ import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import "../styles/MerdekaGallery.css";
 
+const AGE_CATEGORIES = [
+  { key: "4-6", label: "4 – 6 Years" },
+  { key: "7-12", label: "7 – 12 Years" },
+  { key: "13-17", label: "13 – 17 Years" },
+  { key: "18+", label: "18+ Years" },
+];
+
+const PLACEMENT_LABELS = ["1st Place", "2nd Place", "3rd Place"];
+
 function MerdekaPublicGallery() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,46 +40,72 @@ function MerdekaPublicGallery() {
     }
   }
 
+  function getCategoryItems(catKey) {
+    return submissions
+      .filter((s) => s.age_category === catKey)
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+      .slice(0, 3);
+  }
+
   return (
     <div className="merdeka-gallery-page">
       <Link to="/" className="merdeka-gallery-back">
         ← Back to RJ Arts Academy
       </Link>
 
-      <section className="merdeka-gallery" data-aos="fade-up">
-        <h2>Merdeka Colouring Competition Entries</h2>
+      <section className="merdeka-gallery-hero" data-aos="fade-up">
+        <span className="merdeka-gallery-eyebrow">Merdeka ke-69</span>
+        <h2>Merdeka Colouring Competition Winners</h2>
         <p className="merdeka-gallery-subtitle">
-          Celebrating the creativity of every participant. Theme: Merdeka ke-69.
+          Celebrating the creativity and talent of our young and young-at-heart artists.
         </p>
+      </section>
 
+      <section className="merdeka-gallery">
         {loading ? (
           <p className="merdeka-gallery-empty">Loading submissions...</p>
-        ) : submissions.length === 0 ? (
-          <p className="merdeka-gallery-empty">
-            No submissions yet. Be the first to join the competition!
-          </p>
         ) : (
-          <div className="merdeka-gallery-grid">
-            {submissions.map((item) => (
-              <div
-                className="merdeka-gallery-card"
-                key={item.id}
-                onClick={() => setPreviewImage(item.image_url)}
-              >
-                <img
-                  src={item.image_url}
-                  alt="Colouring competition entry"
-                  loading="lazy"
-                  decoding="async"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src =
-                      "https://via.placeholder.com/300x220?text=Image+unavailable";
-                  }}
-                />
+          AGE_CATEGORIES.map((cat) => {
+            const items = getCategoryItems(cat.key);
+
+            return (
+              <div className="merdeka-category-section" key={cat.key}>
+                <h3 className="merdeka-category-title">{cat.label}</h3>
+
+                {items.length === 0 ? (
+                  <p className="merdeka-gallery-empty">
+                    Winners coming soon for this category!
+                  </p>
+                ) : (
+                  <div className="merdeka-gallery-grid">
+                    {items.map((item, index) => (
+                      <div
+                        className="merdeka-gallery-card"
+                        key={item.id}
+                        onClick={() => setPreviewImage(item.image_url)}
+                      >
+                        <span className={`merdeka-badge badge-${index}`}>
+                          {PLACEMENT_LABELS[index]}
+                        </span>
+
+                        <img
+                          src={item.image_url}
+                          alt="Colouring competition entry"
+                          loading="lazy"
+                          decoding="async"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src =
+                              "https://via.placeholder.com/300x220?text=Image+unavailable";
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
+            );
+          })
         )}
 
         {previewImage && (

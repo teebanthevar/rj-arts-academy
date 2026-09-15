@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaChartLine, FaUsers, FaEnvelope } from "react-icons/fa";
 
 import TutorSidebar from "../components/tutor/TutorSidebar";
@@ -10,6 +10,20 @@ import "../styles/TutorLayout.css";
 
 function TutorLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Swap the active PWA manifest to Teach Hub's while inside the tutor app,
+  // so installed shortcuts stay in standalone mode across /tutor-dashboard,
+  // /tutor/*, etc. (these routes sit outside academy-manifest's scope).
+  useEffect(() => {
+    const link = document.querySelector('link[rel="manifest"]');
+    const prevHref = link?.getAttribute("href");
+
+    if (link) link.setAttribute("href", "/teachhub-manifest.webmanifest");
+
+    return () => {
+      if (link && prevHref) link.setAttribute("href", prevHref);
+    };
+  }, []);
 
   return (
     <div className="tutor-layout">
