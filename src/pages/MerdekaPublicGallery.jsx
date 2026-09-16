@@ -15,7 +15,7 @@ const PLACEMENT_LABELS = ["1st Place", "2nd Place", "3rd Place"];
 function MerdekaPublicGallery() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [previewImage, setPreviewImage] = useState(null);
+  const [previewItem, setPreviewItem] = useState(null);
 
   useEffect(() => {
     fetchSubmissions();
@@ -82,7 +82,7 @@ function MerdekaPublicGallery() {
                       <div
                         className="merdeka-gallery-card"
                         key={item.id}
-                        onClick={() => setPreviewImage(item.image_url)}
+                        onClick={() => setPreviewItem(item)}
                       >
                         <span className={`merdeka-badge badge-${index}`}>
                           {PLACEMENT_LABELS[index]}
@@ -99,6 +99,12 @@ function MerdekaPublicGallery() {
                               "https://via.placeholder.com/300x220?text=Image+unavailable";
                           }}
                         />
+
+                        {item.winner_name && (
+                          <p className="merdeka-winner-name">
+                            {item.winner_name}
+                          </p>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -108,17 +114,17 @@ function MerdekaPublicGallery() {
           })
         )}
 
-        {previewImage && (
+        {previewItem && (
           <div
             className="merdeka-preview-overlay"
-            onClick={() => setPreviewImage(null)}
+            onClick={() => setPreviewItem(null)}
           >
             <div
               className="merdeka-preview-content"
               onClick={(e) => e.stopPropagation()}
             >
               <img
-                src={previewImage}
+                src={previewItem.image_url}
                 alt="Colouring competition entry"
                 onError={(e) => {
                   e.currentTarget.onerror = null;
@@ -127,9 +133,15 @@ function MerdekaPublicGallery() {
                 }}
               />
 
+              {previewItem.winner_name && (
+                <p className="merdeka-preview-name">
+                  {previewItem.winner_name}
+                </p>
+              )}
+
               <button
                 className="merdeka-preview-close"
-                onClick={() => setPreviewImage(null)}
+                onClick={() => setPreviewItem(null)}
               >
                 Close
               </button>

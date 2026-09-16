@@ -220,3 +220,36 @@
     height: 140px;
   }
 }
+
+.admin-merdeka-name-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0;
+}
+
+.admin-merdeka-name-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.admin-merdeka-name-field input {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.admin-merdeka-save-name-btn {
+  align-self: flex-start;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  background: #1e5631;
+  color: #fff;
+  cursor: pointer;
+}
+
+.admin-merdeka-save-name-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
