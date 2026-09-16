@@ -21,6 +21,11 @@ function AdminMerdekaGallery() {
   const [deletingId, setDeletingId] = useState(null);
   const [errorMessages, setErrorMessages] = useState({});
 
+  // Winner name editing state
+  const [nameInputs, setNameInputs] = useState({});
+  const [savingNameId, setSavingNameId] = useState(null);
+  const [nameErrors, setNameErrors] = useState({});
+
   useEffect(() => {
     fetchSubmissions();
   }, []);
@@ -139,6 +144,37 @@ function AdminMerdekaGallery() {
     }
   }
 
+  async function handleSaveName(item) {
+    const newName = (nameInputs[item.id] ?? item.winner_name ?? "").trim();
+
+    setNameErrors((prev) => ({ ...prev, [item.id]: "" }));
+
+    try {
+      setSavingNameId(item.id);
+
+      const { error } = await supabase
+        .from("merdeka_submissions")
+        .update({ winner_name: newName })
+        .eq("id", item.id);
+
+      if (error) throw error;
+
+      setSubmissions((prev) =>
+        prev.map((s) =>
+          s.id === item.id ? { ...s, winner_name: newName } : s
+        )
+      );
+    } catch (err) {
+      console.error("Error saving winner name:", err);
+      setNameErrors((prev) => ({
+        ...prev,
+        [item.id]: "Failed to save name. Please try again.",
+      }));
+    } finally {
+      setSavingNameId(null);
+    }
+  }
+
   return (
     <div className="admin-merdeka-page">
       <div className="admin-merdeka-header">
@@ -235,6 +271,39 @@ function AdminMerdekaGallery() {
                             "https://via.placeholder.com/300x220?text=Image+unavailable";
                         }}
                       />
+
+                      <div className="admin-merdeka-name-field">
+                        <label htmlFor={`merdeka-name-${item.id}`}>
+                          Winner Name
+                        </label>
+                        <input
+                          id={`merdeka-name-${item.id}`}
+                          type="text"
+                          placeholder="Enter winner's name"
+                          value={nameInputs[item.id] ?? item.winner_name ?? ""}
+                          onChange={(e) =>
+                            setNameInputs((prev) => ({
+                              ...prev,
+                              [item.id]: e.target.value,
+                            }))
+                          }
+                        />
+
+                        <button
+                          type="button"
+                          className="admin-merdeka-save-name-btn"
+                          onClick={() => handleSaveName(item)}
+                          disabled={savingNameId === item.id}
+                        >
+                          {savingNameId === item.id ? "Saving..." : "Save Name"}
+                        </button>
+
+                        {nameErrors[item.id] && (
+                          <p className="admin-merdeka-error">
+                            {nameErrors[item.id]}
+                          </p>
+                        )}
+                      </div>
 
                       <button
                         type="button"
