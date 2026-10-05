@@ -6,6 +6,7 @@ import "./AdminLogin.css";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
+
   const [adminId, setAdminId] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,31 +19,62 @@ export default function AdminLogin() {
 
     setLoading(true);
 
-    // Query your custom admins table for the entered admin_id
-    const { data, error } = await supabase
-      .from("admins")
-      .select("*")
-      .eq("admin_id", adminId)
-      .single();
+    try {
+      // 1. Find the admin using the custom Admin ID
+      const { data: admin, error: adminError } = await supabase
+        .from("admins")
+        .select("admin_id, full_name, email, role")
+        .eq("admin_id", adminId.trim())
+        .single();
 
-    setLoading(false);
+      if (adminError || !admin) {
+        alert("Invalid Admin ID or password");
+        return;
+      }
 
-    if (error || !data) {
-      alert("Invalid Admin ID or password");
-      return;
+      // 2. Make sure this is actually an administrator
+      if (admin.role !== "Admin") {
+        alert("You do not have administrator access.");
+        return;
+      }
+
+      // 3. The admin must have an Auth email
+      if (!admin.email) {
+        alert("This administrator has not been connected to Supabase Auth yet.");
+        return;
+      }
+
+      // 4. Login through Supabase Auth
+      const { data: authData, error: authError } =
+        await supabase.auth.signInWithPassword({
+          email: admin.email,
+          password,
+        });
+
+      if (authError || !authData.session) {
+        alert("Invalid Admin ID or password");
+        return;
+      }
+
+      // 5. Save basic admin information locally
+      localStorage.setItem(
+        "admin",
+        JSON.stringify({
+          admin_id: admin.admin_id,
+          full_name: admin.full_name,
+          email: admin.email,
+          role: admin.role,
+        })
+      );
+
+      // 6. Go to admin dashboard
+      navigate("/admin");
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong while logging in.");
+    } finally {
+      setLoading(false);
     }
-
-    // Check if the password matches
-    if (data.password !== password) {
-      alert("Invalid Admin ID or password");
-      return;
-    }
-
-    // Optional: Store admin session locally if needed
-    localStorage.setItem("admin", JSON.stringify(data));
-
-    // Redirect to the admin dashboard
-    navigate("/admin");
   }
 
   return (

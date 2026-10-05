@@ -26,6 +26,9 @@ const StudentLogin = lazy(() => import("./pages/StudentLogin"));
 const TutorRegister = lazy(() => import("./pages/tutor/TutorRegister"));
 const TutorLogin = lazy(() => import("./pages/tutor/TutorLogin"));
 
+// ⭐ NEW: Free Art Class Application (B40)
+const ApplyForm = lazy(() => import("./pages/ApplyForm"));
+
 // =====================================================
 // PRESCHOOL PAGES
 // =====================================================
@@ -33,8 +36,6 @@ const TutorLogin = lazy(() => import("./pages/tutor/TutorLogin"));
 const PreschoolRegister = lazy(() => import("./pages/preschool/PreschoolRegister"));
 const PreschoolLogin = lazy(() => import("./pages/preschool/PreschoolLogin"));
 const PreschoolDashboard = lazy(() => import("./pages/preschool/PreschoolDashboard"));
-
-// ⭐ NEW: Public Preschool Profile
 const PreschoolPublicProfile = lazy(() => import("./pages/PreschoolPublicProfile"));
 
 // =====================================================
@@ -100,9 +101,10 @@ const AdminSubscriptions = lazy(() => import("./pages/AdminSubscriptions"));
 const AdminAnnouncement = lazy(() => import("./pages/AdminAnnouncement"));
 const AdminBlog = lazy(() => import("./pages/AdminBlog"));
 const AdminMerdekaGallery = lazy(() => import("./pages/AdminMerdekaGallery"));
-
-// ⭐ NEW: Admin Gallery (manages images shown on the public Gallery section)
 const AdminGallery = lazy(() => import("./pages/AdminGallery"));
+
+// ⭐ NEW: Free Art Class applications (admin)
+const AdminApplications = lazy(() => import("./pages/AdminApplications"));
 
 export default function App() {
   return (
@@ -114,142 +116,51 @@ export default function App() {
             No Academy Header / No Dashboard Sidebar
         ===================================================== */}
 
-        {/* TeachHub Explore */}
-        <Route
-          path="/teachhub"
-          element={<PublicExplore />}
-        />
-
-        {/* Tutor Public Profile */}
-        <Route
-          path="/tutor-profile/:id"
-          element={<TutorProfile />}
-        />
-
-        {/* Student Login */}
-        <Route
-          path="/student-login"
-          element={<StudentLogin />}
-        />
-
-        {/* Student Registration */}
-        <Route
-          path="/student-register"
-          element={<StudentRegister />}
-        />
-
-        {/* Student Public Login */}
-        <Route
-          path="/student-public-login"
-          element={<StudentPublicLogin />}
-        />
-
-        {/* Student Public Profile */}
-        <Route
-          path="/student-public-profile/:id"
-          element={<StudentPublicProfile />}
-        />
-
-        {/* Tutor Registration */}
-        <Route
-          path="/tutor-register"
-          element={<TutorRegister />}
-        />
-
-        {/* Tutor Login */}
-        <Route
-          path="/tutor-login"
-          element={<TutorLogin />}
-        />
-
-        {/* Merdeka Colouring Competition Public Gallery */}
-        <Route
-          path="/merdeka-gallery"
-          element={<MerdekaPublicGallery />}
-        />
-
+        <Route path="/teachhub" element={<PublicExplore />} />
+        <Route path="/tutor-profile/:id" element={<TutorProfile />} />
+        <Route path="/student-login" element={<StudentLogin />} />
+        <Route path="/student-register" element={<StudentRegister />} />
+        <Route path="/student-public-login" element={<StudentPublicLogin />} />
+        <Route path="/student-public-profile/:id" element={<StudentPublicProfile />} />
+        <Route path="/tutor-register" element={<TutorRegister />} />
+        <Route path="/tutor-login" element={<TutorLogin />} />
+        <Route path="/merdeka-gallery" element={<MerdekaPublicGallery />} />
 
         {/* =====================================================
             PRESCHOOL
         ===================================================== */}
 
-        {/* Preschool Registration */}
-        <Route
-          path="/preschool-register"
-          element={<PreschoolRegister />}
-        />
-
-        {/* Preschool Login */}
-        <Route
-          path="/preschool-login"
-          element={<PreschoolLogin />}
-        />
-
-        {/* Preschool Dashboard */}
-        <Route
-          path="/preschool-dashboard"
-          element={<PreschoolDashboard />}
-        />
-
-        {/* ⭐ PUBLIC PRESCHOOL PROFILE
-            Example:
-            /preschool-profile/USER_ID
-        */}
-        <Route
-  path="/preschool-public-profile/:id"
-  element={<PreschoolPublicProfile />}
-/>
-
+        <Route path="/preschool-register" element={<PreschoolRegister />} />
+        <Route path="/preschool-login" element={<PreschoolLogin />} />
+        <Route path="/preschool-dashboard" element={<PreschoolDashboard />} />
+        <Route path="/preschool-public-profile/:id" element={<PreschoolPublicProfile />} />
 
         {/* =====================================================
             BLOG
         ===================================================== */}
 
-        <Route
-          path="/blog"
-          element={<Blog />}
-        />
-
-        <Route
-          path="/blog/:id"
-          element={<BlogArticle />}
-        />
-
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:id" element={<BlogArticle />} />
 
         {/* =====================================================
-            PUBLIC WEBSITE WITH MAIN LAYOUT
+            PUBLIC WEBSITE WITH MAIN LAYOUT (Navbar shows here)
         ===================================================== */}
 
         <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
 
-          <Route
-            path="/"
-            element={<Home />}
-          />
-
+          {/* ⭐ NEW: Free Art Class Application */}
+          <Route path="/apply" element={<ApplyForm />} />
         </Route>
-
 
         {/* =====================================================
             TUTOR DASHBOARD
         ===================================================== */}
 
         <Route element={<TutorLayout />}>
-
-          <Route
-            path="/tutor-dashboard"
-            element={<TutorDashboard />}
-          />
-
-          <Route
-            path="/tutor/create-course"
-            element={<CreateCourse />}
-          />
-
-          <Route
-            path="/tutor/edit-course/:id"
-            element={<EditCourse />}
-          />
+          <Route path="/tutor-dashboard" element={<TutorDashboard />} />
+          <Route path="/tutor/create-course" element={<CreateCourse />} />
+          <Route path="/tutor/edit-course/:id" element={<EditCourse />} />
 
           <Route
             path="/tutor/analytics"
@@ -260,30 +171,11 @@ export default function App() {
             }
           />
 
-          <Route
-            path="/tutor/my-courses"
-            element={<TutorMyCourses />}
-          />
-
-          <Route
-            path="/tutor/students"
-            element={<TutorStudents />}
-          />
-
-          <Route
-            path="/tutor/student-profile/:id"
-            element={<StudentProfile />}
-          />
-
-          <Route
-            path="/tutor/messages"
-            element={<TutorMessages />}
-          />
-
-          <Route
-            path="/tutor/earnings"
-            element={<TutorEarnings />}
-          />
+          <Route path="/tutor/my-courses" element={<TutorMyCourses />} />
+          <Route path="/tutor/students" element={<TutorStudents />} />
+          <Route path="/tutor/student-profile/:id" element={<StudentProfile />} />
+          <Route path="/tutor/messages" element={<TutorMessages />} />
+          <Route path="/tutor/earnings" element={<TutorEarnings />} />
 
           <Route
             path="/tutor/advertisements"
@@ -303,160 +195,49 @@ export default function App() {
             }
           />
 
-          <Route
-            path="/tutor/reviews"
-            element={<TutorReviews />}
-          />
-
-          <Route
-            path="/tutor/subscription"
-            element={<TutorSubscription />}
-          />
-
-          <Route
-            path="/tutor/settings"
-            element={<TutorSettings />}
-          />
-
+          <Route path="/tutor/reviews" element={<TutorReviews />} />
+          <Route path="/tutor/subscription" element={<TutorSubscription />} />
+          <Route path="/tutor/settings" element={<TutorSettings />} />
         </Route>
-
 
         {/* =====================================================
             STUDENT DASHBOARD
         ===================================================== */}
 
         <Route element={<DashboardLayout />}>
-
-          <Route
-            path="/student-dashboard"
-            element={<DashboardHome />}
-          />
-
-          <Route
-            path="/portfolio"
-            element={<MyPortfolio />}
-          />
-
-          <Route
-            path="/courses"
-            element={<MyCourses />}
-          />
-
-          <Route
-            path="/course-player"
-            element={<CoursePlayer />}
-          />
-
-          <Route
-            path="/quiz-player"
-            element={<QuizPlayer />}
-          />
-
-          <Route
-            path="/attendance"
-            element={<Attendance />}
-          />
-
-          <Route
-            path="/certificates"
-            element={<Certificates />}
-          />
-
-          <Route
-            path="/payments"
-            element={<Payments />}
-          />
-
-          <Route
-            path="/profile"
-            element={<Profile />}
-          />
-
-          <Route
-            path="/settings"
-            element={<Settings />}
-          />
-
+          <Route path="/student-dashboard" element={<DashboardHome />} />
+          <Route path="/portfolio" element={<MyPortfolio />} />
+          <Route path="/courses" element={<MyCourses />} />
+          <Route path="/course-player" element={<CoursePlayer />} />
+          <Route path="/quiz-player" element={<QuizPlayer />} />
+          <Route path="/attendance" element={<Attendance />} />
+          <Route path="/certificates" element={<Certificates />} />
+          <Route path="/payments" element={<Payments />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
-
 
         {/* =====================================================
             ADMIN
         ===================================================== */}
 
-        <Route
-          path="/admin-login"
-          element={<AdminLogin />}
-        />
+        <Route path="/admin-login" element={<AdminLogin />} />
 
         <Route element={<AdminLayout />}>
-
-          <Route
-            path="/admin"
-            element={<AdminDashboard />}
-          />
-
-          <Route
-            path="/admin/students"
-            element={<AdminStudents />}
-          />
-
-          <Route
-            path="/admin/students/:id"
-            element={<StudentDetails />}
-          />
-
-          <Route
-            path="/admin/artworks"
-            element={<AdminArtworks />}
-          />
-
-          <Route
-            path="/admin/courses"
-            element={<AdminCourses />}
-          />
-
-          <Route
-            path="/admin/attendance"
-            element={<AdminAttendance />}
-          />
-
-          <Route
-            path="/admin/certificates"
-            element={<AdminCertificates />}
-          />
-
-          <Route
-            path="/admin/payments"
-            element={<AdminPayments />}
-          />
-
-          <Route
-            path="/admin/subscriptions"
-            element={<AdminSubscriptions />}
-          />
-
-          <Route
-            path="/admin/announcements"
-            element={<AdminAnnouncement />}
-          />
-
-          <Route
-            path="/admin/merdeka-gallery"
-            element={<AdminMerdekaGallery />}
-          />
-
-          <Route
-            path="/admin/blog"
-            element={<AdminBlog />}
-          />
-
-          {/* ⭐ NEW: Admin Gallery — upload/manage images shown in public Gallery */}
-          <Route
-            path="/admin/gallery"
-            element={<AdminGallery />}
-          />
-
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/students" element={<AdminStudents />} />
+          <Route path="/admin/students/:id" element={<StudentDetails />} />
+          <Route path="/admin/applications" element={<AdminApplications />} />
+          <Route path="/admin/artworks" element={<AdminArtworks />} />
+          <Route path="/admin/courses" element={<AdminCourses />} />
+          <Route path="/admin/attendance" element={<AdminAttendance />} />
+          <Route path="/admin/certificates" element={<AdminCertificates />} />
+          <Route path="/admin/payments" element={<AdminPayments />} />
+          <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
+          <Route path="/admin/announcements" element={<AdminAnnouncement />} />
+          <Route path="/admin/merdeka-gallery" element={<AdminMerdekaGallery />} />
+          <Route path="/admin/blog" element={<AdminBlog />} />
+          <Route path="/admin/gallery" element={<AdminGallery />} />
         </Route>
 
       </Routes>

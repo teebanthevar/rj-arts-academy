@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import {
   FaChartPie,
   FaUsers,
+  FaClipboardList,
   FaPalette,
   FaBook,
   FaCalendarCheck,
@@ -43,6 +44,15 @@ function AdminSidebar() {
           <FaUsers />
 
           Students
+
+        </NavLink>
+
+        {/* ⭐ NEW: Free Art Class applications (B40) */}
+        <NavLink to="/admin/applications">
+
+          <FaClipboardList />
+
+          Applications
 
         </NavLink>
 
