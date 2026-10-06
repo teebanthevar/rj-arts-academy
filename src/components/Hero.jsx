@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
 import "../styles/Hero.css";
 import heroBg from "../assets/images/hero-bg.jpg";
+import AdPopup from "./AdPopup";
 
 function Hero() {
   return (
     <section id="home" className="hero">
+      <AdPopup />
+
       <img
         className="hero-image"
         src={heroBg}
