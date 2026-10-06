@@ -2,11 +2,21 @@
 // Sends an email to the parent when an application is received (INSERT)
 // and when the admin approves or rejects it (UPDATE of status).
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const FROM_NAME = "RJ Arts Academy";
 const GMAIL_USER = Deno.env.get("GMAIL_USER")!; // rjartsacademy@gmail.com
 const GMAIL_APP_PASSWORD = Deno.env.get("GMAIL_APP_PASSWORD")!;
 const WEBHOOK_SECRET = Deno.env.get("WEBHOOK_SECRET")!;
+// Comma-separated admin emails allowed to trigger status emails, e.g. "admin@gmail.com,other@gmail.com"
+const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+const cors = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-webhook-secret",
+};
 
 const esc = (s = "") =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
@@ -75,43 +85,58 @@ function buildEmail(type: string, rec: any, old: any) {
   };
 }
 
+async function sendMail(rec: any, type: string) {
+  const mail = buildEmail(type, rec, null);
+  const client = new SMTPClient({
+    connection: {
+      hostname: "smtp.gmail.com",
+      port: 465,
+      tls: true,
+      auth: { username: GMAIL_USER, password: GMAIL_APP_PASSWORD },
+    },
+  });
+  await client.send({
+    from: `${FROM_NAME} <${GMAIL_USER}>`,
+    to: rec.email,
+    subject: mail.subject,
+    content: mail.text,
+    html: mail.html,
+  });
+  await client.close();
+}
+
 Deno.serve(async (req) => {
-  if (req.headers.get("x-webhook-secret") !== WEBHOOK_SECRET) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  const reply = (text: string, status = 200) => new Response(text, { status, headers: cors });
 
   try {
-    const { type, record, old_record } = await req.json();
-    if (!record?.email) return new Response("No email, skipped");
+    const body = await req.json();
 
-    const statusChanged = type === "UPDATE" && old_record?.status !== record.status;
-    const send =
-      type === "INSERT" ||
-      (statusChanged && (record.status === "approved" || record.status === "rejected"));
-    if (!send) return new Response("Nothing to send");
+    // A) Database webhook: a new application was submitted
+    const secret = req.headers.get("x-webhook-secret");
+    if (secret) {
+      if (secret !== WEBHOOK_SECRET) return reply("Unauthorized", 401);
+      if (body.type !== "INSERT" || !body.record?.email) return reply("Skipped");
+      await sendMail(body.record, "INSERT");
+      return reply("Sent");
+    }
 
-    const mail = buildEmail(type, record, old_record);
+    // B) Admin page: Approve / Reject was clicked
+    const token = (req.headers.get("authorization") ?? "").replace("Bearer ", "");
+    const supa = createClient(SUPABASE_URL, SERVICE_KEY);
+    const { data: auth } = await supa.auth.getUser(token);
+    const email = auth?.user?.email?.toLowerCase();
+    if (!email || !ADMIN_EMAILS.includes(email)) return reply("Forbidden", 403);
 
-    const client = new SMTPClient({
-      connection: {
-        hostname: "smtp.gmail.com",
-        port: 465,
-        tls: true,
-        auth: { username: GMAIL_USER, password: GMAIL_APP_PASSWORD },
-      },
-    });
-    await client.send({
-      from: `${FROM_NAME} <${GMAIL_USER}>`,
-      to: record.email,
-      subject: mail.subject,
-      content: mail.text,
-      html: mail.html,
-    });
-    await client.close();
+    const { data: rec, error } = await supa.from("applications").select("*").eq("id", body.application_id).single();
+    if (error || !rec) return reply("Application not found", 404);
+    if (!rec.email) return reply("This application has no email address", 422);
+    if (rec.status !== "approved" && rec.status !== "rejected") return reply("Nothing to send");
 
-    return new Response("Sent");
+    await sendMail(rec, "STATUS");
+    return reply("Sent");
   } catch (e) {
     console.error(e);
-    return new Response("Error: " + (e as Error).message, { status: 500 });
+    return reply("Error: " + (e as Error).message, 500);
   }
 });

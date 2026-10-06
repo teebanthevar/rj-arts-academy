@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "../lib/supabase.js"; // change the path if your Supabase client file is elsewhere
+import { supabase } from "../lib/supabase.js";
 import "./AdminApplications.css";
 
 const STATUSES = ["pending", "approved", "rejected"];
@@ -65,6 +65,22 @@ export default function AdminApplications() {
     const { error } = await supabase.from("applications").update({ status }).eq("id", id);
     if (error) return alert("Could not update: " + error.message);
     setRows((p) => p.map((r) => (r.id === id ? { ...r, status } : r)));
+
+    // Email the parent about the decision
+    if (status === "approved" || status === "rejected") {
+      const { error: mailErr } = await supabase.functions.invoke("send-application-email", {
+        body: { application_id: id },
+      });
+      if (mailErr) {
+        let detail = mailErr.message;
+        try {
+          detail = await mailErr.context.text(); // the real reason sent back by the function
+        } catch {
+          /* keep the generic message */
+        }
+        alert("Status saved, but the email could not be sent: " + detail);
+      }
+    }
   };
 
   const remove = async (row) => {
