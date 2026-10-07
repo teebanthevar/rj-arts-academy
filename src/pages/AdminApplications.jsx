@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase.js";
 import "./AdminApplications.css";
 
-const STATUSES = ["pending", "approved", "rejected"];
+const STATUSES = ["pending", "approved", "partially_approved", "rejected"];
+const label = (s) => s.charAt(0).toUpperCase() + s.slice(1).replace("_", " ");
 const rm = (n) => (n == null ? "-" : `RM ${Number(n).toLocaleString()}`);
 const fmtDate = (d) => new Date(d).toLocaleDateString("en-MY", { day: "numeric", month: "short", year: "numeric" });
 
@@ -67,7 +68,7 @@ export default function AdminApplications() {
     setRows((p) => p.map((r) => (r.id === id ? { ...r, status } : r)));
 
     // Email the parent about the decision
-    if (status === "approved" || status === "rejected") {
+    if (["approved", "partially_approved", "rejected"].includes(status)) {
       const { error: mailErr } = await supabase.functions.invoke("send-application-email", {
         body: { application_id: id },
       });
@@ -110,7 +111,7 @@ export default function AdminApplications() {
           <option value="all">All statuses</option>
           {STATUSES.map((s) => (
             <option key={s} value={s}>
-              {s[0].toUpperCase() + s.slice(1)}
+              {label(s)}
             </option>
           ))}
         </select>
@@ -143,7 +144,7 @@ export default function AdminApplications() {
             </div>
             <div className="app-badges">
               <span className={`badge mode-${(r.class_mode || "").toLowerCase()}`}>{r.class_mode || "-"}</span>
-              <span className={`badge st-${r.status}`}>{r.status}</span>
+              <span className={`badge st-${r.status}`}>{label(r.status)}</span>
               <span className="app-date">{fmtDate(r.created_at)}</span>
             </div>
           </button>
@@ -215,6 +216,13 @@ export default function AdminApplications() {
               <div className="app-actions">
                 <button className="approve" disabled={r.status === "approved"} onClick={() => setStatus(r.id, "approved")}>
                   Approve
+                </button>
+                <button
+                  className="partial"
+                  disabled={r.status === "partially_approved"}
+                  onClick={() => setStatus(r.id, "partially_approved")}
+                >
+                  Partially approve
                 </button>
                 <button className="reject" disabled={r.status === "rejected"} onClick={() => setStatus(r.id, "rejected")}>
                   Reject

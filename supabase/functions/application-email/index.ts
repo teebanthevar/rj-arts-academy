@@ -8,10 +8,8 @@ const FROM_NAME = "RJ Arts Academy";
 const GMAIL_USER = Deno.env.get("GMAIL_USER")!; // rjartsacademy@gmail.com
 const GMAIL_APP_PASSWORD = Deno.env.get("GMAIL_APP_PASSWORD")!;
 const WEBHOOK_SECRET = Deno.env.get("WEBHOOK_SECRET")!;
-// Comma-separated admin emails allowed to trigger status emails, e.g. "admin@gmail.com,other@gmail.com"
-const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -71,6 +69,49 @@ function buildEmail(type: string, rec: any, old: any) {
     };
   }
 
+  if (rec.status === "partially_approved") {
+    return {
+      subject: "Application Update - Partially Approved \u{1F3A8}",
+      text: `Dear Parent/Guardian,
+
+Thank you for applying for the FREE Art Class for B40 Students at RJ Arts Academy. \u{1F3A8}
+
+After carefully reviewing your application, we are pleased to inform you that your application has been PARTIALLY APPROVED. \u2764\uFE0F
+
+Although we are unable to provide a fully sponsored FREE class in this round, we would still like to support your child's artistic journey.
+
+Under our Partial Support Arrangement, RJ Arts Academy will cover a portion of the regular class fee, meaning you will not need to pay the full amount.
+
+We will provide you with the supported fee amount and further details before your child begins the class.
+
+This partial approval is offered as part of our commitment to making quality art education more accessible to students from B40 families. \u{1F31F}
+
+We are happy to have the opportunity to support your child and look forward to welcoming them to the RJ Arts Academy family. \u{1F3A8}\u2764\uFE0F
+
+RJ ARTS ACADEMY
+Learn \u2022 Create \u2022 Grow
+\u{1F310} rjartsacademy.com
+\u{1F4F1} WhatsApp: 012-2451679
+
+Congratulations on your Partial Approval! \u{1F389}
+We look forward to seeing your child's creativity grow.`,
+      html: wrap(
+        "Application Update: Partially Approved",
+        `<p>Dear Parent/Guardian,</p>
+         <p>Thank you for applying for the <b>FREE Art Class for B40 Students</b> at RJ Arts Academy. \u{1F3A8}</p>
+         <p>After carefully reviewing your application, we are pleased to inform you that your application has been <b>PARTIALLY APPROVED</b>. \u2764\uFE0F</p>
+         <p style="background:#ece6fb;color:#4a2e91;display:inline-block;padding:6px 14px;border-radius:999px;font-weight:bold">Status: Partially approved</p>
+         <p>Although we are unable to provide a fully sponsored FREE class in this round, we would still like to support your child's artistic journey.</p>
+         <p>Under our <b>Partial Support Arrangement</b>, RJ Arts Academy will cover a portion of the regular class fee, meaning you will not need to pay the full amount.</p>
+         <p>We will provide you with the supported fee amount and further details before your child begins the class.</p>
+         <p>This partial approval is offered as part of our commitment to making quality art education more accessible to students from B40 families. \u{1F31F}</p>
+         <p>We are happy to have the opportunity to support your child and look forward to welcoming them to the RJ Arts Academy family. \u{1F3A8}\u2764\uFE0F</p>
+         <p style="margin-top:22px"><b>RJ ARTS ACADEMY</b><br>Learn \u2022 Create \u2022 Grow<br>\u{1F310} rjartsacademy.com<br>\u{1F4F1} WhatsApp: 012-2451679</p>
+         <p style="font-weight:bold;color:#4a2e91">Congratulations on your Partial Approval! \u{1F389}<br><span style="font-weight:normal;color:#1d2b25">We look forward to seeing your child's creativity grow.</span></p>`,
+      ),
+    };
+  }
+
   // rejected
   return {
     subject: "Update on your Free Art Class application - RJ Arts Academy",
@@ -121,17 +162,20 @@ Deno.serve(async (req) => {
       return reply("Sent");
     }
 
-    // B) Admin page: Approve / Reject was clicked
-    const token = (req.headers.get("authorization") ?? "").replace("Bearer ", "");
-    const supa = createClient(SUPABASE_URL, SERVICE_KEY);
-    const { data: auth } = await supa.auth.getUser(token);
-    const email = auth?.user?.email?.toLowerCase();
-    if (!email || !ADMIN_EMAILS.includes(email)) return reply("Forbidden", 403);
-
-    const { data: rec, error } = await supa.from("applications").select("*").eq("id", body.application_id).single();
-    if (error || !rec) return reply("Application not found", 404);
+    // B) Admin page: Approve / Reject was clicked.
+    // We read the application using the caller's own login. The database rules only let
+    // the admin read applications, so if this returns a row, the caller is the admin.
+    const userClient = createClient(SUPABASE_URL, ANON_KEY, {
+      global: { headers: { Authorization: req.headers.get("authorization") ?? "" } },
+    });
+    const { data: rec, error } = await userClient
+      .from("applications")
+      .select("*")
+      .eq("id", body.application_id)
+      .maybeSingle();
+    if (error || !rec) return reply("Forbidden: not logged in as admin, or application not found", 403);
     if (!rec.email) return reply("This application has no email address", 422);
-    if (rec.status !== "approved" && rec.status !== "rejected") return reply("Nothing to send");
+    if (!["approved", "partially_approved", "rejected"].includes(rec.status)) return reply("Nothing to send");
 
     await sendMail(rec, "STATUS");
     return reply("Sent");
