@@ -16,7 +16,7 @@ function Contact() {
         <div className="contact-info">
           <h3>RJ Arts Academy</h3>
 
-          <p>📍 Lot 1205, Kampung Perhentian, 35800 Slim River, Perak</p>
+          <p>📍  Ipoh, Perak</p>
           <p>📞 +60 12-245 1679</p>
           <p>📧 rjartsacademy@gmail.com</p>
 
