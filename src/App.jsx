@@ -29,6 +29,9 @@ const TutorLogin = lazy(() => import("./pages/tutor/TutorLogin"));
 // ⭐ NEW: Free Art Class Application (B40)
 const ApplyForm = lazy(() => import("./pages/ApplyForm"));
 
+// ⭐ NEW: Step-by-Step Drawing Tutorials
+const DrawingTutorials = lazy(() => import("./pages/DrawingTutorials"));
+
 // =====================================================
 // PRESCHOOL PAGES
 // =====================================================
@@ -151,6 +154,9 @@ export default function App() {
 
           {/* ⭐ NEW: Free Art Class Application */}
           <Route path="/apply" element={<ApplyForm />} />
+
+          {/* ⭐ NEW: Step-by-Step Drawing Tutorials */}
+          <Route path="/tutorials" element={<DrawingTutorials />} />
         </Route>
 
         {/* =====================================================

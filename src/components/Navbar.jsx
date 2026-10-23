@@ -15,13 +15,17 @@ function scrollToHash(hash) {
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [eventsDropdownOpen, setEventsDropdownOpen] = useState(false);
+  // Which dropdown is open: "courses", "events" or null (only one at a time)
+  const [openDropdown, setOpenDropdown] = useState(null);
   const location = useLocation();
 
   const closeMenu = () => {
     setMenuOpen(false);
-    setEventsDropdownOpen(false);
+    setOpenDropdown(null);
   };
+
+  const toggleDropdown = (name) =>
+    setOpenDropdown((prev) => (prev === name ? null : name));
 
   // After going to the home page from another page, scroll to the section.
   // The home page loads lazily, so keep trying until the section exists.
@@ -77,9 +81,34 @@ export default function Navbar() {
           <Link to="/#about" onClick={goTo("#about")}>
             About
           </Link>
-          <Link to="/#courses" onClick={goTo("#courses")}>
-            Courses
-          </Link>
+
+          {/* ⭐ Courses dropdown (Tutorials lives here) */}
+          <div className="nav-dropdown">
+            <button
+              type="button"
+              className="nav-dropdown-trigger"
+              onClick={() => toggleDropdown("courses")}
+            >
+              Courses
+              <FaChevronDown className="nav-dropdown-arrow" />
+            </button>
+
+            <div
+              className={
+                openDropdown === "courses"
+                  ? "nav-dropdown-menu open"
+                  : "nav-dropdown-menu"
+              }
+            >
+              <Link to="/#courses" onClick={goTo("#courses")}>
+                Our Courses
+              </Link>
+              <Link to="/tutorials" onClick={closeMenu}>
+                Drawing Tutorials
+              </Link>
+            </div>
+          </div>
+
           <Link to="/#gallery" onClick={goTo("#gallery")}>
             Gallery
           </Link>
@@ -88,7 +117,7 @@ export default function Navbar() {
             <button
               type="button"
               className="nav-dropdown-trigger"
-              onClick={() => setEventsDropdownOpen((prev) => !prev)}
+              onClick={() => toggleDropdown("events")}
             >
               Events
               <FaChevronDown className="nav-dropdown-arrow" />
@@ -96,7 +125,7 @@ export default function Navbar() {
 
             <div
               className={
-                eventsDropdownOpen
+                openDropdown === "events"
                   ? "nav-dropdown-menu open"
                   : "nav-dropdown-menu"
               }
