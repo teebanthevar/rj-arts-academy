@@ -55,20 +55,18 @@ export default function PublicExplore() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (session?.user) {
-          setCurrentUser(session.user);
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setCurrentUser(session.user);
 
-          fetchStudentProfile(session.user.id);
-          fetchUserFollows(session.user.id);
-        } else {
-          setCurrentUser(null);
-          setStudentProfile(null);
-          setFollowedTutors({});
-        }
+        fetchStudentProfile(session.user.id);
+        fetchUserFollows(session.user.id);
+      } else {
+        setCurrentUser(null);
+        setStudentProfile(null);
+        setFollowedTutors({});
       }
-    );
+    });
 
     return () => {
       subscription.unsubscribe();
@@ -92,10 +90,7 @@ export default function PublicExplore() {
         fetchUserFollows(session.user.id);
       }
     } catch (err) {
-      console.error(
-        "Error checking user session:",
-        err
-      );
+      console.error("Error checking user session:", err);
     }
   };
 
@@ -115,10 +110,7 @@ export default function PublicExplore() {
         setStudentProfile(data);
       }
     } catch (err) {
-      console.error(
-        "Error fetching logged-in profile:",
-        err
-      );
+      console.error("Error fetching logged-in profile:", err);
     }
   };
 
@@ -143,10 +135,7 @@ export default function PublicExplore() {
         setFollowedTutors(followMap);
       }
     } catch (err) {
-      console.error(
-        "Error fetching user follows:",
-        err
-      );
+      console.error("Error fetching user follows:", err);
     }
   };
 
@@ -175,11 +164,7 @@ export default function PublicExplore() {
     if (featuredCourses.length <= 1) return;
 
     const interval = setInterval(() => {
-      setCurrentIndex(
-        (prevIndex) =>
-          (prevIndex + 1) %
-          featuredCourses.length
-      );
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % featuredCourses.length);
     }, 5000);
 
     return () => clearInterval(interval);
@@ -187,6 +172,7 @@ export default function PublicExplore() {
 
   // =========================================================
   // FETCH PUBLIC TUTORS
+  // (hides profiles where hide_from_explore = true)
   // =========================================================
 
   const fetchPublicTutors = async () => {
@@ -194,16 +180,14 @@ export default function PublicExplore() {
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("role", "tutor");
+        .eq("role", "tutor")
+        .or("hide_from_explore.is.null,hide_from_explore.eq.false");
 
       if (error) throw error;
 
       setTutors(data || []);
     } catch (err) {
-      console.error(
-        "Error fetching public tutors:",
-        err
-      );
+      console.error("Error fetching public tutors:", err);
     }
   };
 
@@ -214,10 +198,7 @@ export default function PublicExplore() {
   const fetchPublicPreschools = async () => {
     try {
       // Get preschool accounts
-      const {
-        data: profiles,
-        error: profileError,
-      } = await supabase
+      const { data: profiles, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("role", "preschool");
@@ -232,18 +213,12 @@ export default function PublicExplore() {
       }
 
       // Get preschool details
-      const {
-        data: details,
-        error: detailsError,
-      } = await supabase
+      const { data: details, error: detailsError } = await supabase
         .from("preschool_details")
         .select("*");
 
       if (detailsError) {
-        console.warn(
-          "Could not load preschool_details:",
-          detailsError
-        );
+        console.warn("Could not load preschool_details:", detailsError);
 
         // Still display profile information
         setPreschools(profiles);
@@ -251,26 +226,18 @@ export default function PublicExplore() {
       }
 
       // Merge profile + details
-      const merged = profiles.map(
-        (profile) => {
-          const detail = (details || []).find(
-            (item) =>
-              item.id === profile.id
-          );
+      const merged = profiles.map((profile) => {
+        const detail = (details || []).find((item) => item.id === profile.id);
 
-          return {
-            ...profile,
-            ...(detail || {}),
-          };
-        }
-      );
+        return {
+          ...profile,
+          ...(detail || {}),
+        };
+      });
 
       setPreschools(merged);
     } catch (err) {
-      console.error(
-        "Error fetching public preschools:",
-        err
-      );
+      console.error("Error fetching public preschools:", err);
 
       setPreschools([]);
     }
@@ -297,17 +264,12 @@ export default function PublicExplore() {
           grouped[course.tutor_id] = [];
         }
 
-        grouped[course.tutor_id].push(
-          course.title
-        );
+        grouped[course.tutor_id].push(course.title);
       });
 
       setTutorCourses(grouped);
     } catch (err) {
-      console.error(
-        "Error fetching courses for search:",
-        err
-      );
+      console.error("Error fetching courses for search:", err);
     }
   };
 
@@ -319,9 +281,7 @@ export default function PublicExplore() {
     try {
       const { data, error } = await supabase
         .from("courses")
-        .select(
-          "id, title, description, bg_image_url, banner_text, tutor_id"
-        )
+        .select("id, title, description, bg_image_url, banner_text, tutor_id")
         .eq("is_featured", true)
         .order("id", {
           ascending: false,
@@ -331,10 +291,7 @@ export default function PublicExplore() {
 
       setFeaturedCourses(data || []);
     } catch (err) {
-      console.error(
-        "Error fetching featured courses:",
-        err
-      );
+      console.error("Error fetching featured courses:", err);
     }
   };
 
@@ -342,8 +299,7 @@ export default function PublicExplore() {
   // CURRENT FEATURED COURSE
   // =========================================================
 
-  const currentCourse =
-    featuredCourses[currentIndex];
+  const currentCourse = featuredCourses[currentIndex];
 
   // =========================================================
   // COURSE ENROLL
@@ -353,20 +309,14 @@ export default function PublicExplore() {
     if (!course) return;
 
     if (!currentUser) {
-      navigate(
-        `/student-public-login?redirect=course&id=${course.id}`
-      );
+      navigate(`/student-public-login?redirect=course&id=${course.id}`);
       return;
     }
 
     if (course.tutor_id) {
-      navigate(
-        `/tutor-profile/${course.tutor_id}`
-      );
+      navigate(`/tutor-profile/${course.tutor_id}`);
     } else {
-      alert(
-        "This course is not linked to a specific tutor profile yet."
-      );
+      alert("This course is not linked to a specific tutor profile yet.");
     }
   };
 
@@ -387,22 +337,15 @@ export default function PublicExplore() {
   // PRESCHOOL PROFILE
   // =========================================================
 
-  const handleViewPreschoolProfile = (
-    preschoolId
-  ) => {
-    navigate(
-      `/preschool-public-profile/${preschoolId}`
-    );
+  const handleViewPreschoolProfile = (preschoolId) => {
+    navigate(`/preschool-public-profile/${preschoolId}`);
   };
 
   // =========================================================
   // FOLLOW / UNFOLLOW
   // =========================================================
 
-  const handleToggleFollow = async (
-    tutorId,
-    e
-  ) => {
+  const handleToggleFollow = async (tutorId, e) => {
     e.stopPropagation();
 
     if (!currentUser) {
@@ -410,8 +353,7 @@ export default function PublicExplore() {
       return;
     }
 
-    const isCurrentlyFollowing =
-      !!followedTutors[tutorId];
+    const isCurrentlyFollowing = !!followedTutors[tutorId];
 
     // Optimistic UI
     setFollowedTutors((prev) => ({
@@ -424,39 +366,27 @@ export default function PublicExplore() {
         const { error } = await supabase
           .from("follows")
           .delete()
-          .eq(
-            "student_id",
-            currentUser.id
-          )
-          .eq(
-            "tutor_id",
-            tutorId
-          );
+          .eq("student_id", currentUser.id)
+          .eq("tutor_id", tutorId);
 
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from("follows")
-          .insert([
-            {
-              student_id: currentUser.id,
-              tutor_id: tutorId,
-            },
-          ]);
+        const { error } = await supabase.from("follows").insert([
+          {
+            student_id: currentUser.id,
+            tutor_id: tutorId,
+          },
+        ]);
 
         if (error) throw error;
       }
     } catch (err) {
-      console.error(
-        "Error updating follow:",
-        err
-      );
+      console.error("Error updating follow:", err);
 
       // Revert
       setFollowedTutors((prev) => ({
         ...prev,
-        [tutorId]:
-          isCurrentlyFollowing,
+        [tutorId]: isCurrentlyFollowing,
       }));
     }
   };
@@ -465,125 +395,67 @@ export default function PublicExplore() {
   // FILTER TUTORS
   // =========================================================
 
-  const filteredTutors =
-    tutors.filter((tutor) => {
-      const query =
-        searchQuery
-          .toLowerCase()
-          .trim();
+  const filteredTutors = tutors.filter((tutor) => {
+    const query = searchQuery.toLowerCase().trim();
 
-      const subjects =
-        tutorCourses[tutor.id] || [];
+    const subjects = tutorCourses[tutor.id] || [];
 
-      const matchesSearch =
-        !query ||
-        tutor.full_name
-          ?.toLowerCase()
-          .includes(query) ||
-        tutor.profession
-          ?.toLowerCase()
-          .includes(query) ||
-        tutor.city
-          ?.toLowerCase()
-          .includes(query) ||
-        tutor.category
-          ?.toLowerCase()
-          .includes(query) ||
-        subjects.some((title) =>
-          title
-            ?.toLowerCase()
-            .includes(query)
-        );
+    const matchesSearch =
+      !query ||
+      tutor.full_name?.toLowerCase().includes(query) ||
+      tutor.profession?.toLowerCase().includes(query) ||
+      tutor.city?.toLowerCase().includes(query) ||
+      tutor.category?.toLowerCase().includes(query) ||
+      subjects.some((title) => title?.toLowerCase().includes(query));
 
-      const matchesCategory =
-        selectedCategory === "All" ||
-        tutor.category ===
-          selectedCategory;
+    const matchesCategory =
+      selectedCategory === "All" || tutor.category === selectedCategory;
 
-      return (
-        matchesSearch &&
-        matchesCategory
-      );
-    });
+    return matchesSearch && matchesCategory;
+  });
 
   // =========================================================
   // FILTER PRESCHOOLS
   // =========================================================
 
-  const filteredPreschools =
-    preschools.filter(
-      (preschool) => {
-        const query =
-          searchQuery
-            .toLowerCase()
-            .trim();
+  const filteredPreschools = preschools.filter((preschool) => {
+    const query = searchQuery.toLowerCase().trim();
 
-        if (!query) return true;
+    if (!query) return true;
 
-        const businessName =
-          preschool.business_name ||
-          preschool.full_name ||
-          "";
+    const businessName = preschool.business_name || preschool.full_name || "";
 
-        const ownerName =
-          preschool.owner_name ||
-          "";
+    const ownerName = preschool.owner_name || "";
 
-        const address =
-          preschool.address ||
-          "";
+    const address = preschool.address || "";
 
-        const city =
-          preschool.city ||
-          "";
+    const city = preschool.city || "";
 
-        const description =
-          preschool.description ||
-          preschool.about ||
-          preschool.bio ||
-          "";
+    const description =
+      preschool.description || preschool.about || preschool.bio || "";
 
-        return (
-          businessName
-            .toLowerCase()
-            .includes(query) ||
-          ownerName
-            .toLowerCase()
-            .includes(query) ||
-          address
-            .toLowerCase()
-            .includes(query) ||
-          city
-            .toLowerCase()
-            .includes(query) ||
-          description
-            .toLowerCase()
-            .includes(query)
-        );
-      }
+    return (
+      businessName.toLowerCase().includes(query) ||
+      ownerName.toLowerCase().includes(query) ||
+      address.toLowerCase().includes(query) ||
+      city.toLowerCase().includes(query) ||
+      description.toLowerCase().includes(query)
     );
+  });
 
   // =========================================================
   // GET PRESCHOOL NAME
   // =========================================================
 
-  const getPreschoolName = (
-    preschool
-  ) => {
-    return (
-      preschool.business_name ||
-      preschool.full_name ||
-      "Preschool"
-    );
+  const getPreschoolName = (preschool) => {
+    return preschool.business_name || preschool.full_name || "Preschool";
   };
 
   // =========================================================
   // GET PRESCHOOL AVATAR
   // =========================================================
 
-  const getPreschoolAvatar = (
-    preschool
-  ) => {
+  const getPreschoolAvatar = (preschool) => {
     if (preschool.avatar_url) {
       return preschool.avatar_url;
     }
@@ -604,59 +476,39 @@ export default function PublicExplore() {
       ====================================================== */}
 
       <nav className="public-nav">
-
         <div className="logo">
           Teach
-          <span className="logo-hub">
-            Hub
-          </span>
+          <span className="logo-hub">Hub</span>
         </div>
 
         <div className="nav-actions">
-
           {currentUser ? (
-
             <div className="logged-in-user-panel">
-
               <span className="welcome-user-text">
-                Welcome,{" "}
-                {studentProfile?.full_name ||
-                  currentUser.email}
+                Welcome, {studentProfile?.full_name || currentUser.email}
               </span>
 
               <div className="user-menu-dropdown-wrapper">
-
                 <button
                   className="nav-dashboard-btn"
-                  onClick={() =>
-                    setShowUserMenu(
-                      !showUserMenu
-                    )
-                  }
+                  onClick={() => setShowUserMenu(!showUserMenu)}
                 >
                   My Dashboard ▾
                 </button>
 
                 {showUserMenu && (
                   <div className="user-dropdown-popup">
-
                     {studentProfile && (
                       <Link
                         to={
-                          studentProfile.role ===
-                          "tutor"
+                          studentProfile.role === "tutor"
                             ? "/tutor-dashboard"
-                            : studentProfile.role ===
-                              "preschool"
+                            : studentProfile.role === "preschool"
                             ? "/preschool-dashboard"
                             : `/student-public-profile/${currentUser.id}`
                         }
                         className="dropdown-link-item"
-                        onClick={() =>
-                          setShowUserMenu(
-                            false
-                          )
-                        }
+                        onClick={() => setShowUserMenu(false)}
                       >
                         Dashboard Home
                       </Link>
@@ -664,41 +516,26 @@ export default function PublicExplore() {
 
                     <button
                       onClick={() => {
-                        setShowUserMenu(
-                          false
-                        );
+                        setShowUserMenu(false);
                         handleLogout();
                       }}
                       className="dropdown-logout-item"
                     >
                       Logout
                     </button>
-
                   </div>
                 )}
-
               </div>
-
             </div>
-
           ) : (
-
             <>
-
               {/* STUDENT */}
 
               <div className="hover-dropdown-container">
-
-                <button className="nav-main-btn">
-                  Student Login ▾
-                </button>
+                <button className="nav-main-btn">Student Login ▾</button>
 
                 <div className="hover-dropdown-menu">
-
-                  <Link
-                    to="/student-public-login"
-                    className="dropdown-item"
-                  >
+                  <Link to="/student-public-login" className="dropdown-item">
                     Student Login
                   </Link>
 
@@ -708,49 +545,32 @@ export default function PublicExplore() {
                   >
                     Register Student
                   </Link>
-
                 </div>
-
               </div>
 
               {/* BUSINESS (TUTOR + PRESCHOOL) */}
 
               <div className="hover-dropdown-container">
-
                 <button className="nav-main-btn business-btn">
                   Business ▾
                 </button>
 
                 <div className="hover-dropdown-menu business-dropdown-menu">
+                  <div className="dropdown-group-label">Tutor</div>
 
-                  <div className="dropdown-group-label">
-                    Tutor
-                  </div>
-
-                  <Link
-                    to="/tutor-login"
-                    className="dropdown-item"
-                  >
+                  <Link to="/tutor-login" className="dropdown-item">
                     Tutor Login
                   </Link>
 
-                  <Link
-                    to="/tutor-register"
-                    className="dropdown-item highlight"
-                  >
+                  <Link to="/tutor-register" className="dropdown-item highlight">
                     Register Tutor
                   </Link>
 
                   <div className="dropdown-group-divider" />
 
-                  <div className="dropdown-group-label">
-                    Preschool
-                  </div>
+                  <div className="dropdown-group-label">Preschool</div>
 
-                  <Link
-                    to="/preschool-login"
-                    className="dropdown-item"
-                  >
+                  <Link to="/preschool-login" className="dropdown-item">
                     Preschool Login
                   </Link>
 
@@ -760,17 +580,11 @@ export default function PublicExplore() {
                   >
                     Register Your Preschool
                   </Link>
-
                 </div>
-
               </div>
-
             </>
-
           )}
-
         </div>
-
       </nav>
 
       {/* =====================================================
@@ -778,25 +592,19 @@ export default function PublicExplore() {
       ====================================================== */}
 
       <div className="public-hero">
-
         <div className="public-hero-content-wrapper">
-
           {/* FEATURED COURSE */}
 
           {currentCourse && (
-
             <div
               className="featured-course-banner"
               style={{
                 ...(currentCourse.bg_image_url
                   ? {
                       backgroundImage: `url(${currentCourse.bg_image_url})`,
-                      backgroundSize:
-                        "cover",
-                      backgroundPosition:
-                        "center",
-                      backgroundRepeat:
-                        "no-repeat",
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
                     }
                   : {
                       background:
@@ -804,106 +612,64 @@ export default function PublicExplore() {
                     }),
               }}
             >
-
               {!currentCourse.bg_image_url && (
                 <div className="featured-banner-content">
-
-                  <h2>
-                    {currentCourse.title}
-                  </h2>
+                  <h2>{currentCourse.title}</h2>
 
                   <p>
                     {currentCourse.banner_text ||
                       currentCourse.description ||
                       "Grab this limited-time featured masterclass and elevate your skills today!"}
                   </p>
-
                 </div>
               )}
 
               <button
                 className="featured-explore-btn"
-                onClick={() =>
-                  handleEnrollClick(
-                    currentCourse
-                  )
-                }
+                onClick={() => handleEnrollClick(currentCourse)}
               >
                 Enroll Now →
               </button>
-
             </div>
-
           )}
 
           {/* TITLE */}
 
-          <h1>
-            Find Expert Tutors &
-            Private Preschools
-          </h1>
+          <h1>Find Expert Tutors & Private Preschools</h1>
 
           <p>
-            Explore professional
-            educators worldwide and
-            discover trusted learning
-            communities.
+            Explore professional educators worldwide and discover trusted
+            learning communities.
           </p>
 
           {/* SEARCH */}
 
           <div className="search-filter-bar">
-
             <input
               type="text"
               placeholder="Search by subject, tutor name, preschool, or city..."
               value={searchQuery}
-              onChange={(e) =>
-                setSearchQuery(
-                  e.target.value
-                )
-              }
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
 
             <select
               value={selectedCategory}
-              onChange={(e) =>
-                setSelectedCategory(
-                  e.target.value
-                )
-              }
+              onChange={(e) => setSelectedCategory(e.target.value)}
             >
+              <option value="All">All Categories</option>
 
-              <option value="All">
-                All Categories
-              </option>
+              <option value="Academic Subjects">Academic Subjects</option>
 
-              <option value="Academic Subjects">
-                Academic Subjects
-              </option>
+              <option value="Arts & Design">Arts & Design</option>
 
-              <option value="Arts & Design">
-                Arts & Design
-              </option>
+              <option value="Programming & Tech">Programming & Tech</option>
 
-              <option value="Programming & Tech">
-                Programming & Tech
-              </option>
+              <option value="Languages">Languages</option>
 
-              <option value="Languages">
-                Languages
-              </option>
-
-              <option value="Preschools">
-                Preschools
-              </option>
-
+              <option value="Preschools">Preschools</option>
             </select>
-
           </div>
-
         </div>
-
       </div>
 
       {/* =====================================================
@@ -911,15 +677,12 @@ export default function PublicExplore() {
       ====================================================== */}
 
       <div className="public-explore-container">
-
         {/* ===================================================
             TUTORS
         ==================================================== */}
 
         {filteredTutors.length > 0 && (
-
           <>
-
             <div
               style={{
                 width: "100%",
@@ -927,7 +690,6 @@ export default function PublicExplore() {
                 marginTop: "35px",
               }}
             >
-
               <h2
                 style={{
                   color: "#0f3d2e",
@@ -943,128 +705,74 @@ export default function PublicExplore() {
                   marginTop: "0",
                 }}
               >
-                Learn from professional
-                educators
+                Learn from professional educators
               </p>
-
             </div>
 
             <div className="public-tutors-grid">
+              {filteredTutors.map((tutor) => {
+                const isFollowing = !!followedTutors[tutor.id];
 
-              {filteredTutors.map(
-                (tutor) => {
+                return (
+                  <div key={tutor.id} className="public-tutor-card">
+                    <img
+                      src={
+                        tutor.avatar_url ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          tutor.full_name || "Tutor"
+                        )}&background=0F3D2E&color=fff`
+                      }
+                      alt={tutor.full_name || "Tutor"}
+                      className="public-tutor-avatar"
+                    />
 
-                  const isFollowing =
-                    !!followedTutors[
-                      tutor.id
-                    ];
+                    <h3>{tutor.full_name}</h3>
 
-                  return (
+                    <p className="tutor-profession">
+                      {tutor.profession || "Professional Tutor"}
+                    </p>
+
+                    <span className="tutor-cat-tag">
+                      {tutor.category || "General"}
+                    </span>
 
                     <div
-                      key={tutor.id}
-                      className="public-tutor-card"
+                      className="tutor-action-container"
+                      style={{
+                        margin: "12px 0",
+                      }}
                     >
-
-                      <img
-                        src={
-                          tutor.avatar_url ||
-                          `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                            tutor.full_name ||
-                              "Tutor"
-                          )}&background=0F3D2E&color=fff`
-                        }
-                        alt={
-                          tutor.full_name ||
-                          "Tutor"
-                        }
-                        className="public-tutor-avatar"
-                      />
-
-                      <h3>
-                        {tutor.full_name}
-                      </h3>
-
-                      <p className="tutor-profession">
-                        {tutor.profession ||
-                          "Professional Tutor"}
-                      </p>
-
-                      <span className="tutor-cat-tag">
-                        {tutor.category ||
-                          "General"}
-                      </span>
-
-                      <div
-                        className="tutor-action-container"
+                      <button
+                        onClick={(e) => handleToggleFollow(tutor.id, e)}
                         style={{
-                          margin:
-                            "12px 0",
+                          padding: "6px 16px",
+                          borderRadius: "20px",
+                          border: isFollowing ? "1px solid #0f3d2e" : "none",
+                          backgroundColor: isFollowing
+                            ? "transparent"
+                            : "#0f3d2e",
+                          color: isFollowing ? "#0f3d2e" : "#fff",
+                          fontWeight: "600",
+                          cursor: "pointer",
+                          fontSize: "14px",
+                          transition: "all 0.2s ease",
                         }}
                       >
-
-                        <button
-                          onClick={(e) =>
-                            handleToggleFollow(
-                              tutor.id,
-                              e
-                            )
-                          }
-                          style={{
-                            padding:
-                              "6px 16px",
-                            borderRadius:
-                              "20px",
-                            border:
-                              isFollowing
-                                ? "1px solid #0f3d2e"
-                                : "none",
-                            backgroundColor:
-                              isFollowing
-                                ? "transparent"
-                                : "#0f3d2e",
-                            color:
-                              isFollowing
-                                ? "#0f3d2e"
-                                : "#fff",
-                            fontWeight:
-                              "600",
-                            cursor:
-                              "pointer",
-                            fontSize:
-                              "14px",
-                            transition:
-                              "all 0.2s ease",
-                          }}
-                        >
-                          {isFollowing
-                            ? "Following ✓"
-                            : "+ Follow"}
-                        </button>
-
-                      </div>
-
-                      <button
-                        className="book-session-btn"
-                        onClick={() =>
-                          handleViewProfile(
-                            tutor.id
-                          )
-                        }
-                      >
-                        View Profile
+                        {isFollowing ? "Following ✓" : "+ Follow"}
                       </button>
-
                     </div>
 
-                  );
-                }
-              )}
-
+                    <button
+                      className="book-session-btn"
+                      onClick={() => handleViewProfile(tutor.id)}
+                    >
+                      View Profile
+                    </button>
+                  </div>
+                );
+              })}
             </div>
-
           </>
-
         )}
 
         {/* ===================================================
@@ -1072,21 +780,14 @@ export default function PublicExplore() {
         ==================================================== */}
 
         {filteredPreschools.length > 0 && (
-
           <>
-
             <div
               style={{
                 width: "100%",
                 textAlign: "center",
-                marginTop:
-                  filteredTutors.length >
-                  0
-                    ? "30px"
-                    : "40px",
+                marginTop: filteredTutors.length > 0 ? "30px" : "40px",
               }}
             >
-
               <h2
                 style={{
                   color: "#0f3d2e",
@@ -1102,126 +803,78 @@ export default function PublicExplore() {
                   marginTop: "0",
                 }}
               >
-                Discover trusted preschool
-                learning communities
+                Discover trusted preschool learning communities
               </p>
-
             </div>
 
             <div className="public-tutors-grid">
+              {filteredPreschools.map((preschool) => {
+                const businessName = getPreschoolName(preschool);
 
-              {filteredPreschools.map(
-                (preschool) => {
+                return (
+                  <div key={preschool.id} className="public-tutor-card">
+                    {/* PRESCHOOL AVATAR */}
 
-                  const businessName =
-                    getPreschoolName(
-                      preschool
-                    );
+                    <img
+                      src={getPreschoolAvatar(preschool)}
+                      alt={businessName}
+                      className="public-tutor-avatar"
+                    />
 
-                  return (
+                    {/* BUSINESS NAME */}
 
-                    <div
-                      key={preschool.id}
-                      className="public-tutor-card"
-                    >
+                    <h3>{businessName}</h3>
 
-                      {/* PRESCHOOL AVATAR */}
+                    {/* OWNER */}
 
-                      <img
-                        src={getPreschoolAvatar(
-                          preschool
-                        )}
-                        alt={businessName}
-                        className="public-tutor-avatar"
-                      />
+                    <p className="tutor-profession">
+                      {preschool.owner_name || "Preschool"}
+                    </p>
 
-                      {/* BUSINESS NAME */}
+                    {/* CATEGORY */}
 
-                      <h3>
-                        {businessName}
-                      </h3>
+                    <span className="tutor-cat-tag">Preschool</span>
 
-                      {/* OWNER */}
+                    {/* LOCATION */}
 
-                      <p className="tutor-profession">
-                        {preschool.owner_name ||
-                          "Preschool"}
-                      </p>
-
-                      {/* CATEGORY */}
-
-                      <span className="tutor-cat-tag">
-                        Preschool
-                      </span>
-
-                      {/* LOCATION */}
-
-                      {(preschool.city ||
-                        preschool.address) && (
-
-                        <p
-                          style={{
-                            color:
-                              "#64748b",
-                            fontSize:
-                              "0.85rem",
-                            margin:
-                              "8px 0 14px",
-                          }}
-                        >
-                          📍{" "}
-                          {preschool.city ||
-                            preschool.address}
-                        </p>
-
-                      )}
-
-                      {/* PROFILE BUTTON */}
-
-                      <button
-                        className="book-session-btn"
-                        onClick={() =>
-                          handleViewPreschoolProfile(
-                            preschool.id
-                          )
-                        }
+                    {(preschool.city || preschool.address) && (
+                      <p
+                        style={{
+                          color: "#64748b",
+                          fontSize: "0.85rem",
+                          margin: "8px 0 14px",
+                        }}
                       >
-                        View Preschool Profile
-                      </button>
+                        📍 {preschool.city || preschool.address}
+                      </p>
+                    )}
 
-                    </div>
+                    {/* PROFILE BUTTON */}
 
-                  );
-                }
-              )}
-
+                    <button
+                      className="book-session-btn"
+                      onClick={() => handleViewPreschoolProfile(preschool.id)}
+                    >
+                      View Preschool Profile
+                    </button>
+                  </div>
+                );
+              })}
             </div>
-
           </>
-
         )}
 
         {/* ===================================================
             NOTHING FOUND
         ==================================================== */}
 
-        {filteredTutors.length === 0 &&
-          filteredPreschools.length === 0 && (
-
-            <div
-              className="public-tutors-grid"
-            >
-
-              <p className="no-tutors-found">
-                No tutors or preschools
-                found matching your
-                criteria.
-              </p>
-
-            </div>
-
-          )}
-
+        {filteredTutors.length === 0 && filteredPreschools.length === 0 && (
+          <div className="public-tutors-grid">
+            <p className="no-tutors-found">
+              No tutors or preschools found matching your criteria.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* =====================================================
@@ -1229,18 +882,10 @@ export default function PublicExplore() {
       ====================================================== */}
 
       <footer className="public-footer">
-
         <div className="footer-content">
-
-          <p>
-            © 2026 RJ Arts Academy.
-            All rights reserved.
-          </p>
-
+          <p>© 2026 RJ Arts Academy. All rights reserved.</p>
         </div>
-
       </footer>
-
     </div>
   );
 }
