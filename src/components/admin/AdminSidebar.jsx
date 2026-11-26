@@ -13,6 +13,7 @@ import {
   FaBlog,
   FaCog,
   FaImages,
+  FaPaintBrush,
 } from "react-icons/fa";
 
 import "../../styles/AdminSidebar.css";
@@ -53,6 +54,15 @@ function AdminSidebar() {
           <FaClipboardList />
 
           Applications
+
+        </NavLink>
+
+        {/* ⭐ NEW: SPM Arts Workshop registrations */}
+        <NavLink to="/admin/workshop-registrations">
+
+          <FaPaintBrush />
+
+          Workshop Registrations
 
         </NavLink>
 

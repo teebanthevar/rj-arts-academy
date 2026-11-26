@@ -69,6 +69,7 @@
   margin-top: 45px;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
   gap: 18px;
 }
 
@@ -82,6 +83,9 @@
   border-radius: 50px;
   font-size: 17px;
   font-weight: 600;
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
   transition: 0.35s;
 }
 
@@ -99,10 +103,73 @@
   box-shadow: 0 18px 35px rgba(0, 0, 0, 0.22);
 }
 
+/* ---------- Register New Events popup (opens upward on hover) ---------- */
+
+.register-wrap {
+  position: relative;
+}
+
+.register-menu {
+  position: absolute;
+  bottom: calc(100% + 14px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  animation: menuIn 0.2s ease-out;
+}
+
+/* invisible bridge so the popup doesn't close when the mouse crosses the gap */
+.register-menu::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 20px;
+}
+
+.register-option {
+  display: block;
+  padding: 14px 18px;
+  border-radius: 14px;
+  color: #0f3d2e;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.register-option:hover {
+  background: #d8c2a0;
+}
+
+/* ---------- Animations ---------- */
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(40px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+@keyframes menuIn {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes menuInMobile {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Responsive ---------- */
 
 @media (max-width: 992px) {
   .hero-content h1 { font-size: 48px; }
@@ -117,4 +184,24 @@
   .hero-content p { font-size: 17px; }
   .hero-buttons { flex-direction: column; align-items: center; gap: 15px; }
   .primary-btn, .secondary-btn { width: 220px; }
+
+  /* on mobile the popup sits in-flow under the button so nothing gets clipped */
+  .register-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .register-menu {
+    position: static;
+    transform: none;
+    width: 260px;
+    margin-top: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    animation: menuInMobile 0.2s ease-out;
+  }
+
+  .register-menu::after {
+    display: none;
+  }
 }

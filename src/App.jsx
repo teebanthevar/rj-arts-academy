@@ -29,6 +29,9 @@ const TutorLogin = lazy(() => import("./pages/tutor/TutorLogin"));
 // ⭐ NEW: Free Art Class Application (B40)
 const ApplyForm = lazy(() => import("./pages/ApplyForm"));
 
+// ⭐ NEW: SPM Arts Workshop Registration
+const SpmWorkshopRegistration = lazy(() => import("./pages/SpmWorkshopRegistration"));
+
 // ⭐ NEW: Step-by-Step Drawing Tutorials
 const DrawingTutorials = lazy(() => import("./pages/DrawingTutorials"));
 
@@ -109,6 +112,9 @@ const AdminGallery = lazy(() => import("./pages/AdminGallery"));
 // ⭐ NEW: Free Art Class applications (admin)
 const AdminApplications = lazy(() => import("./pages/AdminApplications"));
 
+// ⭐ NEW: SPM Arts Workshop registrations (admin)
+const AdminWorkshopRegistrations = lazy(() => import("./pages/AdminWorkshopRegistrations"));
+
 export default function App() {
   return (
     <Suspense fallback={<Loader />}>
@@ -154,6 +160,9 @@ export default function App() {
 
           {/* ⭐ NEW: Free Art Class Application */}
           <Route path="/apply" element={<ApplyForm />} />
+
+          {/* ⭐ NEW: SPM Arts Workshop Registration */}
+          <Route path="/spm-arts-workshop" element={<SpmWorkshopRegistration />} />
 
           {/* ⭐ NEW: Step-by-Step Drawing Tutorials */}
           <Route path="/tutorials" element={<DrawingTutorials />} />
@@ -234,6 +243,7 @@ export default function App() {
           <Route path="/admin/students" element={<AdminStudents />} />
           <Route path="/admin/students/:id" element={<StudentDetails />} />
           <Route path="/admin/applications" element={<AdminApplications />} />
+          <Route path="/admin/workshop-registrations" element={<AdminWorkshopRegistrations />} />
           <Route path="/admin/artworks" element={<AdminArtworks />} />
           <Route path="/admin/courses" element={<AdminCourses />} />
           <Route path="/admin/attendance" element={<AdminAttendance />} />
