@@ -2,6 +2,51 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { FaGraduationCap } from 'react-icons/fa';
 
+// ---------- shared styles ----------
+
+const inputStyle = {
+  width: '100%',
+  boxSizing: 'border-box',      // stops inputs overflowing their card
+  padding: '10px',
+  borderRadius: '14px',
+  border: '1px solid rgba(255,255,255,0.15)',
+  background: 'rgba(255,255,255,0.08)',
+  color: '#fff',
+  outline: 'none',
+  fontFamily: 'inherit',
+};
+
+const smallInputStyle = {
+  ...inputStyle,
+  padding: '8px',
+  borderRadius: '10px',
+};
+
+const labelStyle = {
+  display: 'block',
+  fontSize: '12px',
+  color: '#94a3b8',
+  marginBottom: '6px',
+};
+
+const smallLabelStyle = {
+  display: 'block',
+  fontSize: '11px',
+  color: '#94a3b8',
+  marginBottom: '4px',
+};
+
+const cardStyle = {
+  background: 'rgba(255, 255, 255, 0.05)',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
+  borderTop: '3px solid #d4af37',
+  padding: 'clamp(16px, 4vw, 25px)',
+  borderRadius: '24px',
+  marginBottom: '25px',
+  boxSizing: 'border-box',
+  minWidth: 0,
+};
+
 const AdminCourses = () => {
   const [students, setStudents] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState('');
@@ -54,14 +99,17 @@ const AdminCourses = () => {
   const currentStudent = students.find(s => s.id === selectedStudentId);
 
   const handleChange = (field, value) => {
-    setStudents(students.map(s => 
+    setStudents(students.map(s =>
       s.id === currentStudent.id ? { ...s, [field]: value } : s
     ));
   };
 
   const handleSubCourseChange = (index, field, value) => {
     const updatedCourses = [...courseDetails];
-    updatedCourses[index][field] = field === 'progress' ? Number(value) : value;
+    updatedCourses[index] = {
+      ...updatedCourses[index],
+      [field]: field === 'progress' ? Number(value) : value,
+    };
     setCourseDetails(updatedCourses);
   };
 
@@ -94,19 +142,53 @@ const AdminCourses = () => {
   if (!currentStudent) return <div style={{ padding: '50px', textAlign: 'center', color: '#fff' }}>No student selected.</div>;
 
   return (
-    <div style={{ padding: '30px', background: 'linear-gradient(135deg, #0a1f18 0%, #0f2d24 50%, #1b4d3e 100%)', minHeight: '100vh', color: '#fff', borderRadius: '28px', margin: '10px' }}>
+    <div style={{
+      padding: 'clamp(16px, 4vw, 30px)',
+      background: 'linear-gradient(135deg, #0a1f18 0%, #0f2d24 50%, #1b4d3e 100%)',
+      minHeight: '100vh',
+      color: '#fff',
+      borderRadius: '28px',
+      margin: '10px',
+      boxSizing: 'border-box',
+      minWidth: 0,
+    }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px' }}>
-        <FaGraduationCap style={{ fontSize: '28px', color: '#d4af37' }} />
-        <h2 style={{ margin: 0, fontSize: '24px', color: '#fff' }}>Manage Student Portal Stats</h2>
+        <FaGraduationCap style={{ fontSize: '28px', color: '#d4af37', flexShrink: 0 }} />
+        <h2 style={{ margin: 0, fontSize: 'clamp(19px, 5vw, 24px)', color: '#fff' }}>Manage Student Portal Stats</h2>
       </div>
 
       {/* Selector */}
-      <div style={{ background: 'rgba(27, 77, 62, 0.65)', padding: '20px', borderRadius: '24px', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '20px', border: '1px solid rgba(212, 175, 55, 0.3)' }}>
+      <div style={{
+        background: 'rgba(27, 77, 62, 0.65)',
+        padding: 'clamp(14px, 4vw, 20px)',
+        borderRadius: '24px',
+        marginBottom: '25px',
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap',               // dropdown drops under the label on small screens
+        gap: '12px 20px',
+        border: '1px solid rgba(212, 175, 55, 0.3)',
+        boxSizing: 'border-box',
+        minWidth: 0,
+      }}>
         <label style={{ fontWeight: '600', fontSize: '14px', color: '#d4af37' }}>SELECT STUDENT:</label>
-        <select 
-          value={selectedStudentId} 
+        <select
+          value={selectedStudentId}
           onChange={(e) => setSelectedStudentId(e.target.value)}
-          style={{ padding: '10px', borderRadius: '14px', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(212,175,55,0.3)', outline: 'none', cursor: 'pointer' }}
+          style={{
+            flex: '1 1 200px',
+            minWidth: 0,
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+            padding: '10px',
+            borderRadius: '14px',
+            background: 'rgba(255,255,255,0.08)',
+            color: '#fff',
+            border: '1px solid rgba(212,175,55,0.3)',
+            outline: 'none',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}
         >
           {students.map(s => (
             <option key={s.id} value={s.id} style={{ background: '#0f2d24', color: '#fff' }}>
@@ -117,46 +199,48 @@ const AdminCourses = () => {
       </div>
 
       {/* Main Details */}
-      <div style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderTop: '3px solid #d4af37', padding: '25px', borderRadius: '24px', marginBottom: '25px' }}>
-        <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', color: '#d4af37' }}>Edit Student Details for {currentStudent.full_name}</h3>
-        
-        <div style={{ display: 'flex', gap: '25px', flexWrap: 'wrap', marginBottom: '20px' }}>
-          <div style={{ flex: 1, minWidth: '220px' }}>
-            <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px' }}>CURRENT COURSE NAME</label>
-            <input 
-              type="text" 
-              value={currentStudent.course || ''} 
+      <div style={cardStyle}>
+        <h3 style={{ margin: '0 0 15px 0', fontSize: 'clamp(16px, 4.5vw, 18px)', color: '#d4af37', wordBreak: 'break-word' }}>
+          Edit Student Details for {currentStudent.full_name}
+        </h3>
+
+        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '20px' }}>
+          <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+            <label style={labelStyle}>CURRENT COURSE NAME</label>
+            <input
+              type="text"
+              value={currentStudent.course || ''}
               onChange={(e) => handleChange('course', e.target.value)}
-              style={{ width: '100%', padding: '10px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.08)', color: '#fff', outline: 'none' }}
+              style={inputStyle}
             />
           </div>
-          <div style={{ flex: 1, minWidth: '220px' }}>
-            <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px' }}>COURSE LEVEL</label>
-            <input 
-              type="text" 
-              value={currentStudent.level || ''} 
+          <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+            <label style={labelStyle}>COURSE LEVEL</label>
+            <input
+              type="text"
+              value={currentStudent.level || ''}
               onChange={(e) => handleChange('level', e.target.value)}
-              style={{ width: '100%', padding: '10px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.08)', color: '#fff', outline: 'none' }}
+              style={inputStyle}
             />
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '25px', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '220px' }}>
-            <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px' }}>OVERALL PROGRESS (%)</label>
-            <input 
-              type="number" 
-              value={currentStudent.attendance ?? 0} 
+        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+            <label style={labelStyle}>OVERALL PROGRESS (%)</label>
+            <input
+              type="number"
+              value={currentStudent.attendance ?? 0}
               onChange={(e) => handleChange('attendance', e.target.value)}
-              style={{ width: '100%', padding: '10px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.08)', color: '#fff', outline: 'none' }}
+              style={inputStyle}
             />
           </div>
-          <div style={{ flex: 1, minWidth: '220px' }}>
-            <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px' }}>STUDENT RANK</label>
-            <select 
-              value={currentStudent.student_rank || 'BRONZE'} 
+          <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+            <label style={labelStyle}>STUDENT RANK</label>
+            <select
+              value={currentStudent.student_rank || 'BRONZE'}
               onChange={(e) => handleChange('student_rank', e.target.value)}
-              style={{ width: '100%', padding: '10px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.08)', color: '#fff', outline: 'none', cursor: 'pointer' }}
+              style={{ ...inputStyle, cursor: 'pointer' }}
             >
               <option value="BRONZE" style={{ background: '#0f2d24' }}>BRONZE</option>
               <option value="SILVER" style={{ background: '#0f2d24' }}>SILVER</option>
@@ -168,36 +252,63 @@ const AdminCourses = () => {
       </div>
 
       {/* Sub Courses */}
-      <div style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderTop: '3px solid #d4af37', padding: '25px', borderRadius: '24px', marginBottom: '25px' }}>
-        <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', color: '#d4af37' }}>Manage Individual Course Levels & Progress</h3>
+      <div style={cardStyle}>
+        <h3 style={{ margin: '0 0 20px 0', fontSize: 'clamp(16px, 4.5vw, 18px)', color: '#d4af37' }}>
+          Manage Individual Course Levels & Progress
+        </h3>
         {courseDetails.map((course, index) => (
-          <div key={course.key || index} style={{ display: 'flex', gap: '20px', alignItems: 'center', marginBottom: '15px', padding: '15px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', flexWrap: 'wrap' }}>
-            <div style={{ flex: '1 1 200px', fontWeight: '600', color: '#fff' }}>{course.title}</div>
-            <div style={{ flex: '1 1 200px' }}>
-              <label style={{ display: 'block', fontSize: '11px', color: '#94a3b8', marginBottom: '4px' }}>Level</label>
-              <input 
-                type="text" 
-                value={course.level} 
+          <div
+            key={course.key || index}
+            style={{
+              display: 'flex',
+              gap: '14px 20px',
+              alignItems: 'center',
+              marginBottom: '15px',
+              padding: '15px',
+              background: 'rgba(255,255,255,0.03)',
+              borderRadius: '16px',
+              flexWrap: 'wrap',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div style={{ flex: '1 1 100%', fontWeight: '600', color: '#fff' }}>{course.title}</div>
+            <div style={{ flex: '1 1 140px', minWidth: 0 }}>
+              <label style={smallLabelStyle}>Level</label>
+              <input
+                type="text"
+                value={course.level}
                 onChange={(e) => handleSubCourseChange(index, 'level', e.target.value)}
-                style={{ width: '100%', padding: '8px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.08)', color: '#fff', outline: 'none' }}
+                style={smallInputStyle}
               />
             </div>
-            <div style={{ flex: '1 1 200px' }}>
-              <label style={{ display: 'block', fontSize: '11px', color: '#94a3b8', marginBottom: '4px' }}>Progress (%)</label>
-              <input 
-                type="number" 
-                value={course.progress} 
+            <div style={{ flex: '1 1 140px', minWidth: 0 }}>
+              <label style={smallLabelStyle}>Progress (%)</label>
+              <input
+                type="number"
+                value={course.progress}
                 onChange={(e) => handleSubCourseChange(index, 'progress', e.target.value)}
-                style={{ width: '100%', padding: '8px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.08)', color: '#fff', outline: 'none' }}
+                style={smallInputStyle}
               />
             </div>
           </div>
         ))}
       </div>
 
-      <button 
+      <button
         onClick={handleSave}
-        style={{ background: 'linear-gradient(135deg, #d4af37 0%, #aa7c11 100%)', color: '#fff', border: 'none', padding: '12px 28px', borderRadius: '16px', cursor: 'pointer', fontWeight: '700', fontSize: '15px', boxShadow: '0 4px 15px rgba(212, 175, 55, 0.4)' }}
+        style={{
+          background: 'linear-gradient(135deg, #d4af37 0%, #aa7c11 100%)',
+          color: '#fff',
+          border: 'none',
+          padding: '12px 28px',
+          borderRadius: '16px',
+          cursor: 'pointer',
+          fontWeight: '700',
+          fontSize: '15px',
+          boxShadow: '0 4px 15px rgba(212, 175, 55, 0.4)',
+          width: '100%',
+          maxWidth: '260px',
+        }}
       >
         Save Changes
       </button>

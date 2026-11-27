@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "../lib/supabase"; // ✅ same client as AdminLogin.jsx
+import { supabase } from "../lib/supabase";
 import "../styles/AdminWorkshopRegistrations.css";
 
 const TIME_SLOTS = ["10:00 a.m.", "2:00 p.m.", "7:00 p.m."];
@@ -31,16 +31,10 @@ function AdminWorkshopRegistrations() {
     setLoading(true);
     setError("");
 
-    // TEMP DEBUG: delete these 2 lines once it works
-    const { data: sess } = await supabase.auth.getSession();
-    console.log("Session email:", sess.session?.user?.email ?? "NOT LOGGED IN");
-
     const { data, error } = await supabase
       .from("spm_workshop_registrations")
       .select("*")
       .order("created_at", { ascending: false });
-
-    console.log("Rows:", data, "Error:", error); // TEMP DEBUG
 
     if (error) {
       console.error(error);
@@ -140,7 +134,7 @@ function AdminWorkshopRegistrations() {
 
       {error && <div className="wr-error">{error}</div>}
 
-      {/* Table */}
+      {/* Table (becomes stacked cards on mobile) */}
       <div className="wr-table-wrap">
         {loading ? (
           <div className="wr-empty">Loading registrations...</div>
@@ -164,15 +158,15 @@ function AdminWorkshopRegistrations() {
             <tbody>
               {filtered.map((r, i) => (
                 <tr key={r.id}>
-                  <td>{i + 1}</td>
-                  <td className="wr-name">{r.student_name}</td>
-                  <td>{r.age}</td>
-                  <td>{r.school_name}</td>
-                  <td>
+                  <td data-label="#">{i + 1}</td>
+                  <td data-label="Student" className="wr-name">{r.student_name}</td>
+                  <td data-label="Age">{r.age}</td>
+                  <td data-label="School">{r.school_name}</td>
+                  <td data-label="Email">
                     <a href={`mailto:${r.email}`}>{r.email}</a>
                   </td>
-                  <td>{r.city}, {r.state}</td>
-                  <td>
+                  <td data-label="Location">{r.city}, {r.state}</td>
+                  <td data-label="WhatsApp">
                     <a
                       className="wr-wa"
                       href={toWhatsAppLink(r.whatsapp)}
@@ -182,8 +176,8 @@ function AdminWorkshopRegistrations() {
                       💬 {r.whatsapp}
                     </a>
                   </td>
-                  <td><span className="wr-slot">{r.time_slot}</span></td>
-                  <td className="wr-date">{formatDate(r.created_at)}</td>
+                  <td data-label="Time Slot"><span className="wr-slot">{r.time_slot}</span></td>
+                  <td data-label="Registered" className="wr-date">{formatDate(r.created_at)}</td>
                 </tr>
               ))}
             </tbody>

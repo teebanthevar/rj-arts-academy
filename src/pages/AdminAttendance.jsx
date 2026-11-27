@@ -2,6 +2,52 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { FaCalendarCheck } from 'react-icons/fa';
 
+// ---------- shared styles ----------
+
+const inputStyle = {
+  width: '100%',
+  boxSizing: 'border-box',      // stops inputs overflowing their card
+  padding: '10px 14px',
+  borderRadius: '14px',
+  border: '1px solid rgba(255, 255, 255, 0.15)',
+  background: 'rgba(255, 255, 255, 0.08)',
+  color: '#fff',
+  outline: 'none',
+  fontFamily: 'inherit',
+};
+
+const smallInputStyle = {
+  ...inputStyle,
+  padding: '8px 12px',
+  borderRadius: '10px',
+};
+
+const labelStyle = {
+  display: 'block',
+  fontSize: '12px',
+  color: '#94a3b8',
+  marginBottom: '6px',
+  textTransform: 'uppercase',
+};
+
+const smallLabelStyle = {
+  display: 'block',
+  fontSize: '11px',
+  color: '#94a3b8',
+  marginBottom: '4px',
+};
+
+const cardStyle = {
+  background: 'rgba(255, 255, 255, 0.05)',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
+  borderTop: '3px solid #d4af37',
+  padding: 'clamp(16px, 4vw, 25px)',
+  borderRadius: '24px',
+  marginBottom: '25px',
+  boxSizing: 'border-box',
+  minWidth: 0,
+};
+
 const AdminAttendance = () => {
   const [students, setStudents] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState('');
@@ -55,7 +101,7 @@ const AdminAttendance = () => {
 
   const handleAttendanceItemChange = (index, field, value) => {
     const updatedHistory = [...attendanceHistory];
-    updatedHistory[index][field] = value;
+    updatedHistory[index] = { ...updatedHistory[index], [field]: value };
     setAttendanceHistory(updatedHistory);
   };
 
@@ -82,16 +128,55 @@ const AdminAttendance = () => {
   if (students.length === 0) return <div style={{ padding: '50px', textAlign: 'center', color: '#fff' }}>No students found.</div>;
 
   return (
-    <div style={{ padding: '30px', background: 'linear-gradient(135deg, #0a1f18 0%, #0f2d24 50%, #1b4d3e 100%)', minHeight: '100vh', color: '#ffffff', borderRadius: '28px', margin: '10px' }}>
+    <div style={{
+      padding: 'clamp(16px, 4vw, 30px)',
+      background: 'linear-gradient(135deg, #0a1f18 0%, #0f2d24 50%, #1b4d3e 100%)',
+      minHeight: '100vh',
+      color: '#ffffff',
+      borderRadius: '28px',
+      margin: '10px',
+      boxSizing: 'border-box',
+      minWidth: 0,
+    }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px' }}>
-        <FaCalendarCheck style={{ fontSize: '28px', color: '#d4af37' }} />
-        <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '700' }}>Manage Student Attendance</h2>
+        <FaCalendarCheck style={{ fontSize: '28px', color: '#d4af37', flexShrink: 0 }} />
+        <h2 style={{ margin: 0, fontSize: 'clamp(19px, 5vw, 24px)', fontWeight: '700' }}>Manage Student Attendance</h2>
       </div>
 
       {/* Student Selector */}
-      <div style={{ background: 'rgba(27, 77, 62, 0.65)', padding: '20px 25px', borderRadius: '24px', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '20px', border: '1px solid rgba(212, 175, 55, 0.3)' }}>
+      <div style={{
+        background: 'rgba(27, 77, 62, 0.65)',
+        padding: 'clamp(14px, 4vw, 20px) clamp(16px, 4vw, 25px)',
+        borderRadius: '24px',
+        marginBottom: '25px',
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap',               // dropdown drops under the label on small screens
+        gap: '12px 20px',
+        border: '1px solid rgba(212, 175, 55, 0.3)',
+        boxSizing: 'border-box',
+        minWidth: 0,
+      }}>
         <label style={{ fontWeight: '600', fontSize: '14px', color: '#d4af37', textTransform: 'uppercase' }}>Select Student:</label>
-        <select value={selectedStudentId} onChange={(e) => setSelectedStudentId(e.target.value)} style={{ padding: '10px 14px', borderRadius: '14px', border: '1px solid rgba(212, 175, 55, 0.3)', backgroundColor: 'rgba(255, 255, 255, 0.08)', color: '#ffffff', fontSize: '14px', minWidth: '250px', outline: 'none', cursor: 'pointer' }}>
+        <select
+          value={selectedStudentId}
+          onChange={(e) => setSelectedStudentId(e.target.value)}
+          style={{
+            flex: '1 1 200px',
+            minWidth: 0,                // was minWidth: 250px, which caused the overflow
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+            padding: '10px 14px',
+            borderRadius: '14px',
+            border: '1px solid rgba(212, 175, 55, 0.3)',
+            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+            color: '#ffffff',
+            fontSize: '14px',
+            outline: 'none',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}
+        >
           {students.map(student => (
             <option key={student.id} value={student.id} style={{ backgroundColor: '#0f2d24', color: '#ffffff' }}>
               {student.full_name || student.name}
@@ -103,36 +188,77 @@ const AdminAttendance = () => {
       {currentStudent && (
         <>
           {/* Overview Metrics Section */}
-          <div style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderTop: '3px solid #d4af37', padding: '25px', borderRadius: '24px', marginBottom: '25px' }}>
-            <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', color: '#d4af37' }}>Attendance Overview Metrics</h3>
-            <div style={{ display: 'flex', gap: '25px', flexWrap: 'wrap' }}>
-              <div style={{ flex: 1, minWidth: '220px' }}>
-                <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px', textTransform: 'uppercase' }}>Attendance Rate (%)</label>
-                <input type="number" value={attendanceRate} onChange={(e) => setAttendanceRate(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.15)', background: 'rgba(255, 255, 255, 0.08)', color: '#fff', outline: 'none' }} />
+          <div style={cardStyle}>
+            <h3 style={{ margin: '0 0 15px 0', fontSize: 'clamp(16px, 4.5vw, 18px)', color: '#d4af37' }}>
+              Attendance Overview Metrics
+            </h3>
+            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+                <label style={labelStyle}>Attendance Rate (%)</label>
+                <input
+                  type="number"
+                  value={attendanceRate}
+                  onChange={(e) => setAttendanceRate(e.target.value)}
+                  style={inputStyle}
+                />
               </div>
-              <div style={{ flex: 1, minWidth: '220px' }}>
-                <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px', textTransform: 'uppercase' }}>Current Streak</label>
-                <input type="number" value={currentStreak} onChange={(e) => setCurrentStreak(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.15)', background: 'rgba(255, 255, 255, 0.08)', color: '#fff', outline: 'none' }} />
+              <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+                <label style={labelStyle}>Current Streak</label>
+                <input
+                  type="number"
+                  value={currentStreak}
+                  onChange={(e) => setCurrentStreak(e.target.value)}
+                  style={inputStyle}
+                />
               </div>
             </div>
           </div>
 
           {/* History Manager Section */}
-          <div style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderTop: '3px solid #d4af37', padding: '25px', borderRadius: '24px', marginBottom: '25px' }}>
-            <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', color: '#d4af37' }}>Manage Attendance History Records</h3>
+          <div style={cardStyle}>
+            <h3 style={{ margin: '0 0 20px 0', fontSize: 'clamp(16px, 4.5vw, 18px)', color: '#d4af37' }}>
+              Manage Attendance History Records
+            </h3>
             {attendanceHistory.map((item, index) => (
-              <div key={index} style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '15px', padding: '15px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '16px', flexWrap: 'wrap' }}>
-                <div style={{ flex: '1 1 150px' }}>
-                  <label style={{ display: 'block', fontSize: '11px', color: '#94a3b8', marginBottom: '4px' }}>Date</label>
-                  <input type="text" value={item.date} onChange={(e) => handleAttendanceItemChange(index, 'date', e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.15)', background: 'rgba(255, 255, 255, 0.08)', color: '#fff', outline: 'none' }} />
+              <div
+                key={index}
+                style={{
+                  display: 'flex',
+                  gap: '14px 15px',
+                  alignItems: 'center',
+                  marginBottom: '15px',
+                  padding: '15px',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  borderRadius: '16px',
+                  flexWrap: 'wrap',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <div style={{ flex: '1 1 140px', minWidth: 0 }}>
+                  <label style={smallLabelStyle}>Date</label>
+                  <input
+                    type="text"
+                    value={item.date}
+                    onChange={(e) => handleAttendanceItemChange(index, 'date', e.target.value)}
+                    style={smallInputStyle}
+                  />
                 </div>
-                <div style={{ flex: '2 1 200px' }}>
-                  <label style={{ display: 'block', fontSize: '11px', color: '#94a3b8', marginBottom: '4px' }}>Course</label>
-                  <input type="text" value={item.course} onChange={(e) => handleAttendanceItemChange(index, 'course', e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.15)', background: 'rgba(255, 255, 255, 0.08)', color: '#fff', outline: 'none' }} />
+                <div style={{ flex: '2 1 180px', minWidth: 0 }}>
+                  <label style={smallLabelStyle}>Course</label>
+                  <input
+                    type="text"
+                    value={item.course}
+                    onChange={(e) => handleAttendanceItemChange(index, 'course', e.target.value)}
+                    style={smallInputStyle}
+                  />
                 </div>
-                <div style={{ flex: '1 1 150px' }}>
-                  <label style={{ display: 'block', fontSize: '11px', color: '#94a3b8', marginBottom: '4px' }}>Status</label>
-                  <select value={item.status} onChange={(e) => handleAttendanceItemChange(index, 'status', e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.15)', background: '#0f2d24', color: '#fff', outline: 'none', cursor: 'pointer' }}>
+                <div style={{ flex: '1 1 140px', minWidth: 0 }}>
+                  <label style={smallLabelStyle}>Status</label>
+                  <select
+                    value={item.status}
+                    onChange={(e) => handleAttendanceItemChange(index, 'status', e.target.value)}
+                    style={{ ...smallInputStyle, background: '#0f2d24', cursor: 'pointer' }}
+                  >
                     <option value="Present">Present</option>
                     <option value="Absent">Absent</option>
                     <option value="Late">Late</option>
@@ -143,7 +269,23 @@ const AdminAttendance = () => {
           </div>
 
           {/* Save Changes Button */}
-          <button onClick={handleSave} style={{ background: 'linear-gradient(135deg, #d4af37 0%, #aa7c11 100%)', color: '#ffffff', border: 'none', padding: '12px 28px', borderRadius: '16px', cursor: 'pointer', fontWeight: '700', fontSize: '15px', boxShadow: '0 4px 15px rgba(212, 175, 55, 0.4)', marginBottom: '25px' }}>
+          <button
+            onClick={handleSave}
+            style={{
+              background: 'linear-gradient(135deg, #d4af37 0%, #aa7c11 100%)',
+              color: '#ffffff',
+              border: 'none',
+              padding: '12px 28px',
+              borderRadius: '16px',
+              cursor: 'pointer',
+              fontWeight: '700',
+              fontSize: '15px',
+              boxShadow: '0 4px 15px rgba(212, 175, 55, 0.4)',
+              marginBottom: '25px',
+              width: '100%',
+              maxWidth: '260px',
+            }}
+          >
             Save Changes
           </button>
         </>

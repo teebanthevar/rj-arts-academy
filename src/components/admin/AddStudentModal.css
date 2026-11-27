@@ -2,286 +2,223 @@
    MODAL OVERLAY
 =========================== */
 
-.modal-overlay{
-
-position:fixed;
-
-inset:0;
-
-background:rgba(0,0,0,.45);
-
-backdrop-filter:blur(6px);
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-z-index:9999;
-
-animation:fadeIn .3s ease;
-
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
 }
 
 /* ===========================
    MODAL
 =========================== */
 
-.student-modal{
-
-width:900px;
-
-max-width:95%;
-
-background:white;
-
-border-radius:24px;
-
-overflow:hidden;
-
-box-shadow:0 25px 60px rgba(0,0,0,.18);
-
-animation:popup .35s ease;
-
+.student-modal {
+  width: 640px;
+  max-width: 100%;
+  max-height: 90vh;            /* never taller than the screen */
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.18);
+  animation: popup 0.35s ease;
 }
 
 /* ===========================
-HEADER
+   HEADER
 =========================== */
 
-.modal-header{
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-padding:25px 35px;
-
-background:linear-gradient(
-135deg,
-#0F3D2E,
-#145644
-);
-
-color:white;
-
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #0F3D2E, #145644);
+  color: white;
 }
 
-.modal-header h2{
-
-font-size:28px;
-
-font-weight:700;
-
+.modal-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
 }
 
-.modal-header button{
-
-border:none;
-
-background:none;
-
-color:white;
-
-font-size:24px;
-
-cursor:pointer;
-
+.modal-header button {
+  display: flex;
+  border: none;
+  background: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
 }
 
 /* ===========================
-BODY
+   BODY (scrolls if the screen is short)
 =========================== */
 
-.student-modal form{
-
-padding:35px;
-
+.student-modal form {
+  padding: 22px 26px;
+  overflow-y: auto;
+  flex: 1;
 }
 
-.modal-grid{
-
-display:grid;
-
-grid-template-columns:repeat(2,1fr);
-
-gap:22px;
-
+.modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 16px;
+  align-items: end;            /* keeps fields lined up when only some have labels */
 }
 
 .modal-grid input,
-
-.modal-grid select{
-
-width:100%;
-
-padding:16px 18px;
-
-border:1px solid #ddd;
-
-border-radius:14px;
-
-font-size:15px;
-
-transition:.25s;
-
-background:#FAFAFA;
-
+.modal-grid select {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: 0.25s;
+  background: #FAFAFA;
+  box-sizing: border-box;
 }
 
 .modal-grid input:focus,
+.modal-grid select:focus {
+  outline: none;
+  border-color: #0F3D2E;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(15, 61, 46, 0.08);
+}
 
-.modal-grid select:focus{
+.modal-grid input:disabled {
+  background: #f0f0f0;
+  color: #888;
+  cursor: not-allowed;
+}
 
-outline:none;
+.modal-grid .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
 
-border-color:#0F3D2E;
-
-background:white;
-
-box-shadow:0 0 0 4px rgba(15,61,46,.08);
-
+.modal-grid .form-group label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #5a6b63;
 }
 
 /* ===========================
-FOOTER
+   FOOTER (stays visible while scrolling)
 =========================== */
 
-.modal-footer{
-
-margin-top:35px;
-
-display:flex;
-
-justify-content:flex-end;
-
-gap:15px;
-
+.modal-footer {
+  position: sticky;
+  bottom: -22px;               /* cancels the form's bottom padding */
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin: 20px -26px -22px;    /* stretches edge to edge */
+  padding: 14px 26px;
+  background: white;
+  border-top: 1px solid #eee;
 }
 
-.cancel-btn{
-
-padding:15px 28px;
-
-border:none;
-
-border-radius:12px;
-
-background:#ECECEC;
-
-cursor:pointer;
-
-font-size:15px;
-
-font-weight:600;
-
+.cancel-btn {
+  padding: 11px 22px;
+  border: none;
+  border-radius: 10px;
+  background: #ECECEC;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.save-btn{
-
-padding:15px 30px;
-
-border:none;
-
-border-radius:12px;
-
-background:linear-gradient(
-135deg,
-#0F3D2E,
-#145644
-);
-
-color:white;
-
-cursor:pointer;
-
-font-size:15px;
-
-font-weight:600;
-
-box-shadow:0 15px 30px rgba(15,61,46,.18);
-
-transition:.3s;
-
+.save-btn {
+  padding: 11px 24px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #0F3D2E, #145644);
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 10px 22px rgba(15, 61, 46, 0.18);
+  transition: 0.3s;
 }
 
-.save-btn:hover{
+.save-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
 
-transform:translateY(-2px);
-
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* ===========================
-ANIMATION
+   ANIMATION
 =========================== */
 
-@keyframes popup{
-
-from{
-
-opacity:0;
-
-transform:translateY(30px) scale(.96);
-
+@keyframes popup {
+  from { opacity: 0; transform: translateY(30px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-to{
-
-opacity:1;
-
-transform:translateY(0) scale(1);
-
-}
-
-}
-
-@keyframes fadeIn{
-
-from{
-
-opacity:0;
-
-}
-
-to{
-
-opacity:1;
-
-}
-
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* ===========================
-RESPONSIVE
+   RESPONSIVE
 =========================== */
 
-@media(max-width:768px){
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 10px;
+    align-items: flex-end;     /* sits at the bottom like a sheet on phones */
+  }
 
-.modal-grid{
+  .student-modal {
+    max-height: 92vh;
+    border-radius: 18px;
+  }
 
-grid-template-columns:1fr;
+  .modal-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 
-}
+  .modal-header {
+    padding: 14px 18px;
+  }
 
-.student-modal{
+  .modal-header h2 {
+    font-size: 18px;
+  }
 
-width:95%;
+  .student-modal form {
+    padding: 18px;
+  }
 
-}
+  .modal-footer {
+    bottom: -18px;
+    margin: 18px -18px -18px;
+    padding: 12px 18px;
+  }
 
-.modal-header{
-
-padding:20px;
-
-}
-
-.student-modal form{
-
-padding:20px;
-
-}
-
+  .cancel-btn,
+  .save-btn {
+    flex: 1;
+  }
 }

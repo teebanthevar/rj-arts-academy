@@ -1,4 +1,8 @@
-.wr-page { padding: 30px; }
+.wr-page {
+  padding: 30px;
+  min-width: 0;          /* lets the page shrink inside a flex layout */
+  max-width: 100%;
+}
 
 .wr-header {
   display: flex;
@@ -142,7 +146,73 @@
 
 .wr-empty { padding: 60px 20px; text-align: center; color: #5a6b63; font-size: 16px; }
 
+/* ---------- Tablet ---------- */
+
 @media (max-width: 900px) {
   .wr-page { padding: 20px 14px; }
   .wr-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ---------- Mobile: table becomes stacked cards ---------- */
+
+@media (max-width: 768px) {
+  .wr-header h1 { font-size: 22px; }
+
+  .wr-actions { width: 100%; }
+  .wr-actions .wr-btn { flex: 1; padding: 12px 10px; font-size: 14px; }
+
+  .wr-stat { padding: 14px 16px; border-radius: 14px; }
+  .wr-stat-num { font-size: 26px; }
+  .wr-stat-label { font-size: 12.5px; }
+
+  .wr-filters input,
+  .wr-filters select { width: 100%; min-width: 0; flex: 1 1 100%; }
+
+  /* the cards sit on the page background, no white wrapper */
+  .wr-table-wrap {
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .wr-table,
+  .wr-table tbody { display: block; min-width: 0; width: 100%; }
+
+  .wr-table thead { display: none; }
+
+  .wr-table tr {
+    display: block;
+    margin-bottom: 14px;
+    padding: 6px 16px;
+    background: #fff;
+    border-radius: 16px;
+    border-left: 5px solid #d8c2a0;
+    box-shadow: 0 4px 14px rgba(15, 61, 46, 0.08);
+  }
+
+  .wr-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0e9dd;
+    text-align: right;
+    word-break: break-word;
+  }
+  .wr-table td:last-child { border-bottom: none; }
+
+  .wr-table td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #5a6b63;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    text-align: left;
+  }
+
+  /* the "#" row number is just noise on a card */
+  .wr-table td[data-label="#"] { display: none; }
 }
